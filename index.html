@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thomas Lacombe | Data Scientist</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --primary: #38bdf8;
+            --secondary: #818cf8;
+            --text-light: #f1f5f9;
+            --text-dim: #94a3b8;
+            --transition: all 0.3s ease;
+        }
+
+        html {
+            scroll-behavior: smooth; /* Défilement fluide natif */
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-light);
+            overflow-x: hidden;
+        }
+
+        /* --- Navigation --- */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 15px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links a {
+            color: var(--text-light);
+            text-decoration: none;
+            margin-left: 25px;
+            font-size: 0.9rem;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -5px;
+            left: 0;
+            background-color: var(--primary);
+            transition: width 0.3s;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        /* --- Hero Section & Animation --- */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Canevas pour les particules */
+        #particles-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            /* Fond léger pour que le texte ressorte */
+            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+        }
+
+        .hero-content {
+            z-index: 1; /* Au-dessus du canvas */
+            pointer-events: none; /* Laisse la souris interagir avec le canvas autour */
+        }
+        
+        .hero-content * {
+            pointer-events: auto; /* Réactive les clics sur les boutons */
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            line-height: 1.1;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px rgba(0,0,0,0.5);
+            animation: fadeInDown 1s ease-out;
+        }
+
+        .hero span {
+            color: var(--primary);
+        }
+
+        .hero p {
+            font-size: 1.5rem;
+            color: var(--text-dim);
+            margin-bottom: 40px;
+            animation: fadeInUp 1s ease-out 0.5s backwards;
+        }
+
+        .hero-btn {
+            padding: 15px 35px;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            border: none;
+            border-radius: 30px;
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            text-decoration: none;
+            box-shadow: 0 10px 20px rgba(56, 189, 248, 0.3);
+            transition: var(--transition);
+            animation: fadeInUp 1s ease-out 0.8s backwards;
+        }
+
+        .hero-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(56, 189, 248, 0.5);
+        }
+
+        .scroll-down {
+            position: absolute;
+            bottom: 30px;
+            animation: bounce 2s infinite;
+            color: var(--text-dim);
+            z-index: 1;
+        }
+
+        /* --- Sections --- */
+        section {
+            padding: 100px 10%;
+            min-height: auto;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            margin-bottom: 60px;
+            text-align: center;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 4px;
+            background: var(--primary);
+            margin: 10px auto;
+            border-radius: 2px;
+        }
+
+        /* --- About --- */
+        .about-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 50px;
+            align-items: center;
+        }
+
+        .profile-img-container {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 3px solid var(--primary);
+            box-shadow: 0 0 30px rgba(56, 189, 248, 0.2);
+            background: #333; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3rem;
+            color: #555;
+        }
+        
+        .profile-img-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .about-text p {
+            font-size: 1.1rem;
+            color: var(--text-dim);
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        /* --- Skills --- */
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
+
+        .skill-card {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 15px;
+            transition: var(--transition);
+            border-left: 4px solid var(--primary);
+        }
+
+        .skill-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .skill-card h3 { margin-bottom: 15px; }
+
+        .tags { display: flex; flex-wrap: wrap; gap: 10px; }
+
+        .tag {
+            background: rgba(56, 189, 248, 0.1);
+            color: var(--primary);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+
+        /* --- Timeline (Wavy) --- */
+        .timeline {
+            position: relative;
+            /* Suppression de la bordure droite pour mettre une image de fond ondulée */
+            /* border-left: 2px solid var(--secondary); */
+            margin-left: 20px;
+            padding-left: 0;
+            
+            /* Génération d'une ligne ondulée en SVG via CSS */
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='200' viewBox='0 0 40 200'%3E%3Cpath d='M20,0 Q35,50 20,100 T20,200' fill='none' stroke='%23818cf8' stroke-width='2'/%3E%3C/svg%3E");
+            background-repeat: repeat-y;
+            background-position: left top;
+        }
+
+        .timeline-item {
+            margin-bottom: 50px;
+            margin-left: 40px; /* Plus d'espace pour la vague */
+            position: relative;
+        }
+
+        /* Le point sur la timeline */
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -49px; /* Ajustement pour tomber sur la vague */
+            top: 25px;
+            width: 16px;
+            height: 16px;
+            background: var(--bg-color);
+            border: 2px solid var(--primary);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--primary);
+            z-index: 1;
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: var(--transition);
+        }
+        
+        .card:hover {
+            transform: translateX(10px);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .date { color: var(--primary); font-size: 0.9rem; font-weight: 600; }
+        .role { font-size: 1.2rem; font-weight: 700; color: var(--text-light); }
+        .company { color: var(--text-dim); font-style: italic; margin-bottom: 15px; }
+        .description li { list-style-position: inside; color: var(--text-dim); margin-bottom: 5px; }
+
+        /* --- Contact --- */
+        .contact-container {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+            margin-top: 40px;
+        }
+
+        .contact-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            color: var(--text-light);
+            text-decoration: none;
+            padding: 20px;
+            background: var(--card-bg);
+            border-radius: 15px;
+            width: 200px;
+            transition: var(--transition);
+        }
+
+        .contact-item:hover {
+            background: var(--primary);
+            color: var(--bg-color);
+        }
+
+        .contact-item i { font-size: 2rem; }
+
+        footer {
+            padding: 30px;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.8rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* --- Reveal Animation --- */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease-out;
+        }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-50px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes bounce { 0%, 20%, 50%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-10px); } 60% { transform: translateY(-5px); } }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.5rem; }
+            .about-content { grid-template-columns: 1fr; }
+            .nav-links { display: none; } 
+            .profile-img-container { width: 200px; margin: 0 auto; }
+            .timeline { margin-left: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo">TL.</div>
+        <div class="nav-links">
+            <a href="#about">À propos</a>
+            <a href="#skills">Compétences</a>
+            <a href="#experience">Expériences</a>
+            <a href="#education">Formation</a>
+            <a href="#projects">Projets</a>
+            <a href="#contact">Contact</a>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <canvas id="particles-canvas"></canvas>
+        <div class="hero-content">
+            <h1>Thomas <span>Lacombe</span></h1>
+            <p>Ingénieur Data Science & IA</p>
+            <a href="#about" class="hero-btn">Découvrir mon profil</a>
+        </div>
+        
+        <div class="scroll-down">
+            <i class="fas fa-chevron-down"></i>
+        </div>
+    </header>
+
+    <section id="about">
+        <h2 class="section-title reveal">À Propos</h2>
+        <div class="about-content reveal">
+            <div class="profile-img-container">
+                <img src="ta-photo.jpg" alt="Thomas Lacombe" onerror="this.style.display='none'; this.parentElement.innerHTML='TL'">
+            </div>
+            <div class="about-text">
+                <p>
+                    Diplômé d'une formation d'ingénieur avec une spécialisation en data science et intelligence artificielle, 
+                    je suis à la recherche d'une première opportunité professionnelle à partir de janvier 2026.
+                </p>
+                <p>
+                    Mon parcours hybride m'a permis de conduire divers projets concrets autour de la computer vision, 
+                    du NLP et des systèmes RAG. Curieux et motivé, je suis prêt à mobiliser mes compétences 
+                    pour répondre à des problématiques variées.
+                </p>
+                <p style="margin-top: 20px; font-weight: bold; color: var(--primary);">
+                    <i class="fas fa-map-marker-alt"></i> Boulogne Billancourt (92100) &nbsp;|&nbsp; 
+                    <i class="fas fa-car"></i> Permis B
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section id="skills">
+        <h2 class="section-title reveal">Compétences</h2>
+        <div class="skills-grid reveal">
+            <div class="skill-card">
+                <h3><i class="fas fa-brain"></i> IA & Data Science</h3>
+                <div class="tags">
+                    <span class="tag">Machine Learning</span>
+                    <span class="tag">Deep Learning</span>
+                    <span class="tag">RAG Systems</span>
+                    <span class="tag">Computer Vision</span>
+                    <span class="tag">NLP</span>
+                </div>
+            </div>
+            <div class="skill-card">
+                <h3><i class="fas fa-code"></i> Programmation</h3>
+                <div class="tags">
+                    <span class="tag">Python</span>
+                    <span class="tag">SQL</span>
+                    <span class="tag">C</span>
+                    <span class="tag">Java</span>
+                    <span class="tag">R</span>
+                </div>
+            </div>
+            <div class="skill-card">
+                <h3><i class="fas fa-layer-group"></i> Frameworks</h3>
+                <div class="tags">
+                    <span class="tag">TensorFlow / PyTorch</span>
+                    <span class="tag">Scikit-learn</span>
+                    <span class="tag">Pandas</span>
+                    <span class="tag">OpenCV</span>
+                </div>
+            </div>
+            <div class="skill-card">
+                <h3><i class="fas fa-tools"></i> Outils</h3>
+                <div class="tags">
+                    <span class="tag">Docker</span>
+                    <span class="tag">Git</span>
+                    <span class="tag">Power BI</span>
+                    <span class="tag">Anglais (C1)</span>
+                </div>
+            </div>
+            <div class="skill-card">
+                <h3><i class="fas fa-globe"></i> Langues</h3>
+                <div class="tags">
+                    <span class="tag">Français (native)</span>
+                    <span class="tag">Anglais (C1)</span>
+                    <span class="tag">Espagnol (B2)</span>
+                    <span class="tag">Japonnais (A1)</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="experience">
+        <h2 class="section-title reveal">Expériences</h2>
+        <div class="timeline reveal">
+            
+            <div class="timeline-item">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="role">Stage Ingénieur - Data & IA</span>
+                        <span class="date">Mars - Sept 2025</span>
+                    </div>
+                    <div class="company">Dassault Aviation | Saint-Cloud</div>
+                    <ul class="description">
+                        <li>Mise en place de projets d'IA aux achats : RAG, Classification, OCR, LLM.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="role">Projet Industriel (École des Mines)</span>
+                        <span class="date">Sept 2024 - Jan 2025</span>
+                    </div>
+                    <div class="company">Thales | Saint-Étienne</div>
+                    <ul class="description">
+                        <li>Création d'une IA de classification d'image sous contrainte.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="role">Chargé d'affaires</span>
+                        <span class="date">2023 - 2024</span>
+                    </div>
+                    <div class="company">Junior Entreprise - Mines Études et Projets</div>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="role">Stage Assistant Ingénieur</span>
+                        <span class="date">Été 2024</span>
+                    </div>
+                    <div class="company">MGF Grimaldi | Grenoble</div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <section id="education">
+        <h2 class="section-title reveal">Formation</h2>
+        <div class="timeline reveal">
+            <div class="timeline-item">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="role">Ingénieur Civil des Mines (ICM)</span>
+                        <span class="date">2022 - 2025</span>
+                    </div>
+                    <div class="company">Mines Saint-Étienne</div>
+                    <div class="description">
+                        Majeure Data Science et IA - Option mécanique.
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="role">Échange International</span>
+                        <span class="date">2023</span>
+                    </div>
+                    <div class="company">Seoul National University (Corée du Sud)</div>
+                    <div class="description">
+                        Analyse numérique, Finance de marché, Robotique.
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="role">CPGE Scientifique PTSI-PT*</span>
+                        <span class="date">2020 - 2022</span>
+                    </div>
+                    <div class="company">Lycée Vaucanson (Grenoble)</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="projects">
+        <h2 class="section-title reveal">Projets</h2>
+        <div class="timeline reveal">
+             <div class="timeline-item">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="role">Application Musicale (Dev & IA)</span>
+                        <span class="date">En cours</span>
+                    </div>
+                    <div class="company">Projet Perso | Paris</div>
+                    <ul class="description">
+                        <li>Développement React & Backend. Algorithmes de recommandation.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact">
+        <h2 class="section-title reveal">Me Contacter / CV</h2>
+        <div class="contact-container reveal">
+            <a href="mailto:thomas.lacombe38@gmail.com" class="contact-item">
+                <i class="fas fa-envelope"></i>
+                <span>Email</span>
+            </a>
+            <a href="cv-thomas-lacombe.pdf" download class="contact-item">
+                <i class="fas fa-download"></i>
+                <span>Mon CV</span>
+            </a>
+            <a href="#" class="contact-item">
+                <i class="fab fa-linkedin"></i>
+                <span>LinkedIn</span>
+            </a>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 Thomas Lacombe. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // --- 1. Animation des sections au scroll ---
+        const revealElements = document.querySelectorAll('.reveal');
+        const revealOnScroll = () => {
+            const windowHeight = window.innerHeight;
+            const elementVisible = 100;
+            revealElements.forEach((reveal) => {
+                const elementTop = reveal.getBoundingClientRect().top;
+                if (elementTop < windowHeight - elementVisible) {
+                    reveal.classList.add('active');
+                }
+            });
+        };
+        window.addEventListener('scroll', revealOnScroll);
+        revealOnScroll();
+
+        // --- 2. Animation Particules Interactives (Canvas) ---
+        const canvas = document.getElementById('particles-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let particlesArray;
+        let mouse = { x: null, y: null, radius: 150 };
+
+        window.addEventListener('mousemove', (event) => {
+            mouse.x = event.x;
+            mouse.y = event.y;
+        });
+
+        // Classe Particule
+        class Particle {
+            constructor(x, y, directionX, directionY, size, color) {
+                this.x = x;
+                this.y = y;
+                this.directionX = directionX;
+                this.directionY = directionY;
+                this.size = size;
+                this.color = color;
+                this.baseX = x; // Position originale pour effet "retour" (optionnel, ici mouvement libre)
+                this.baseY = y;
+            }
+            // Dessiner
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+            // Mettre à jour position
+            update() {
+                // Vérifier collision souris
+                let dx = mouse.x - this.x;
+                let dy = mouse.y - this.y;
+                let distance = Math.sqrt(dx*dx + dy*dy);
+                let forceDirectionX = dx / distance;
+                let forceDirectionY = dy / distance;
+                let maxDistance = mouse.radius;
+                let force = (maxDistance - distance) / maxDistance;
+                let directionX = forceDirectionX * force * 5; // Vitesse repulsion
+                let directionY = forceDirectionY * force * 5;
+
+                if (distance < mouse.radius) {
+                    this.x -= directionX;
+                    this.y -= directionY;
+                } else {
+                    // Mouvement naturel
+                    if (this.x > canvas.width || this.x < 0) this.directionX = -this.directionX;
+                    if (this.y > canvas.height || this.y < 0) this.directionY = -this.directionY;
+                    this.x += this.directionX;
+                    this.y += this.directionY;
+                }
+                this.draw();
+            }
+        }
+
+        function init() {
+            particlesArray = [];
+            let numberOfParticles = (canvas.height * canvas.width) / 9000; // Densité
+            for (let i = 0; i < numberOfParticles; i++) {
+                let size = (Math.random() * 3) + 1;
+                let x = (Math.random() * ((innerWidth - size * 2) - (size * 2)) + size * 2);
+                let y = (Math.random() * ((innerHeight - size * 2) - (size * 2)) + size * 2);
+                let directionX = (Math.random() * 2) - 1; // Vitesse entre -1 et 1
+                let directionY = (Math.random() * 2) - 1;
+                let color = '#38bdf8'; // Couleur cyan
+                
+                particlesArray.push(new Particle(x, y, directionX, directionY, size, color));
+            }
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            ctx.clearRect(0,0, innerWidth, innerHeight);
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+            }
+        }
+
+        // Redimensionnement
+        window.addEventListener('resize', () => {
+            canvas.width = innerWidth;
+            canvas.height = innerHeight;
+            init();
+        });
+
+        init();
+        animate();
+    </script>
+</body>
+</html>
