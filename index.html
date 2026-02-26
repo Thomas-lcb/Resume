@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thomas Lacombe | Data Scientist</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <style>
         :root {
             --bg-color: #0f172a;
@@ -19,7 +20,7 @@
         }
 
         html {
-            scroll-behavior: auto; 
+            scroll-behavior: auto;
         }
 
         * {
@@ -33,7 +34,8 @@
             background-color: var(--bg-color);
             color: var(--text-light);
             overflow-x: hidden;
-            position: relative; /* Pour le positionnement relatif du canvas de fond */
+            position: relative;
+            /* Pour le positionnement relatif du canvas de fond */
         }
 
         /* --- BACKGROUND SCINTILLANT --- */
@@ -43,8 +45,10 @@
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: -10; /* Tout au fond */
-            pointer-events: none; /* Ne bloque pas les clics */
+            z-index: -10;
+            /* Tout au fond */
+            pointer-events: none;
+            /* Ne bloque pas les clics */
         }
 
         /* --- NAVIGATION --- */
@@ -59,7 +63,7 @@
             background: rgba(15, 23, 42, 0.95);
             backdrop-filter: blur(10px);
             z-index: 1000;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .logo {
@@ -80,7 +84,9 @@
             cursor: pointer;
         }
 
-        .nav-links a:hover { color: var(--primary); }
+        .nav-links a:hover {
+            color: var(--primary);
+        }
 
         .nav-links a::after {
             content: '';
@@ -93,7 +99,9 @@
             transition: width 0.3s;
         }
 
-        .nav-links a:hover::after { width: 100%; }
+        .nav-links a:hover::after {
+            width: 100%;
+        }
 
         /* --- HERO SECTION --- */
         .hero {
@@ -106,7 +114,7 @@
             position: relative;
             overflow: hidden;
             /* Le Hero a son propre fond qui va masquer les étoiles scintillantes en dessous */
-            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%); 
+            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
         }
 
         #particles-canvas {
@@ -122,18 +130,22 @@
             z-index: 1;
             pointer-events: none;
         }
-        
-        .hero-content * { pointer-events: auto; }
+
+        .hero-content * {
+            pointer-events: auto;
+        }
 
         .hero h1 {
             font-size: 4rem;
             line-height: 1.1;
             margin-bottom: 20px;
-            text-shadow: 0 0 20px rgba(0,0,0,0.5);
+            text-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
             animation: fadeInDown 1s ease-out;
         }
 
-        .hero span { color: var(--primary); }
+        .hero span {
+            color: var(--primary);
+        }
 
         .hero p {
             font-size: 1.5rem;
@@ -175,7 +187,8 @@
             padding: 100px 10%;
             min-height: auto;
             position: relative;
-            z-index: 1; /* Pour être au dessus des étoiles de fond */
+            z-index: 1;
+            /* Pour être au dessus des étoiles de fond */
         }
 
         .section-title {
@@ -210,14 +223,14 @@
             overflow: hidden;
             border: 3px solid var(--primary);
             box-shadow: 0 0 30px rgba(56, 189, 248, 0.2);
-            background: #333; 
+            background: #333;
             display: flex;
             justify-content: center;
             align-items: center;
             font-size: 3rem;
             color: #555;
         }
-        
+
         .profile-img-container img {
             width: 100%;
             height: 100%;
@@ -245,12 +258,10 @@
             top: 25px;
             bottom: 25px;
             width: 2px;
-            background: linear-gradient(
-                to bottom, 
-                var(--primary) 0%, 
-                var(--secondary) 50%, 
-                rgba(129, 140, 248, 0.1) 100%
-            );
+            background: linear-gradient(to bottom,
+                    var(--primary) 0%,
+                    var(--secondary) 50%,
+                    rgba(129, 140, 248, 0.1) 100%);
             z-index: 0;
         }
 
@@ -268,7 +279,7 @@
             transition: max-height 0.5s ease-in-out;
             position: relative;
         }
-        
+
         .description::after {
             content: '';
             position: absolute;
@@ -279,11 +290,11 @@
             background: linear-gradient(transparent, var(--card-bg));
             transition: opacity 0.3s;
         }
-        
+
         .timeline-item.expanded .description {
             max-height: 1000px;
         }
-        
+
         .timeline-item.expanded .description::after {
             opacity: 0;
         }
@@ -303,7 +314,7 @@
         .hex-svg {
             width: 100%;
             height: 100%;
-            fill: var(--bg-color); 
+            fill: var(--bg-color);
             stroke: var(--primary);
             stroke-width: 2;
             transition: all 0.4s ease;
@@ -313,7 +324,7 @@
             background: var(--card-bg);
             padding: 25px;
             border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
             transition: var(--transition);
             flex-grow: 1;
             border: 1px solid transparent;
@@ -330,7 +341,7 @@
             transform: translateY(-5px) translateX(5px);
             border-color: rgba(56, 189, 248, 0.3);
         }
-        
+
         .timeline-item.expanded .hex-svg {
             fill: var(--primary);
             stroke: var(--secondary);
@@ -342,7 +353,7 @@
             border-color: var(--primary);
             background: rgba(56, 189, 248, 0.05);
         }
-        
+
         /* Styles Timeline Header */
         .card-header {
             display: flex;
@@ -379,27 +390,27 @@
             transform: scale(1.2);
         }
 
-        .date { 
+        .date {
             color: var(--text-dim);
-            font-size: 0.9rem; 
-            font-weight: 400; 
-            white-space: nowrap; 
+            font-size: 0.9rem;
+            font-weight: 400;
+            white-space: nowrap;
             margin-top: 5px;
         }
 
-        .role { 
-            font-size: 1.05rem; 
+        .role {
+            font-size: 1.05rem;
             font-weight: 500;
             color: var(--primary);
             display: block;
             margin-bottom: 15px;
         }
 
-        .description li { 
-            list-style-position: inside; 
-            color: var(--text-dim); 
-            margin-bottom: 5px; 
-            line-height: 1.5; 
+        .description li {
+            list-style-position: inside;
+            color: var(--text-dim);
+            margin-bottom: 5px;
+            line-height: 1.5;
         }
 
         /* --- CONTACT --- */
@@ -430,7 +441,9 @@
             color: var(--bg-color);
         }
 
-        .contact-item i { font-size: 2rem; }
+        .contact-item i {
+            font-size: 2rem;
+        }
 
         .back-to-top {
             display: flex;
@@ -438,7 +451,7 @@
             justify-content: center;
             align-items: center;
             gap: 5px;
-            margin-top: 110px;
+            margin-top: 170px;
             margin-bottom: -50px;
             cursor: pointer;
             position: relative;
@@ -471,7 +484,7 @@
             text-align: center;
             color: var(--text-dim);
             font-size: 0.8rem;
-            border-top: 1px solid rgba(255,255,255,0.1);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         /* --- ANIMATIONS --- */
@@ -480,11 +493,54 @@
             transform: translateY(30px);
             transition: all 0.8s ease-out;
         }
-        .reveal.active { opacity: 1; transform: translateY(0); }
 
-        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-50px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes bounce { 0%, 20%, 50%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-10px); } 60% { transform: translateY(-5px); } }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes bounce {
+
+            0%,
+            20%,
+            50%,
+            80%,
+            100% {
+                transform: translateY(0);
+            }
+
+            40% {
+                transform: translateY(-10px);
+            }
+
+            60% {
+                transform: translateY(-5px);
+            }
+        }
 
         /* --- SKILLS --- */
         .skills-grid {
@@ -504,7 +560,7 @@
 
         .skill-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
         }
 
         .skill-card h3 {
@@ -516,9 +572,15 @@
             color: var(--text-light);
         }
 
-        .skill-card h3 i { color: var(--primary); }
+        .skill-card h3 i {
+            color: var(--primary);
+        }
 
-        .tags { display: flex; flex-wrap: wrap; gap: 10px; }
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
 
         .tag {
             background: rgba(56, 189, 248, 0.1);
@@ -534,23 +596,64 @@
             background: var(--primary);
             color: var(--bg-color);
         }
-        
+
         /* --- MEDIA QUERIES --- */
         @media (max-width: 768px) {
-            .hero h1 { font-size: 2.5rem; }
-            .about-content { grid-template-columns: 1fr; }
-            .nav-links { display: none; } 
-            .profile-img-container { width: 200px; margin: 0 auto; }
-            .timeline::before { left: 19px; }
-            .timeline-marker { width: 40px; height: 40px; margin-right: 15px; }
-            .timeline-content { padding: 20px; }
-            .card-header { flex-direction: column; align-items: flex-start; gap: 5px; }
-            .company-group { width: 100%; justify-content: space-between; }
-            .role { font-size: 1rem; }
-            .date { order: -1; font-size: 0.8rem; margin-bottom: 2px;} 
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .about-content {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .profile-img-container {
+                width: 200px;
+                margin: 0 auto;
+            }
+
+            .timeline::before {
+                left: 19px;
+            }
+
+            .timeline-marker {
+                width: 40px;
+                height: 40px;
+                margin-right: 15px;
+            }
+
+            .timeline-content {
+                padding: 20px;
+            }
+
+            .card-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+
+            .company-group {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .role {
+                font-size: 1rem;
+            }
+
+            .date {
+                order: -1;
+                font-size: 0.8rem;
+                margin-bottom: 2px;
+            }
         }
     </style>
 </head>
+
 <body>
 
     <canvas id="bg-stars"></canvas>
@@ -575,7 +678,7 @@
             <p>Machine Learning Engineer (AI & Software Systems)</p>
             <a onclick="handleClickHero(event)" class="hero-btn">Discover my profile</a>
         </div>
-        
+
         <div class="scroll-down">
             <i class="fas fa-chevron-down"></i>
         </div>
@@ -584,19 +687,25 @@
     <section id="about">
         <h2 class="section-title reveal">About</h2>
         <div class="about-content reveal">
-             <div class="profile-img-container">
-                <img src="PP.JPG" alt="Thomas Lacombe" onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\'color:#fff\'>TL</span>'">
+            <div class="profile-img-container">
+                <img src="PP.JPG" alt="Thomas Lacombe"
+                    onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\'color:#fff\'>TL</span>'">
             </div>
             <div class="about-text">
-                <p>As an engineering graduate specializing in Data Science and Artificial Intelligence, I am seeking my first professional opportunity starting in february 2026, following the completion of my final-year internship.</p>
-                 <p>My hybrid background has enabled me to lead various concrete projects focused on Computer Vision, NLP, RAG (Retrieval-Augmented Generation) systems, and classification.</p>
-                 <p>Curious and motivated, I am eager to leverage my Data Science skills to address diverse and real-world challenges.</p>
-                  <p style="margin-top: 15px; font-weight: bold; color: var(--primary);"><i class="fas fa-map-marker-alt" style="margin-right: 15px;"></i>Boulogne Billancourt (92100)</p>
+                <p>As an engineering graduate specializing in Data Science and Artificial Intelligence, I am seeking my
+                    first professional opportunity starting in february 2026, following the completion of my final-year
+                    internship.</p>
+                <p>My hybrid background has enabled me to lead various concrete projects focused on Computer Vision,
+                    NLP, RAG (Retrieval-Augmented Generation) systems, and classification.</p>
+                <p>Curious and motivated, I am eager to leverage my Data Science skills to address diverse and
+                    real-world challenges.</p>
+                <p style="margin-top: 15px; font-weight: bold; color: var(--primary);"><i class="fas fa-map-marker-alt"
+                        style="margin-right: 15px;"></i>Boulogne Billancourt (92100)</p>
             </div>
         </div>
     </section>
 
-<section id="skills">
+    <section id="skills">
         <h2 class="section-title reveal">Skills</h2>
         <div class="skills-grid reveal">
             <div class="skill-card">
@@ -674,7 +783,7 @@
     <section id="experience">
         <h2 class="section-title reveal">Experience</h2>
         <div class="timeline reveal">
-            
+
             <div class="timeline-item">
                 <div class="timeline-marker">
                     <svg class="hex-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
@@ -685,7 +794,8 @@
                     <div class="card-header">
                         <div class="company-group">
                             <span class="company-name">Dassault Aviation | Saint-Cloud</span>
-                            <a href="https://www.linkedin.com/company/dassault-aviation/" target="_blank" class="linkedin-link" title="View on LinkedIn" onclick="event.stopPropagation()">
+                            <a href="https://www.linkedin.com/company/dassault-aviation/" target="_blank"
+                                class="linkedin-link" title="View on LinkedIn" onclick="event.stopPropagation()">
                                 <i class="fab fa-linkedin"></i>
                             </a>
                         </div>
@@ -693,11 +803,15 @@
                     </div>
                     <span class="role">Data Scientist Intern – Artificial Intelligence</span>
                     <ul class="description">
-                        <li>Development and deployment of AI solutions to improve Purchasing Department performance.</li>
-                        <li>Implementation of classification models (decision trees, gradient boosting, neural networks), data extraction via OCR, and development of programs to simplify processes.</li>
-                        <li>Work on LLM projects, specifically implementing RAG (and auto-RAG) systems to facilitate information access and optimize decision-making.</li>
-                        <li>Tool containerized and deployed via Docker, with a simple UI (Streamlit) accessible via web browser.</li>
-                        <li>Web scraping (using Selenium) to populate knowledge bases.</li> 
+                        <li>Development and deployment of AI solutions to improve Purchasing Department performance.
+                        </li>
+                        <li>Implementation of classification models (decision trees, gradient boosting, neural
+                            networks), data extraction via OCR, and development of programs to simplify processes.</li>
+                        <li>Work on LLM projects, specifically implementing RAG (and auto-RAG) systems to facilitate
+                            information access and optimize decision-making.</li>
+                        <li>Tool containerized and deployed via Docker, with a simple UI (Streamlit) accessible via web
+                            browser.</li>
+                        <li>Web scraping (using Selenium) to populate knowledge bases.</li>
                         <li>Presentation of results in Power BI linked to Dassault data via SQL queries.</li>
                     </ul>
                 </div>
@@ -713,7 +827,8 @@
                     <div class="card-header">
                         <div class="company-group">
                             <span class="company-name">MGF Grimaldi | Grenoble</span>
-                            <a href="https://www.linkedin.com/company/mgf-grimaldi/" target="_blank" class="linkedin-link" title="View on LinkedIn" onclick="event.stopPropagation()">
+                            <a href="https://www.linkedin.com/company/mgf-grimaldi/" target="_blank"
+                                class="linkedin-link" title="View on LinkedIn" onclick="event.stopPropagation()">
                                 <i class="fab fa-linkedin"></i>
                             </a>
                         </div>
@@ -741,7 +856,8 @@
                     <div class="card-header">
                         <div class="company-group">
                             <span class="company-name">JE - Mines Études et Projets | Saint-Étienne</span>
-                            <a href="https://www.linkedin.com/company/mines-tudes-et-projets/" target="_blank" class="linkedin-link" title="View on LinkedIn" onclick="event.stopPropagation()">
+                            <a href="https://www.linkedin.com/company/mines-tudes-et-projets/" target="_blank"
+                                class="linkedin-link" title="View on LinkedIn" onclick="event.stopPropagation()">
                                 <i class="fab fa-linkedin"></i>
                             </a>
                         </div>
@@ -750,14 +866,15 @@
                     <span class="role">Business Manager</span>
                     <ul class="description">
                         <li>Served as Business Manager and Project Manager within the school's Junior Enterprise.
-                        <br>- Define and lead studies submitted by companies to our Junior-Enterprise.
-                        <br>- Manage administrative phases: scoping, proposal, budgeting, signing...
-                        <br>- Manage teams of consultants.
-                        <br>- Manage stakeholders with different profiles and expectations.
-                        <br>- Participated in the National Junior-Entrepreneur Congress.</li>
+                            <br>- Define and lead studies submitted by companies to our Junior-Enterprise.
+                            <br>- Manage administrative phases: scoping, proposal, budgeting, signing...
+                            <br>- Manage teams of consultants.
+                            <br>- Manage stakeholders with different profiles and expectations.
+                            <br>- Participated in the National Junior-Entrepreneur Congress.
+                        </li>
                     </ul>
                 </div>
-            </div>            
+            </div>
 
             <div class="timeline-item">
                 <div class="timeline-marker">
@@ -769,7 +886,8 @@
                     <div class="card-header">
                         <div class="company-group">
                             <span class="company-name">Tecumseh | Cessieu</span>
-                            <a href="https://www.linkedin.com/company/tecumseh/" target="_blank" class="linkedin-link" title="View on LinkedIn" onclick="event.stopPropagation()">
+                            <a href="https://www.linkedin.com/company/tecumseh/" target="_blank" class="linkedin-link"
+                                title="View on LinkedIn" onclick="event.stopPropagation()">
                                 <i class="fab fa-linkedin"></i>
                             </a>
                         </div>
@@ -778,9 +896,10 @@
                     <span class="role">Production Operator Intern</span>
                     <ul class="description">
                         <li>Internship as a production operator:
-                        <br>- Production on various machines in the machining workshop.
-                        <br>- Quality control of parts.
-                        <br>- Machine maintenance.</li>
+                            <br>- Production on various machines in the machining workshop.
+                            <br>- Quality control of parts.
+                            <br>- Machine maintenance.
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -791,7 +910,7 @@
     <section id="education">
         <h2 class="section-title reveal">Education</h2>
         <div class="timeline reveal">
-            
+
             <div class="timeline-item">
                 <div class="timeline-marker">
                     <svg class="hex-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
@@ -800,9 +919,10 @@
                 </div>
                 <div class="timeline-content">
                     <div class="card-header">
-                         <div class="company-group">
+                        <div class="company-group">
                             <span class="company-name">École Nationale Supérieure des Mines de Saint-Étienne</span>
-                            <a href="https://www.linkedin.com/school/mines-st-etienne/" target="_blank" class="linkedin-link" title="View on LinkedIn" onclick="event.stopPropagation()">
+                            <a href="https://www.linkedin.com/school/mines-st-etienne/" target="_blank"
+                                class="linkedin-link" title="View on LinkedIn" onclick="event.stopPropagation()">
                                 <i class="fab fa-linkedin"></i>
                             </a>
                         </div>
@@ -811,8 +931,10 @@
                     <span class="role">Major in Data Science & AI - Mechanics Option (MSc in Engineering)</span>
                     <div class="description" style="color: var(--text-dim);">
                         <strong>3rd Year – Data Science Major:</strong><br>
-                        Courses: Probabilistic foundations, statistical learning, machine learning, metamodeling and optimization, artificial intelligence.<br>
-                        Projects: Pedestrian detection for Thales via ML, reconstruction of radiation-noised images using deep learning.<br><br>
+                        Courses: Probabilistic foundations, statistical learning, machine learning, metamodeling and
+                        optimization, artificial intelligence.<br>
+                        Projects: Pedestrian detection for Thales via ML, reconstruction of radiation-noised images
+                        using deep learning.<br><br>
 
                         <strong>2nd Year:</strong><br>
                         Courses: Semester at Seoul National University, transition management.<br>
@@ -820,8 +942,11 @@
                         Project: CAD design of an autonomous production and breeding module.<br><br>
 
                         <strong>1st Year – Core Curriculum:</strong><br>
-                        Courses: Physics (materials, thermodynamics, fluid mechanics, continuum mechanics), Computer Science (C, Java, Python, SQL, algorithms), Mathematics (statistics, OR, signal processing), marketing, economics, corporate law, sustainable development.<br>
-                        Projects: Solar power plant study (PRO II software), mechanical energy vehicle design, app creation for HPSE charity.
+                        Courses: Physics (materials, thermodynamics, fluid mechanics, continuum mechanics), Computer
+                        Science (C, Java, Python, SQL, algorithms), Mathematics (statistics, OR, signal processing),
+                        marketing, economics, corporate law, sustainable development.<br>
+                        Projects: Solar power plant study (PRO II software), mechanical energy vehicle design, app
+                        creation for HPSE charity.
                     </div>
                 </div>
             </div>
@@ -836,17 +961,19 @@
                     <div class="card-header">
                         <div class="company-group">
                             <span class="company-name">Seoul National University (South Korea)</span>
-                            <a href="https://www.linkedin.com/school/seoulnational-university/" target="_blank" class="linkedin-link" title="View on LinkedIn" onclick="event.stopPropagation()">
+                            <a href="https://www.linkedin.com/school/seoulnational-university/" target="_blank"
+                                class="linkedin-link" title="View on LinkedIn" onclick="event.stopPropagation()">
                                 <i class="fab fa-linkedin"></i>
                             </a>
                         </div>
                         <span class="date">September 2023 - January 2024</span>
                     </div>
                     <span class="role">International Exchange (6 months)</span>
-                    <div class="description" style="color: var(--text-dim);">Academic exchange semester in the Mechanical Engineering department:<br>
-                    - Numerical analysis in mechanical engineering<br>
-                    - Robot mechanics<br>
-                    - Market finance</div>
+                    <div class="description" style="color: var(--text-dim);">Academic exchange semester in the
+                        Mechanical Engineering department:<br>
+                        - Numerical analysis in mechanical engineering<br>
+                        - Robot mechanics<br>
+                        - Market finance</div>
                 </div>
             </div>
 
@@ -860,14 +987,17 @@
                     <div class="card-header">
                         <div class="company-group">
                             <span class="company-name">Lycée Vaucanson Prep School (Grenoble)</span>
-                            <a href="https://www.linkedin.com/school/lycee-vaucanson/" target="_blank" class="linkedin-link" title="View on LinkedIn" onclick="event.stopPropagation()">
+                            <a href="https://www.linkedin.com/school/lycee-vaucanson/" target="_blank"
+                                class="linkedin-link" title="View on LinkedIn" onclick="event.stopPropagation()">
                                 <i class="fab fa-linkedin"></i>
                             </a>
                         </div>
                         <span class="date">September 2020 - July 2022</span>
                     </div>
                     <span class="role">CPGE Scientific Preparatory Classes PTSI-PT*</span>
-                    <div class="description" style="color: var(--text-dim);">Fundamentals in engineering fields (Mathematics, Physics, Engineering Sciences, Computer Science) to prepare for competitive entrance exams for French "Grandes Écoles".</div>
+                    <div class="description" style="color: var(--text-dim);">Fundamentals in engineering fields
+                        (Mathematics, Physics, Engineering Sciences, Computer Science) to prepare for competitive
+                        entrance exams for French "Grandes Écoles".</div>
                 </div>
             </div>
 
@@ -887,7 +1017,8 @@
                     <div class="card-header">
                         <div class="company-group">
                             <span class="company-name">Personal Project | Paris</span>
-                             <a href="https://github.com/Thomas-lcb" target="_blank" class="linkedin-link" title="View on GitHub" onclick="event.stopPropagation()">
+                            <a href="https://github.com/Thomas-lcb" target="_blank" class="linkedin-link"
+                                title="View on GitHub" onclick="event.stopPropagation()">
                                 <i class="fab fa-github"></i>
                             </a>
                         </div>
@@ -895,9 +1026,44 @@
                     </div>
                     <span class="role">Music Recommendation App (Dev & AI)</span>
                     <ul class="description">
-                        <li>Development in React (with Expo), backend setup, and testing of recommendation algorithms (similarity, clustering).
-                        Reflection on UI/UX and implementation of the complete recommendation system.
-                        Management of app cache/data and data pipelines.</li>
+                        <li>Development in React (with Expo), backend setup, and testing of recommendation algorithms
+                            (similarity, clustering).
+                            Reflection on UI/UX and implementation of the complete recommendation system.
+                            Management of app cache/data and data pipelines.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-marker">
+                    <svg class="hex-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+                        <polygon points="50 5, 95 27.5, 95 72.5, 50 95, 5 72.5, 5 27.5" />
+                    </svg>
+                </div>
+                <div class="timeline-content">
+                    <div class="card-header">
+                        <div class="company-group">
+                            <span class="company-name">Personal Project | Paris</span>
+                            <a href="https://github.com/Thomas-lcb/Deep-Reinforcemen-tLearning-Trading-Agent"
+                                target="_blank" class="linkedin-link" title="View on GitHub"
+                                onclick="event.stopPropagation()">
+                                <i class="fab fa-github"></i>
+                            </a>
+                        </div>
+                        <span class="date">January 2026 - Present</span>
+                    </div>
+                    <span class="role">Autonomous Crypto Trading Agent (Deep Reinforcement Learning)</span>
+                    <ul class="description">
+                        <li>Design and development of an autonomous trading agent using Deep Reinforcement Learning
+                            (PPO/SAC, PyTorch, Stable-Baselines3).</li>
+                        <li>Construction of a custom Gym environment with continuous action space, multi-asset support
+                            (10 crypto pairs), and domain randomization.</li>
+                        <li>Implementation of a multi-component reward function (log-return, drawdown penalty, trend
+                            alignment, unrealized PnL).</li>
+                        <li>Data pipeline with multi-timeframe feature engineering (1H/4H/1D/1W), rolling z-score
+                            normalization, and sentiment integration.</li>
+                        <li>Progressive training via curriculum learning with GPU-optimized batch processing (CUDA).
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -912,7 +1078,8 @@
                     <div class="card-header">
                         <div class="company-group">
                             <span class="company-name">EMSE | Saint-Étienne</span>
-                            <a href="https://www.linkedin.com/school/mines-st-etienne/" target="_blank" class="linkedin-link" title="View on LinkedIn" onclick="event.stopPropagation()">
+                            <a href="https://www.linkedin.com/school/mines-st-etienne/" target="_blank"
+                                class="linkedin-link" title="View on LinkedIn" onclick="event.stopPropagation()">
                                 <i class="fab fa-linkedin"></i>
                             </a>
                         </div>
@@ -920,13 +1087,14 @@
                     </div>
                     <span class="role">Research Project (École des Mines)</span>
                     <ul class="description">
-                        <li>Development and training of a deep learning model to denoise images damaged by ionizing radiation (nuclear reactor).
+                        <li>Development and training of a deep learning model to denoise images damaged by ionizing
+                            radiation (nuclear reactor).
                             Use of encoder-decoder networks and noise reproduction to generate training data.
                             Drafting of a research paper and poster to present results.
                         </li>
                     </ul>
                 </div>
-            </div>   
+            </div>
 
             <div class="timeline-item">
                 <div class="timeline-marker">
@@ -938,7 +1106,8 @@
                     <div class="card-header">
                         <div class="company-group">
                             <span class="company-name">Thales | Saint-Étienne</span>
-                            <a href="https://www.linkedin.com/company/thales/" target="_blank" class="linkedin-link" title="View on LinkedIn" onclick="event.stopPropagation()">
+                            <a href="https://www.linkedin.com/company/thales/" target="_blank" class="linkedin-link"
+                                title="View on LinkedIn" onclick="event.stopPropagation()">
                                 <i class="fab fa-linkedin"></i>
                             </a>
                         </div>
@@ -947,7 +1116,8 @@
                     <span class="role">Industrial Project (École des Mines)</span>
                     <ul class="description">
                         <li>Training of a constrained image classification AI for infrared pedestrian detection.
-                            Benchmarking existing models and training CNN models using TensorFlow and PyTorch (MobileNet and YOLO). Testing and analysis of evaluation and training metrics.
+                            Benchmarking existing models and training CNN models using TensorFlow and PyTorch (MobileNet
+                            and YOLO). Testing and analysis of evaluation and training metrics.
                             Model training on Linux cluster with GPU resource management.
                         </li>
                     </ul>
@@ -964,7 +1134,8 @@
                     <div class="card-header">
                         <div class="company-group">
                             <span class="company-name">Fermavers | Saint-Étienne</span>
-                            <a href="https://www.linkedin.com/company/fermavers/" target="_blank" class="linkedin-link" title="View on LinkedIn" onclick="event.stopPropagation()">
+                            <a href="https://www.linkedin.com/company/fermavers/" target="_blank" class="linkedin-link"
+                                title="View on LinkedIn" onclick="event.stopPropagation()">
                                 <i class="fab fa-linkedin"></i>
                             </a>
                         </div>
@@ -972,13 +1143,14 @@
                     </div>
                     <span class="role">PRICE Program (École des Mines)</span>
                     <ul class="description">
-                        <li>Development of a Black Soldier Fly larvae breeding tool for organic waste valorization into protein.
+                        <li>Development of a Black Soldier Fly larvae breeding tool for organic waste valorization into
+                            protein.
                             Module design in CAD (Inventor), and resource flow management for larvae welfare.
                         </li>
                     </ul>
                 </div>
             </div>
-            
+
             <div class="timeline-item">
                 <div class="timeline-marker">
                     <svg class="hex-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
@@ -994,13 +1166,14 @@
                     </div>
                     <span class="role">Civic Project (École des Mines)</span>
                     <ul class="description">
-                        <li>Development of an application to promote Saint-Étienne's heritage via an interactive treasure hunt throughout the city.
+                        <li>Development of an application to promote Saint-Étienne's heritage via an interactive
+                            treasure hunt throughout the city.
                         </li>
                     </ul>
                 </div>
             </div>
-            
-            
+
+
             <div class="timeline-item">
                 <div class="timeline-marker">
                     <svg class="hex-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
@@ -1016,11 +1189,12 @@
                     </div>
                     <span class="role">Preparatory Class Project (TIPE)</span>
                     <ul class="description">
-                        <li>Study, simulation, and modeling of an insulin pump and its effect on the human body (mechanically represented).
+                        <li>Study, simulation, and modeling of an insulin pump and its effect on the human body
+                            (mechanically represented).
                         </li>
                     </ul>
                 </div>
-            </div>   
+            </div>
 
 
         </div>
@@ -1088,7 +1262,7 @@
             }
             requestAnimationFrame(animation);
         }
-        
+
         const timelineItems = document.querySelectorAll('.timeline-item');
         timelineItems.forEach(item => {
             item.addEventListener('click', () => {
@@ -1103,7 +1277,7 @@
         const heroCtx = heroCanvas.getContext('2d');
         let heroParticlesArray;
         let mouse = { x: null, y: null, radius: 150 };
-        let flashActive = false; 
+        let flashActive = false;
 
         // Important: On redimensionne les 2 canvas au chargement et resize
         function resizeCanvases() {
@@ -1123,8 +1297,8 @@
         function handleClickHero(e) {
             e.preventDefault();
             flashActive = true;
-            setTimeout(() => { flashActive = false; }, 280); 
-            setTimeout(() => { smoothScrollTo('about'); }, 1000); 
+            setTimeout(() => { flashActive = false; }, 280);
+            setTimeout(() => { smoothScrollTo('about'); }, 1000);
         }
 
         class HeroParticle {
@@ -1183,12 +1357,12 @@
         function initHeroParticles() {
             heroParticlesArray = [];
             // Un peu moins de particules pour ne pas saturer
-            let numberOfParticles = (heroCanvas.height * heroCanvas.width) / 10000; 
+            let numberOfParticles = (heroCanvas.height * heroCanvas.width) / 10000;
             for (let i = 0; i < numberOfParticles; i++) {
                 let size = (Math.random() * 3) + 1;
                 let x = Math.random() * heroCanvas.width;
                 let y = Math.random() * heroCanvas.height;
-                let directionX = (Math.random() * 1.5) - 0.75; 
+                let directionX = (Math.random() * 1.5) - 0.75;
                 let directionY = (Math.random() * 1.5) - 0.75;
                 heroParticlesArray.push(new HeroParticle(x, y, directionX, directionY, size));
             }
@@ -1209,10 +1383,10 @@
                 this.baseAlpha = Math.random(); // Transparence de départ
                 this.speedAlpha = Math.random() * 0.02 + 0.005; // Vitesse de scintillement
                 this.increasing = true;
-                
+
                 // Couleur aléatoire entre Cyan et Violet pour "effet sympa"
                 // Cyan: 190, Violet: 250 (Hue)
-                this.hue = Math.floor(Math.random() * 60) + 190; 
+                this.hue = Math.floor(Math.random() * 60) + 190;
             }
 
             draw() {
@@ -1244,7 +1418,7 @@
         function initBgStars() {
             bgStarsArray = [];
             // Environ 80 étoiles pour un fond subtil
-            let numberOfStars = 80; 
+            let numberOfStars = 80;
             for (let i = 0; i < numberOfStars; i++) {
                 bgStarsArray.push(new Star());
             }
@@ -1255,7 +1429,7 @@
         // =========================================================
         function animate() {
             // Animation Hero
-            heroCtx.clearRect(0,0, heroCanvas.width, heroCanvas.height); 
+            heroCtx.clearRect(0, 0, heroCanvas.width, heroCanvas.height);
             for (let i = 0; i < heroParticlesArray.length; i++) {
                 heroParticlesArray[i].update();
             }
@@ -1274,7 +1448,8 @@
         // Lancement
         resizeCanvases(); // Initie tout
         animate(); // Lance la boucle
-        
+
     </script>
 </body>
+
 </html>
