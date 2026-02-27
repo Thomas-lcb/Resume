@@ -597,6 +597,32 @@
             color: var(--bg-color);
         }
 
+        /* --- LANG TOGGLE --- */
+        .lang-toggle {
+            background: transparent;
+            border: none;
+            color: var(--text-dim);
+            padding: 8px 12px;
+            border-radius: 50%;
+            font-size: 0.85rem;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            letter-spacing: 1px;
+
+            margin-left: 10px;
+            /* Subtle glass effect without border */
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+        }
+
+        .lang-toggle:hover {
+            color: var(--primary);
+            background: radial-gradient(circle, rgba(56, 189, 248, 0.1) 0%, transparent 90%);
+            text-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+        }
+
         /* --- MEDIA QUERIES --- */
         @media (max-width: 768px) {
             .hero h1 {
@@ -659,15 +685,18 @@
     <canvas id="bg-stars"></canvas>
 
     <nav>
-        <img src="PP.JPG" alt="Logo" class="logo" onerror="this.style.display='none'">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <img src="PP.JPG" alt="Logo" class="logo" onerror="this.style.display='none'">
+            <button class="lang-toggle" onclick="toggleLang()" title="Switch language">EN</button>
+        </div>
         <div class="nav-links">
-            <a onclick="smoothScrollTo('hero')">Home</a>
-            <a onclick="smoothScrollTo('about')">About</a>
-            <a onclick="smoothScrollTo('skills')">Skills</a>
-            <a onclick="smoothScrollTo('experience')">Experience</a>
-            <a onclick="smoothScrollTo('education')">Education</a>
-            <a onclick="smoothScrollTo('projects')">Projects</a>
-            <a onclick="smoothScrollTo('contact')">Contact/CV</a>
+            <a onclick="smoothScrollTo('hero')" data-i18n="nav.home">Home</a>
+            <a onclick="smoothScrollTo('about')" data-i18n="nav.about">About</a>
+            <a onclick="smoothScrollTo('skills')" data-i18n="nav.skills">Skills</a>
+            <a onclick="smoothScrollTo('experience')" data-i18n="nav.experience">Experience</a>
+            <a onclick="smoothScrollTo('education')" data-i18n="nav.education">Education</a>
+            <a onclick="smoothScrollTo('projects')" data-i18n="nav.projects">Projects</a>
+            <a onclick="smoothScrollTo('contact')" data-i18n="nav.contact">Contact/CV</a>
         </div>
     </nav>
 
@@ -675,8 +704,8 @@
         <canvas id="particles-canvas"></canvas>
         <div class="hero-content">
             <h1>Thomas <span>Lacombe</span></h1>
-            <p>Machine Learning Engineer (AI & Software Systems)</p>
-            <a onclick="handleClickHero(event)" class="hero-btn">Discover my profile</a>
+            <p data-i18n="hero.subtitle">Machine Learning Engineer (AI & Software Systems)</p>
+            <a onclick="handleClickHero(event)" class="hero-btn" data-i18n="hero.btn">Discover my profile</a>
         </div>
 
         <div class="scroll-down">
@@ -685,31 +714,35 @@
     </header>
 
     <section id="about">
-        <h2 class="section-title reveal">About</h2>
+        <h2 class="section-title reveal" data-i18n="about.title">About</h2>
         <div class="about-content reveal">
             <div class="profile-img-container">
                 <img src="PP.JPG" alt="Thomas Lacombe"
                     onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\'color:#fff\'>TL</span>'">
             </div>
             <div class="about-text">
-                <p>As an engineering graduate specializing in Data Science and Artificial Intelligence, I am seeking my
+                <p data-i18n="about.p1">As an engineering graduate specializing in Data Science and Artificial
+                    Intelligence, I am seeking my
                     first professional opportunity starting in february 2026, following the completion of my final-year
                     internship.</p>
-                <p>My hybrid background has enabled me to lead various concrete projects focused on Computer Vision,
+                <p data-i18n="about.p2">My hybrid background has enabled me to lead various concrete projects focused on
+                    Computer Vision,
                     NLP, RAG (Retrieval-Augmented Generation) systems, and classification.</p>
-                <p>Curious and motivated, I am eager to leverage my Data Science skills to address diverse and
+                <p data-i18n="about.p3">Curious and motivated, I am eager to leverage my Data Science skills to address
+                    diverse and
                     real-world challenges.</p>
                 <p style="margin-top: 15px; font-weight: bold; color: var(--primary);"><i class="fas fa-map-marker-alt"
-                        style="margin-right: 15px;"></i>Boulogne Billancourt (92100)</p>
+                        style="margin-right: 15px;"></i><span data-i18n="about.location">Boulogne Billancourt
+                        (92100)</span></p>
             </div>
         </div>
     </section>
 
     <section id="skills">
-        <h2 class="section-title reveal">Skills</h2>
+        <h2 class="section-title reveal" data-i18n="skills.title">Skills</h2>
         <div class="skills-grid reveal">
             <div class="skill-card">
-                <h3><i class="fas fa-brain"></i> AI & Data Science</h3>
+                <h3><i class="fas fa-brain"></i> <span data-i18n="skills.ai">AI & Data Science</span></h3>
                 <div class="tags">
                     <span class="tag">Machine Learning</span>
                     <span class="tag">NLP</span>
@@ -723,7 +756,7 @@
                 </div>
             </div>
             <div class="skill-card">
-                <h3><i class="fas fa-code"></i> Programming</h3>
+                <h3><i class="fas fa-code"></i> <span data-i18n="skills.programming">Programming</span></h3>
                 <div class="tags">
                     <span class="tag">Python ♥</span>
                     <span class="tag">SQL</span>
@@ -761,27 +794,27 @@
             <div class="skill-card">
                 <h3><i class="fas fa-globe"></i> Languages</h3>
                 <div class="tags">
-                    <span class="tag">French (Native)</span>
-                    <span class="tag">English (C1)</span>
-                    <span class="tag">Spanish (B2)</span>
-                    <span class="tag">Japanese (A1)</span>
+                    <span class="tag" data-i18n="skills.french">French (Native)</span>
+                    <span class="tag" data-i18n="skills.english">English (C1)</span>
+                    <span class="tag" data-i18n="skills.spanish">Spanish (B2)</span>
+                    <span class="tag" data-i18n="skills.japanese">Japanese (A1)</span>
                 </div>
             </div>
             <div class="skill-card">
-                <h3><i class="fa-solid fa-gear"></i> Office & Others</h3>
+                <h3><i class="fa-solid fa-gear"></i> <span data-i18n="skills.office">Office & Others</span></h3>
                 <div class="tags">
                     <span class="tag">Power BI</span>
                     <span class="tag">Microsoft Suite</span>
                     <span class="tag">SolidWorks</span>
                     <span class="tag">Photoshop</span>
-                    <span class="tag">Driving License (B) - Vehicle Owner</span>
+                    <span class="tag" data-i18n="skills.driving">Driving License (B) - Vehicle Owner</span>
                 </div>
             </div>
         </div>
     </section>
 
     <section id="experience">
-        <h2 class="section-title reveal">Experience</h2>
+        <h2 class="section-title reveal" data-i18n="exp.title">Experience</h2>
         <div class="timeline reveal">
 
             <div class="timeline-item">
@@ -799,10 +832,11 @@
                                 <i class="fab fa-linkedin"></i>
                             </a>
                         </div>
-                        <span class="date">March 2025 - Sept 2025 (6 months)</span>
+                        <span class="date" data-i18n="exp.dassault.date">March 2025 - Sept 2025 (6 months)</span>
                     </div>
-                    <span class="role">Data Scientist Intern – Artificial Intelligence</span>
-                    <ul class="description">
+                    <span class="role" data-i18n="exp.dassault.role">Data Scientist Intern – Artificial
+                        Intelligence</span>
+                    <ul class="description" data-i18n-html="exp.dassault.desc">
                         <li>Development and deployment of AI solutions to improve Purchasing Department performance.
                         </li>
                         <li>Implementation of classification models (decision trees, gradient boosting, neural
@@ -832,10 +866,10 @@
                                 <i class="fab fa-linkedin"></i>
                             </a>
                         </div>
-                        <span class="date">May 2024 - August 2024 (3 months)</span>
+                        <span class="date" data-i18n="exp.mgf.date">May 2024 - August 2024 (3 months)</span>
                     </div>
-                    <span class="role">CAD Design Engineer Intern</span>
-                    <ul class="description">
+                    <span class="role" data-i18n="exp.mgf.role">CAD Design Engineer Intern</span>
+                    <ul class="description" data-i18n-html="exp.mgf.desc">
                         <li>3-month Assistant Engineer internship in the Methods Bureau at MGF Grimaldi:
                             <br>- Creation of fixtures adapted for high-precision machining (SolidWorks)
                             <br>- 3D part reproduction
@@ -861,10 +895,10 @@
                                 <i class="fab fa-linkedin"></i>
                             </a>
                         </div>
-                        <span class="date">December 2022 - May 2024 (1.5 years)</span>
+                        <span class="date" data-i18n="exp.je.date">December 2022 - May 2024 (1.5 years)</span>
                     </div>
-                    <span class="role">Business Manager</span>
-                    <ul class="description">
+                    <span class="role" data-i18n="exp.je.role">Business Manager</span>
+                    <ul class="description" data-i18n-html="exp.je.desc">
                         <li>Served as Business Manager and Project Manager within the school's Junior Enterprise.
                             <br>- Define and lead studies submitted by companies to our Junior-Enterprise.
                             <br>- Manage administrative phases: scoping, proposal, budgeting, signing...
@@ -891,10 +925,10 @@
                                 <i class="fab fa-linkedin"></i>
                             </a>
                         </div>
-                        <span class="date">January 2023 - February 2023 (1 month)</span>
+                        <span class="date" data-i18n="exp.tecumseh.date">January 2023 - February 2023 (1 month)</span>
                     </div>
-                    <span class="role">Production Operator Intern</span>
-                    <ul class="description">
+                    <span class="role" data-i18n="exp.tecumseh.role">Production Operator Intern</span>
+                    <ul class="description" data-i18n-html="exp.tecumseh.desc">
                         <li>Internship as a production operator:
                             <br>- Production on various machines in the machining workshop.
                             <br>- Quality control of parts.
@@ -908,7 +942,7 @@
     </section>
 
     <section id="education">
-        <h2 class="section-title reveal">Education</h2>
+        <h2 class="section-title reveal" data-i18n="edu.title">Education</h2>
         <div class="timeline reveal">
 
             <div class="timeline-item">
@@ -926,10 +960,11 @@
                                 <i class="fab fa-linkedin"></i>
                             </a>
                         </div>
-                        <span class="date">September 2022 - October 2025</span>
+                        <span class="date" data-i18n="edu.mines.date">September 2022 - October 2025</span>
                     </div>
-                    <span class="role">Major in Data Science & AI - Mechanics Option (MSc in Engineering)</span>
-                    <div class="description" style="color: var(--text-dim);">
+                    <span class="role" data-i18n="edu.mines.role">Major in Data Science & AI - Mechanics Option (MSc in
+                        Engineering)</span>
+                    <div class="description" style="color: var(--text-dim);" data-i18n-html="edu.mines.desc">
                         <strong>3rd Year – Data Science Major:</strong><br>
                         Courses: Probabilistic foundations, statistical learning, machine learning, metamodeling and
                         optimization, artificial intelligence.<br>
@@ -966,10 +1001,11 @@
                                 <i class="fab fa-linkedin"></i>
                             </a>
                         </div>
-                        <span class="date">September 2023 - January 2024</span>
+                        <span class="date" data-i18n="edu.snu.date">September 2023 - January 2024</span>
                     </div>
-                    <span class="role">International Exchange (6 months)</span>
-                    <div class="description" style="color: var(--text-dim);">Academic exchange semester in the
+                    <span class="role" data-i18n="edu.snu.role">International Exchange (6 months)</span>
+                    <div class="description" style="color: var(--text-dim);" data-i18n-html="edu.snu.desc">Academic
+                        exchange semester in the
                         Mechanical Engineering department:<br>
                         - Numerical analysis in mechanical engineering<br>
                         - Robot mechanics<br>
@@ -986,16 +1022,19 @@
                 <div class="timeline-content">
                     <div class="card-header">
                         <div class="company-group">
-                            <span class="company-name">Lycée Vaucanson Prep School (Grenoble)</span>
+                            <span class="company-name" data-i18n="edu.vaucanson.name">Lycée Vaucanson Prep School
+                                (Grenoble)</span>
                             <a href="https://www.linkedin.com/school/lycee-vaucanson/" target="_blank"
                                 class="linkedin-link" title="View on LinkedIn" onclick="event.stopPropagation()">
                                 <i class="fab fa-linkedin"></i>
                             </a>
                         </div>
-                        <span class="date">September 2020 - July 2022</span>
+                        <span class="date" data-i18n="edu.vaucanson.date">September 2020 - July 2022</span>
                     </div>
-                    <span class="role">CPGE Scientific Preparatory Classes PTSI-PT*</span>
-                    <div class="description" style="color: var(--text-dim);">Fundamentals in engineering fields
+                    <span class="role" data-i18n="edu.vaucanson.role">CPGE Scientific Preparatory Classes
+                        PTSI-PT*</span>
+                    <div class="description" style="color: var(--text-dim);" data-i18n-html="edu.vaucanson.desc">
+                        Fundamentals in engineering fields
                         (Mathematics, Physics, Engineering Sciences, Computer Science) to prepare for competitive
                         entrance exams for French "Grandes Écoles".</div>
                 </div>
@@ -1005,7 +1044,7 @@
     </section>
 
     <section id="projects">
-        <h2 class="section-title reveal">Projects</h2>
+        <h2 class="section-title reveal" data-i18n="proj.title">Projects</h2>
         <div class="timeline reveal">
             <div class="timeline-item">
                 <div class="timeline-marker">
@@ -1022,10 +1061,10 @@
                                 <i class="fab fa-github"></i>
                             </a>
                         </div>
-                        <span class="date">May 2025 - Present</span>
+                        <span class="date" data-i18n="proj.music.date">May 2025 - Present</span>
                     </div>
-                    <span class="role">Music Recommendation App (Dev & AI)</span>
-                    <ul class="description">
+                    <span class="role" data-i18n="proj.music.role">Music Recommendation App (Dev & AI)</span>
+                    <ul class="description" data-i18n-html="proj.music.desc">
                         <li>Development in React (with Expo), backend setup, and testing of recommendation algorithms
                             (similarity, clustering).
                             Reflection on UI/UX and implementation of the complete recommendation system.
@@ -1050,10 +1089,11 @@
                                 <i class="fab fa-github"></i>
                             </a>
                         </div>
-                        <span class="date">January 2026 - Present</span>
+                        <span class="date" data-i18n="proj.trading.date">January 2026 - Present</span>
                     </div>
-                    <span class="role">Autonomous Crypto Trading Agent (Deep Reinforcement Learning)</span>
-                    <ul class="description">
+                    <span class="role" data-i18n="proj.trading.role">Autonomous Crypto Trading Agent (Deep Reinforcement
+                        Learning)</span>
+                    <ul class="description" data-i18n-html="proj.trading.desc">
                         <li>Design and development of an autonomous trading agent using Deep Reinforcement Learning
                             (PPO/SAC, PyTorch, Stable-Baselines3).</li>
                         <li>Construction of a custom Gym environment with continuous action space, multi-asset support
@@ -1083,10 +1123,10 @@
                                 <i class="fab fa-linkedin"></i>
                             </a>
                         </div>
-                        <span class="date">January 2024 - March 2025</span>
+                        <span class="date" data-i18n="proj.research.date">January 2025 - March 2025</span>
                     </div>
-                    <span class="role">Research Project (École des Mines)</span>
-                    <ul class="description">
+                    <span class="role" data-i18n="proj.research.role">Research Project (École des Mines)</span>
+                    <ul class="description" data-i18n-html="proj.research.desc">
                         <li>Development and training of a deep learning model to denoise images damaged by ionizing
                             radiation (nuclear reactor).
                             Use of encoder-decoder networks and noise reproduction to generate training data.
@@ -1111,10 +1151,10 @@
                                 <i class="fab fa-linkedin"></i>
                             </a>
                         </div>
-                        <span class="date">Sept 2024 - Jan 2025</span>
+                        <span class="date" data-i18n="proj.thales.date">Sept 2024 - Jan 2025</span>
                     </div>
-                    <span class="role">Industrial Project (École des Mines)</span>
-                    <ul class="description">
+                    <span class="role" data-i18n="proj.thales.role">Industrial Project (École des Mines)</span>
+                    <ul class="description" data-i18n-html="proj.thales.desc">
                         <li>Training of a constrained image classification AI for infrared pedestrian detection.
                             Benchmarking existing models and training CNN models using TensorFlow and PyTorch (MobileNet
                             and YOLO). Testing and analysis of evaluation and training metrics.
@@ -1139,10 +1179,10 @@
                                 <i class="fab fa-linkedin"></i>
                             </a>
                         </div>
-                        <span class="date">February 2024 - June 2024</span>
+                        <span class="date" data-i18n="proj.fermavers.date">February 2024 - June 2024</span>
                     </div>
-                    <span class="role">PRICE Program (École des Mines)</span>
-                    <ul class="description">
+                    <span class="role" data-i18n="proj.fermavers.role">PRICE Program (École des Mines)</span>
+                    <ul class="description" data-i18n-html="proj.fermavers.desc">
                         <li>Development of a Black Soldier Fly larvae breeding tool for organic waste valorization into
                             protein.
                             Module design in CAD (Inventor), and resource flow management for larvae welfare.
@@ -1162,10 +1202,10 @@
                         <div class="company-group">
                             <span class="company-name">HEPSE | Saint-Étienne</span>
                         </div>
-                        <span class="date">September 2022 - May 2023</span>
+                        <span class="date" data-i18n="proj.hepse.date">September 2022 - May 2023</span>
                     </div>
-                    <span class="role">Civic Project (École des Mines)</span>
-                    <ul class="description">
+                    <span class="role" data-i18n="proj.hepse.role">Civic Project (École des Mines)</span>
+                    <ul class="description" data-i18n-html="proj.hepse.desc">
                         <li>Development of an application to promote Saint-Étienne's heritage via an interactive
                             treasure hunt throughout the city.
                         </li>
@@ -1185,10 +1225,10 @@
                         <div class="company-group">
                             <span class="company-name">TIPE (CPGE) | Grenoble</span>
                         </div>
-                        <span class="date">September 2020 - July 2022</span>
+                        <span class="date" data-i18n="proj.tipe.date">September 2020 - July 2022</span>
                     </div>
-                    <span class="role">Preparatory Class Project (TIPE)</span>
-                    <ul class="description">
+                    <span class="role" data-i18n="proj.tipe.role">Preparatory Class Project (TIPE)</span>
+                    <ul class="description" data-i18n-html="proj.tipe.desc">
                         <li>Study, simulation, and modeling of an insulin pump and its effect on the human body
                             (mechanically represented).
                         </li>
@@ -1201,7 +1241,7 @@
     </section>
 
     <section id="contact">
-        <h2 class="section-title reveal">Contact Me / CV</h2>
+        <h2 class="section-title reveal" data-i18n="contact.title">Contact Me / CV</h2>
         <div class="contact-container reveal">
             <a href="mailto:thomas.lacombe38@gmail.com" class="contact-item">
                 <i class="fas fa-envelope"></i>
@@ -1209,7 +1249,7 @@
             </a>
             <a href="Thomas_Lacombe_CV.pdf" download class="contact-item">
                 <i class="fas fa-download"></i>
-                <span>My Resume</span>
+                <span data-i18n="contact.resume">My Resume</span>
             </a>
             <a href="https://www.linkedin.com/in/thomas-lacombe-8b760a253/" target="_blank" class="contact-item">
                 <i class="fab fa-linkedin"></i>
@@ -1223,7 +1263,7 @@
         </div>
         <div class="back-to-top" onclick="smoothScrollTo('hero')">
             <i class="fas fa-arrow-up"></i>
-            <span class="back-to-top-label">Back to top</span>
+            <span class="back-to-top-label" data-i18n="contact.backtotop">Back to top</span>
         </div>
     </section>
 
@@ -1448,6 +1488,135 @@
         // Lancement
         resizeCanvases(); // Initie tout
         animate(); // Lance la boucle
+
+        // =========================================================
+        // INTERNATIONALISATION (i18n) EN / FR
+        // =========================================================
+        let currentLang = localStorage.getItem('lang') || 'en';
+
+        const translations = {
+            fr: {
+                // Nav
+                'nav.home': 'Accueil',
+                'nav.about': 'À propos',
+                'nav.skills': 'Compétences',
+                'nav.experience': 'Expérience',
+                'nav.education': 'Formation',
+                'nav.projects': 'Projets',
+                'nav.contact': 'Contact/CV',
+                // Hero
+                'hero.subtitle': 'Ingénieur Machine Learning (IA & Systèmes Logiciels)',
+                'hero.btn': 'Découvrir mon profil',
+                // About
+                'about.title': 'À propos',
+                'about.p1': 'Diplômé ingénieur spécialisé en Data Science et Intelligence Artificielle, je recherche ma première opportunité professionnelle à partir de février 2026, à la suite de mon stage de fin d\'études.',
+                'about.p2': 'Mon parcours hybride m\'a permis de mener divers projets concrets en Computer Vision, NLP, systèmes RAG (Retrieval-Augmented Generation) et classification.',
+                'about.p3': 'Curieux et motivé, je suis impatient de mettre mes compétences en Data Science au service de défis variés et concrets.',
+                'about.location': 'Boulogne Billancourt (92100)',
+                // Skills
+                'skills.title': 'Compétences',
+                'skills.ai': 'IA & Data Science',
+                'skills.programming': 'Programmation',
+                'skills.office': 'Bureautique & Autres',
+                'skills.french': 'Français (Natif)',
+                'skills.english': 'Anglais (C1)',
+                'skills.spanish': 'Espagnol (B2)',
+                'skills.japanese': 'Japonais (A1)',
+                'skills.driving': 'Permis B - Véhiculé',
+                // Experience
+                'exp.title': 'Expérience',
+                'exp.dassault.date': 'Mars 2025 - Sept 2025 (6 mois)',
+                'exp.dassault.role': 'Stagiaire Data Scientist – Intelligence Artificielle',
+                'exp.dassault.desc': '<li>Développement et déploiement de solutions IA pour améliorer la performance de la Direction des Achats.</li><li>Mise en place de modèles de classification (arbres de décision, gradient boosting, réseaux de neurones), extraction de données via OCR, et développement de programmes pour simplifier les processus.</li><li>Travail sur des projets LLM, notamment la mise en œuvre de systèmes RAG (et auto-RAG) pour faciliter l\'accès à l\'information et optimiser la prise de décision.</li><li>Outil conteneurisé et déployé via Docker, avec une interface simple (Streamlit) accessible via navigateur web.</li><li>Web scraping (avec Selenium) pour alimenter les bases de connaissances.</li><li>Présentation des résultats dans Power BI lié aux données Dassault via des requêtes SQL.</li>',
+                'exp.mgf.date': 'Mai 2024 - Août 2024 (3 mois)',
+                'exp.mgf.role': 'Stagiaire Ingénieur Conception CAO',
+                'exp.mgf.desc': '<li>Stage de 3 mois en tant qu\'ingénieur assistant au Bureau des Méthodes chez MGF Grimaldi :<br>- Création de montages adaptés à l\'usinage de haute précision (SolidWorks)<br>- Reproduction de pièces en 3D<br>- Impression 3D de pièces/prototypes<br>- Lecture/Création de plans</li>',
+                'exp.je.date': 'Décembre 2022 - Mai 2024 (1,5 ans)',
+                'exp.je.role': 'Chargé d\'Affaires',
+                'exp.je.desc': '<li>Chargé d\'affaires et chef de projet au sein de la Junior-Entreprise de l\'école.<br>- Définir et piloter les études soumises par les entreprises à notre Junior-Entreprise.<br>- Gérer les phases administratives : cadrage, proposition, budgétisation, signature...<br>- Manager des équipes de consultants.<br>- Gérer des parties prenantes aux profils et attentes variés.<br>- Participation au Congrès National des Junior-Entrepreneurs.</li>',
+                'exp.tecumseh.date': 'Janvier 2023 - Février 2023 (1 mois)',
+                'exp.tecumseh.role': 'Stagiaire Opérateur de Production',
+                'exp.tecumseh.desc': '<li>Stage en tant qu\'opérateur de production :<br>- Production sur différentes machines de l\'atelier d\'usinage.<br>- Contrôle qualité des pièces.<br>- Maintenance des machines.</li>',
+                // Education
+                'edu.title': 'Formation',
+                'edu.mines.date': 'Septembre 2022 - Octobre 2025',
+                'edu.mines.role': 'Majeure Data Science & IA - Option Mécanique (Diplôme d\'ingénieur)',
+                'edu.mines.desc': '<strong>3ème année – Majeure Data Science :</strong><br>Cours : Fondements probabilistes, apprentissage statistique, machine learning, métamodélisation et optimisation, intelligence artificielle.<br>Projets : Détection de piétons pour Thales via ML, reconstruction d\'images bruitées par radiation via deep learning.<br><br><strong>2ème année :</strong><br>Cours : Semestre à Seoul National University, management de la transition.<br>Électifs : Entrepreneuriat, économie, design thinking.<br>Projet : Conception CAO d\'un module autonome de production et d\'élevage.<br><br><strong>1ère année – Tronc commun :</strong><br>Cours : Physique (matériaux, thermodynamique, mécanique des fluides, mécanique des milieux continus), Informatique (C, Java, Python, SQL, algorithmique), Mathématiques (statistiques, RO, traitement du signal), marketing, économie, droit des sociétés, développement durable.<br>Projets : Étude d\'une centrale solaire (logiciel PRO II), conception d\'un véhicule à énergie mécanique, création d\'une app pour l\'association HPSE.',
+                'edu.snu.date': 'Septembre 2023 - Janvier 2024',
+                'edu.snu.role': 'Échange International (6 mois)',
+                'edu.snu.desc': 'Semestre d\'échange académique au département de Génie Mécanique :<br>- Analyse numérique en génie mécanique<br>- Mécanique des robots<br>- Finance de marché',
+                'edu.vaucanson.name': 'Lycée Vaucanson (Grenoble)',
+                'edu.vaucanson.date': 'Septembre 2020 - Juillet 2022',
+                'edu.vaucanson.role': 'Classes Préparatoires Scientifiques PTSI-PT*',
+                'edu.vaucanson.desc': 'Fondamentaux dans les domaines de l\'ingénierie (Mathématiques, Physique, Sciences de l\'Ingénieur, Informatique) pour préparer les concours d\'entrée aux Grandes Écoles.',
+                // Projects
+                'proj.title': 'Projets',
+                'proj.music.date': 'Mai 2025 - Présent',
+                'proj.music.role': 'Application de Recommandation Musicale (Dev & IA)',
+                'proj.music.desc': '<li>Développement en React (avec Expo), mise en place du backend, et test d\'algorithmes de recommandation (similarité, clustering). Réflexion UI/UX et implémentation du système complet de recommandation. Gestion du cache/données de l\'app et des pipelines de données.</li>',
+                'proj.trading.date': 'Janvier 2026 - Présent',
+                'proj.trading.role': 'Agent de Trading Crypto Autonome (Deep Reinforcement Learning)',
+                'proj.trading.desc': '<li>Conception et développement d\'un agent de trading autonome utilisant le Deep Reinforcement Learning (PPO/SAC, PyTorch, Stable-Baselines3).</li><li>Construction d\'un environnement Gym personnalisé avec espace d\'action continu, support multi-actifs (10 paires crypto) et randomisation de domaine.</li><li>Implémentation d\'une fonction de récompense multi-composantes (log-return, pénalité de drawdown, alignement de tendance, PnL latent).</li><li>Pipeline de données avec feature engineering multi-timeframe (1H/4H/1D/1W), normalisation z-score glissante et intégration de sentiment.</li><li>Entraînement progressif via curriculum learning avec traitement par batch optimisé GPU (CUDA).</li>',
+                'proj.research.date': 'Janvier 2025 - Mars 2025',
+                'proj.research.role': 'Projet de Recherche (École des Mines)',
+                'proj.research.desc': '<li>Développement et entraînement d\'un modèle de deep learning pour débruiter des images endommagées par des radiations ionisantes (réacteur nucléaire). Utilisation de réseaux encodeur-décodeur et reproduction de bruit pour générer des données d\'entraînement. Rédaction d\'un article de recherche et d\'un poster pour présenter les résultats.</li>',
+                'proj.thales.date': 'Sept 2024 - Jan 2025',
+                'proj.thales.role': 'Projet Industriel (École des Mines)',
+                'proj.thales.desc': '<li>Entraînement d\'une IA de classification d\'images contrainte pour la détection infrarouge de piétons. Benchmarking de modèles existants et entraînement de modèles CNN avec TensorFlow et PyTorch (MobileNet et YOLO). Tests et analyse des métriques d\'évaluation et d\'entraînement. Entraînement des modèles sur cluster Linux avec gestion des ressources GPU.</li>',
+                'proj.fermavers.date': 'Février 2024 - Juin 2024',
+                'proj.fermavers.role': 'Programme PRICE (École des Mines)',
+                'proj.fermavers.desc': '<li>Développement d\'un outil d\'élevage de larves de mouches soldat noires pour la valorisation des déchets organiques en protéines. Conception du module en CAO (Inventor) et gestion des flux de ressources pour le bien-être des larves.</li>',
+                'proj.hepse.date': 'Septembre 2022 - Mai 2023',
+                'proj.hepse.role': 'Projet Civique (École des Mines)',
+                'proj.hepse.desc': '<li>Développement d\'une application pour promouvoir le patrimoine de Saint-Étienne via une chasse au trésor interactive à travers la ville.</li>',
+                'proj.tipe.date': 'Septembre 2020 - Juillet 2022',
+                'proj.tipe.role': 'Projet de Classe Préparatoire (TIPE)',
+                'proj.tipe.desc': '<li>Étude, simulation et modélisation d\'une pompe à insuline et de son effet sur le corps humain (représenté mécaniquement).</li>',
+                // Contact
+                'contact.title': 'Me Contacter / CV',
+                'contact.resume': 'Mon CV',
+                'contact.backtotop': 'Retour en haut',
+            }
+        };
+
+        function applyLang(lang) {
+            currentLang = lang;
+            localStorage.setItem('lang', lang);
+            document.documentElement.lang = lang;
+
+            // Update button text to show the OTHER language
+            const btn = document.querySelector('.lang-toggle');
+            if (btn) btn.textContent = lang === 'en' ? 'EN' : 'FR';
+
+            // data-i18n: textContent swap
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (lang === 'fr' && translations.fr[key]) {
+                    if (!el.dataset.i18nOriginal) el.dataset.i18nOriginal = el.textContent;
+                    el.textContent = translations.fr[key];
+                } else if (lang === 'en' && el.dataset.i18nOriginal) {
+                    el.textContent = el.dataset.i18nOriginal;
+                }
+            });
+
+            // data-i18n-html: innerHTML swap
+            document.querySelectorAll('[data-i18n-html]').forEach(el => {
+                const key = el.getAttribute('data-i18n-html');
+                if (lang === 'fr' && translations.fr[key]) {
+                    if (!el.dataset.i18nOriginalHtml) el.dataset.i18nOriginalHtml = el.innerHTML;
+                    el.innerHTML = translations.fr[key];
+                } else if (lang === 'en' && el.dataset.i18nOriginalHtml) {
+                    el.innerHTML = el.dataset.i18nOriginalHtml;
+                }
+            });
+        }
+
+        function toggleLang() {
+            applyLang(currentLang === 'en' ? 'fr' : 'en');
+        }
+
+        // Apply saved language on load
+        if (currentLang !== 'en') applyLang(currentLang);
 
     </script>
 </body>
