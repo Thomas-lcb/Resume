@@ -44,90 +44,439 @@ timelineItems.forEach(item => {
 });
 
 // =========================================================
-// CANVAS 1 — PARTICULES HERO
+// RÉSEAU DE NEURONES 3D (Three.js)
 // =========================================================
 
-const heroCanvas = document.getElementById('particles-canvas');
-const heroCtx = heroCanvas.getContext('2d');
-let heroParticlesArray;
-let mouse = { x: null, y: null, radius: 150 };
-let flashActive = false;
-
-window.addEventListener('mousemove', (event) => {
-    mouse.x = event.x;
-    mouse.y = event.y;
-});
+// Shockwave click system — smooth bell-curve boost
+let shockwaveT  = -1;   // -1 = inactive, 0→1 = active
+let shockwaveFrame = 0;
+const SHOCKWAVE_DUR = 75; // frames (~1.25s at 60fps)
+let heroClickBoost = 0;   // derived each frame from shockwaveT
 
 function handleClickHero(e) {
     e.preventDefault();
-    flashActive = true;
-    setTimeout(() => { flashActive = false; }, 280);
-    setTimeout(() => { smoothScrollTo('about'); }, 1000);
+    shockwaveFrame = 0;
+    shockwaveT = 0;
+    smoothScrollTo('about');
 }
 
-class HeroParticle {
-    constructor(x, y, directionX, directionY, size) {
-        this.x = x; this.y = y;
-        this.directionX = directionX; this.directionY = directionY;
-        this.size = size; this.baseSize = size;
-        this.baseR = 56; this.baseG = 189; this.baseB = 248; // #38bdf8
-        this.currR = this.baseR; this.currG = this.baseG; this.currB = this.baseB;
-    }
-    draw() {
-        heroCtx.beginPath();
-        heroCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
-        heroCtx.fillStyle = `rgb(${Math.floor(this.currR)}, ${Math.floor(this.currG)}, ${Math.floor(this.currB)})`;
-        heroCtx.fill();
-    }
-    update() {
-        // Interaction souris
-        let dx = mouse.x - this.x;
-        let dy = mouse.y - this.y;
-        let distance = Math.sqrt(dx * dx + dy * dy);
-        if (distance < mouse.radius) {
-            let forceDirectionX = dx / distance;
-            let forceDirectionY = dy / distance;
-            let force = (mouse.radius - distance) / mouse.radius;
-            this.x -= forceDirectionX * force * 3;
-            this.y -= forceDirectionY * force * 3;
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// --- Scene setup ---
+const neuralCanvas = document.getElementById('neural-canvas');
+const neuralScene = new THREE.Scene();
+const neuralGroup = new THREE.Group();
+neuralScene.add(neuralGroup);
+
+const neuralCamera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+neuralCamera.position.z = 8;
+
+const neuralRenderer = new THREE.WebGLRenderer({ canvas: neuralCanvas, antialias: true, alpha: true });
+neuralRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+neuralRenderer.setClearColor(0x000000, 0);
+
+// --- Node layout: 7 layers [1,6,9,12,9,6,1] — single I/O nodes + hidden cube ---
+const LAYER_COUNTS = [1, 6, 9, 12, 9, 6, 1];
+const LAYER_GRID = [
+    { rows: 1, cols: 1 },
+    { rows: 2, cols: 3 },
+    { rows: 3, cols: 3 },
+    { rows: 4, cols: 3 },
+    { rows: 3, cols: 3 },
+    { rows: 2, cols: 3 },
+    { rows: 1, cols: 1 },
+];
+const X_SPAN = 6.0;
+const NODE_Y_STEP = 1.2;
+const NODE_Z_STEP = 1.45;
+const allNodePositions = [];
+const positionsByLayer = [];
+
+LAYER_COUNTS.forEach((count, li) => {
+    const layerPositions = [];
+    const x = (li / (LAYER_COUNTS.length - 1)) * X_SPAN - X_SPAN / 2;
+    const { rows, cols } = LAYER_GRID[li];
+    for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+            const y = (row - (rows - 1) / 2) * NODE_Y_STEP;
+            const z = (col - (cols - 1) / 2) * NODE_Z_STEP;
+            const pos = new THREE.Vector3(x, y, z);
+            allNodePositions.push(pos);
+            layerPositions.push(pos);
         }
-        // Mouvement
-        if (this.x > heroCanvas.width || this.x < 0) this.directionX = -this.directionX;
-        if (this.y > heroCanvas.height || this.y < 0) this.directionY = -this.directionY;
-        this.x += this.directionX;
-        this.y += this.directionY;
-        // Animation flash
-        const growthSpeed = 0.4;
-        const colorSpeed = 8;
-        const maxSizeScale = 5;
-        if (flashActive) {
-            if (this.size < this.baseSize * maxSizeScale) this.size += growthSpeed;
-            if (this.currR < 255) this.currR += colorSpeed;
-            if (this.currG < 255) this.currG += colorSpeed;
-            if (this.currB < 255) this.currB += colorSpeed;
-        } else {
-            if (this.size > this.baseSize) this.size -= growthSpeed * 0.4;
-            if (this.currR > this.baseR) this.currR -= colorSpeed * 0.4;
-            if (this.currG > this.baseG) this.currG -= colorSpeed * 0.4;
-            if (this.currB > this.baseB) this.currB -= colorSpeed * 0.4;
+    }
+    positionsByLayer.push(layerPositions);
+});
+
+// --- Node meshes ---
+const nodeObjects = [];
+let cumCount = 0;
+LAYER_COUNTS.forEach((count, li) => {
+    const isSingle = count === 1;
+    const isEdgeGroup = li === 1 || li === LAYER_COUNTS.length - 2;
+    const color = isSingle ? 0x38bdf8 : isEdgeGroup ? 0x38bdf8 : 0x818cf8;
+    const radius = isSingle ? 0.09 : 0.055;
+    for (let i = 0; i < count; i++) {
+        const pos = allNodePositions[cumCount + i];
+        const geo = new THREE.SphereGeometry(radius, 12, 12);
+        const mat = new THREE.MeshBasicMaterial({ color });
+        const mesh = new THREE.Mesh(geo, mat);
+        mesh.position.copy(pos);
+        neuralGroup.add(mesh);
+        nodeObjects.push({ mesh, pulseOffset: Math.random() * Math.PI * 2, isSingle });
+    }
+    cumCount += count;
+});
+
+// --- Full connections: each node → 4 nearest in next layer ---
+const connectionObjects = [];
+const CONNS_PER_NODE = 4;
+
+positionsByLayer.forEach((layerA, li) => {
+    if (li >= positionsByLayer.length - 1) return;
+    const layerB = positionsByLayer[li + 1];
+
+    layerA.forEach(posA => {
+        const sorted = [...layerB].sort((a, b) => posA.distanceTo(a) - posA.distanceTo(b));
+        const numConn = Math.min(CONNS_PER_NODE, layerB.length);
+
+        sorted.slice(0, numConn).forEach(posB => {
+            const lineGeo = new THREE.BufferGeometry().setFromPoints([posA.clone(), posB.clone()]);
+            const lineMat = new THREE.LineBasicMaterial({ color: 0x818cf8, transparent: true, opacity: 0.08 });
+            const line = new THREE.Line(lineGeo, lineMat);
+            neuralGroup.add(line);
+
+            // Sparse particles — ~35% of edges
+            const edgeParticles = [];
+            if (Math.random() < 0.35) {
+                const pgeo = new THREE.SphereGeometry(0.022, 8, 8);
+                const pColor = Math.random() > 0.5 ? 0x38bdf8 : 0xa78bfa;
+                const pmat = new THREE.MeshBasicMaterial({ color: pColor });
+                const pmesh = new THREE.Mesh(pgeo, pmat);
+                const t0 = Math.random();
+                pmesh.position.lerpVectors(posA, posB, t0);
+                neuralGroup.add(pmesh);
+                edgeParticles.push({
+                    mesh: pmesh, t: t0,
+                    baseSpeed: 0.003 + Math.random() * 0.004,
+                    posA, posB
+                });
+            }
+            connectionObjects.push({ line, edgeParticles });
+        });
+    });
+});
+
+// --- Mouse + rotation state ---
+// neuralMouseNX/NY: relative to full window (for vertical tilt)
+// neuralMouseRelX: relative to the neural panel center (for horizontal rotation)
+let neuralMouseNX = 0, neuralMouseNY = 0, neuralMouseRelX = 0;
+let neuralVelY = 0;    // vitesse angulaire Y (rad/frame)
+let neuralAngleY = 0;  // angle accumulé libre — rotation complète possible
+let neuralRotX = 0;    // tilt X (limité)
+let heroRightRect = null;
+// Cursor halo position (in heroBgCanvas coords)
+let heroBgMouseX = -2000, heroBgMouseY = -2000;
+
+function updateHeroRightRect() {
+    const el = document.querySelector('.hero-right');
+    if (el) heroRightRect = el.getBoundingClientRect();
+}
+
+window.addEventListener('mousemove', (e) => {
+    neuralMouseNX = (e.clientX / window.innerWidth) * 2 - 1;
+    neuralMouseNY = -((e.clientY / window.innerHeight) * 2 - 1);
+    // Mouse relative to the neural panel center → equal range left/right
+    if (heroRightRect) {
+        const panelCX = (heroRightRect.left + heroRightRect.right) / 2;
+        neuralMouseRelX = Math.max(-1, Math.min(1,
+            (e.clientX - panelCX) / (heroRightRect.width / 2)
+        ));
+    } else {
+        neuralMouseRelX = neuralMouseNX;
+    }
+    // Track mouse relative to hero canvas
+    if (heroBgCanvas) {
+        const rect = heroBgCanvas.getBoundingClientRect();
+        heroBgMouseX = e.clientX - rect.left;
+        heroBgMouseY = e.clientY - rect.top;
+    }
+});
+
+// --- Per-particle mouse proximity boost ---
+function getParticleBoost(particleMesh) {
+    if (!heroRightRect) return 1;
+    const worldPos = particleMesh.position.clone();
+    worldPos.applyMatrix4(neuralGroup.matrixWorld);
+    const v = worldPos.clone().project(neuralCamera);
+
+    const screenX = (v.x + 1) / 2 * heroRightRect.width + heroRightRect.left;
+    const screenY = (-v.y + 1) / 2 * heroRightRect.height + heroRightRect.top;
+    const mx = (neuralMouseNX + 1) / 2 * window.innerWidth;
+    const my = (-neuralMouseNY + 1) / 2 * window.innerHeight;
+
+    const dist = Math.sqrt((screenX - mx) ** 2 + (screenY - my) ** 2);
+    const threshold = 180;
+    if (dist > threshold) return 1;
+    return 1 + (1 - dist / threshold) * 3.5;
+}
+
+// --- Canvas resize ---
+function resizeNeuralCanvas() {
+    const el = document.querySelector('.hero-right');
+    if (!el) return;
+    const w = Math.max(1, el.clientWidth);
+    const h = Math.max(1, el.clientHeight);
+    neuralRenderer.setSize(w, h);
+    neuralCamera.aspect = w / h;
+    neuralCamera.updateProjectionMatrix();
+    updateHeroRightRect();
+}
+
+// --- Neural animate ---
+function animateNeural(timestamp) {
+    // Rotation Y : vitesse angulaire pilotée par la souris, friction pour la douceur
+    if (!prefersReducedMotion) {
+        neuralVelY += neuralMouseRelX * 0.0011; // accélération proportionnelle au curseur
+        neuralVelY *= 0.93;                      // friction — décélère naturellement au centre
+        neuralAngleY += neuralVelY;              // angle libre : 360° complets possibles
+    }
+    // Tilt X suivi doux de la souris (limité ±25°)
+    const targetRotX = -neuralMouseNY * 0.28;
+    neuralRotX += (targetRotX - neuralRotX) * 0.05;
+
+    neuralGroup.rotation.x = neuralRotX;
+    neuralGroup.rotation.y = neuralAngleY;
+    neuralGroup.updateMatrixWorld();
+
+    // Pulse nodes — spring-like scale on click, gentle idle pulse
+    const t = timestamp * 0.001;
+    const clickSpring = heroClickBoost > 0
+        ? Math.pow(Math.sin(heroClickBoost * Math.PI), 0.6) * 1.4
+        : 0;
+    nodeObjects.forEach(n => {
+        const idlePulse = n.isSingle ? 0.3 : 0.18;
+        const s = (1 + Math.sin(t + n.pulseOffset) * idlePulse) + clickSpring;
+        n.mesh.scale.setScalar(Math.max(0.1, s));
+    });
+
+    // Animate data-flow particles
+    connectionObjects.forEach(conn => {
+        conn.edgeParticles.forEach(p => {
+            const proximityBoost = prefersReducedMotion ? 1 : getParticleBoost(p.mesh);
+            const clickSpeedBoost = 1 + heroClickBoost * 4;
+            p.t += p.baseSpeed * proximityBoost * clickSpeedBoost;
+            if (p.t > 1) p.t = 0;
+            p.mesh.position.lerpVectors(p.posA, p.posB, p.t);
+        });
+    });
+
+    neuralRenderer.render(neuralScene, neuralCamera);
+}
+
+// =========================================================
+// CANVAS HERO BG — CONSTELLATION (particules + connexions)
+// =========================================================
+
+const heroBgCanvas = document.getElementById('hero-bg-canvas');
+const heroBgCtx = heroBgCanvas.getContext('2d');
+let heroBgParticles = [];
+const HERO_BG_COUNT = 80;
+const HERO_BG_CONNECT_DIST = 115;
+
+// Ambient glow blobs — slow-drifting radial light fields
+const AMBIENT_BLOBS = [
+    { bx: 0.72, by: 0.35, r: 300, hue: 195, drift: 0.31 },
+    { bx: 0.28, by: 0.65, r: 220, hue: 248, drift: 0.19 },
+    { bx: 0.52, by: 0.50, r: 260, hue: 215, drift: 0.25 },
+];
+let blobTime = 0;
+
+class HeroBgParticle {
+    constructor() { this.reset(true); }
+    reset(initial = false) {
+        this.x = Math.random() * heroBgCanvas.width;
+        this.y = initial
+            ? Math.random() * heroBgCanvas.height
+            : (Math.random() < 0.5 ? -5 : heroBgCanvas.height + 5);
+        this.vx = (Math.random() - 0.5) * 0.38;
+        this.vy = (Math.random() - 0.5) * 0.38;
+        this.baseSize = Math.random() * 2.0 + 0.4;
+        this.hue = Math.floor(Math.random() * 70) + 185;
+        this.alpha = Math.random() * 0.5 + 0.2;
+        this.twinkleSpeed = Math.random() * 0.018 + 0.006; // slower = subtler
+        this.twinkleOffset = Math.random() * Math.PI * 2;
+    }
+    update(boost, t) {
+        // Cursor repulsion — gentle push away
+        if (heroBgMouseX > -1000) {
+            const dx = this.x - heroBgMouseX;
+            const dy = this.y - heroBgMouseY;
+            const distSq = dx * dx + dy * dy;
+            const repR = 110;
+            if (distSq < repR * repR && distSq > 1) {
+                const dist = Math.sqrt(distSq);
+                const force = (1 - dist / repR) * 0.28;
+                this.vx += (dx / dist) * force;
+                this.vy += (dy / dist) * force;
+            }
         }
-        this.currR = Math.max(this.baseR, Math.min(255, this.currR));
-        this.currG = Math.max(this.baseG, Math.min(255, this.currG));
-        this.currB = Math.max(this.baseB, Math.min(255, this.currB));
-        this.draw();
+        // Velocity damping + boost
+        this.vx *= 0.988;
+        this.vy *= 0.988;
+        const speed = 1 + boost * 2.2;
+        this.x += this.vx * speed;
+        this.y += this.vy * speed;
+        if (this.x < -10 || this.x > heroBgCanvas.width + 10 ||
+            this.y < -10 || this.y > heroBgCanvas.height + 10) {
+            this.reset();
+        }
+        // Subtle twinkle — amplitude reduced
+        this.currentAlpha = this.alpha * (0.88 + 0.12 * Math.sin(t * this.twinkleSpeed + this.twinkleOffset));
+    }
+    draw(boost) {
+        const s = this.baseSize * (1 + boost * 1.0);
+        const a = this.currentAlpha + boost * 0.14;
+        heroBgCtx.beginPath();
+        heroBgCtx.arc(this.x, this.y, s, 0, Math.PI * 2);
+        heroBgCtx.fillStyle = `hsla(${this.hue}, 100%, 72%, ${a})`;
+        heroBgCtx.fill();
+        // Glow halo on larger particles only
+        if (this.baseSize > 1.5) {
+            const grad = heroBgCtx.createRadialGradient(this.x, this.y, 0, this.x, this.y, s * 3.2);
+            grad.addColorStop(0, `hsla(${this.hue}, 100%, 75%, ${a * 0.2})`);
+            grad.addColorStop(1, `hsla(${this.hue}, 100%, 75%, 0)`);
+            heroBgCtx.fillStyle = grad;
+            heroBgCtx.beginPath();
+            heroBgCtx.arc(this.x, this.y, s * 3.2, 0, Math.PI * 2);
+            heroBgCtx.fill();
+        }
     }
 }
 
-function initHeroParticles() {
-    heroParticlesArray = [];
-    let numberOfParticles = (heroCanvas.height * heroCanvas.width) / 10000;
-    for (let i = 0; i < numberOfParticles; i++) {
-        let size = (Math.random() * 3) + 1;
-        let x = Math.random() * heroCanvas.width;
-        let y = Math.random() * heroCanvas.height;
-        let directionX = (Math.random() * 1.5) - 0.75;
-        let directionY = (Math.random() * 1.5) - 0.75;
-        heroParticlesArray.push(new HeroParticle(x, y, directionX, directionY, size));
+function initHeroBg() {
+    heroBgCanvas.width = window.innerWidth;
+    heroBgCanvas.height = document.querySelector('.hero').offsetHeight || window.innerHeight;
+    heroBgParticles = Array.from({ length: HERO_BG_COUNT }, () => new HeroBgParticle());
+}
+
+function animateHeroBg(t) {
+    const boost = heroClickBoost;
+    heroBgCtx.clearRect(0, 0, heroBgCanvas.width, heroBgCanvas.height);
+
+    if (!prefersReducedMotion) blobTime += 0.0008;
+    const W = heroBgCanvas.width, H = heroBgCanvas.height;
+
+    // Ambient glow blobs
+    AMBIENT_BLOBS.forEach((blob, i) => {
+        const cx = (blob.bx + Math.sin(blobTime * blob.drift + i * 2.09) * 0.13) * W;
+        const cy = (blob.by + Math.cos(blobTime * blob.drift + i * 1.67) * 0.10) * H;
+        const radius = blob.r * (1 + boost * 0.4);
+        const grad = heroBgCtx.createRadialGradient(cx, cy, 0, cx, cy, radius);
+        grad.addColorStop(0,    `hsla(${blob.hue}, 90%, 62%, ${0.10 + boost * 0.06})`);
+        grad.addColorStop(0.45, `hsla(${blob.hue}, 85%, 58%, ${0.04 + boost * 0.025})`);
+        grad.addColorStop(1,    `hsla(${blob.hue}, 80%, 55%, 0)`);
+        heroBgCtx.fillStyle = grad;
+        heroBgCtx.fillRect(0, 0, W, H);
+    });
+
+    // Shockwave rings — expand from neural network center on click
+    if (shockwaveT >= 0 && heroRightRect) {
+        const heroBgRect = heroBgCanvas.getBoundingClientRect();
+        const cx = heroRightRect.left + heroRightRect.width  / 2 - heroBgRect.left;
+        const cy = heroRightRect.top  + heroRightRect.height / 2 - heroBgRect.top;
+        const maxR = Math.max(heroRightRect.width, heroRightRect.height) * 0.9;
+
+        // Two staggered rings
+        [[1.0, 0.0], [0.72, 0.12]].forEach(([scale, delay]) => {
+            const pt = Math.max(0, (shockwaveT - delay) / (1 - delay));
+            if (pt <= 0 || pt > 1) return;
+            const eased = 1 - Math.pow(1 - pt, 2.8);
+            const r     = eased * maxR * scale;
+            const alpha = Math.pow(1 - pt, 1.8) * 0.6;
+            const lw    = (1 - pt) * 2.5 + 0.3;
+            heroBgCtx.beginPath();
+            heroBgCtx.arc(cx, cy, r, 0, Math.PI * 2);
+            heroBgCtx.strokeStyle = `rgba(56, 189, 248, ${alpha})`;
+            heroBgCtx.lineWidth = lw;
+            heroBgCtx.stroke();
+        });
+    }
+
+    // Connexions entre particules proches
+    for (let i = 0; i < heroBgParticles.length; i++) {
+        for (let j = i + 1; j < heroBgParticles.length; j++) {
+            const dx = heroBgParticles[i].x - heroBgParticles[j].x;
+            const dy = heroBgParticles[i].y - heroBgParticles[j].y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < HERO_BG_CONNECT_DIST) {
+                const op = (1 - dist / HERO_BG_CONNECT_DIST) * (0.11 + boost * 0.10);
+                heroBgCtx.strokeStyle = `rgba(129, 140, 248, ${op})`;
+                heroBgCtx.lineWidth = 0.55;
+                heroBgCtx.beginPath();
+                heroBgCtx.moveTo(heroBgParticles[i].x, heroBgParticles[i].y);
+                heroBgCtx.lineTo(heroBgParticles[j].x, heroBgParticles[j].y);
+                heroBgCtx.stroke();
+            }
+        }
+    }
+
+    heroBgParticles.forEach(p => { p.update(boost, t); p.draw(boost); });
+
+    // Réticule de scan — curseur stylisé (scan-target)
+    if (heroBgMouseX > -1000 && !prefersReducedMotion) {
+        const ts = t * 0.001;
+        const pulse   = Math.sin(ts * 2.8) * 0.12;
+        const innerR  = 26 * (1 + pulse) + boost * 12;
+        const outerR  = 54 + boost * 22;
+        const alphaI  = 0.28 + boost * 0.22;
+        const alphaO  = 0.14 + boost * 0.14;
+        const mx = heroBgMouseX, my = heroBgMouseY;
+
+        heroBgCtx.save();
+
+        // Diffuse glow derrière le réticule
+        const glow = heroBgCtx.createRadialGradient(mx, my, outerR * 0.5, mx, my, outerR * 2.2);
+        glow.addColorStop(0, `rgba(129, 140, 248, ${alphaO * 0.35})`);
+        glow.addColorStop(1, `rgba(129, 140, 248, 0)`);
+        heroBgCtx.fillStyle = glow;
+        heroBgCtx.beginPath();
+        heroBgCtx.arc(mx, my, outerR * 2.2, 0, Math.PI * 2);
+        heroBgCtx.fill();
+
+        // Anneau extérieur
+        heroBgCtx.beginPath();
+        heroBgCtx.arc(mx, my, outerR, 0, Math.PI * 2);
+        heroBgCtx.strokeStyle = `rgba(129, 140, 248, ${alphaO})`;
+        heroBgCtx.lineWidth = 0.8;
+        heroBgCtx.stroke();
+
+        // Anneau intérieur
+        heroBgCtx.beginPath();
+        heroBgCtx.arc(mx, my, innerR, 0, Math.PI * 2);
+        heroBgCtx.strokeStyle = `rgba(56, 189, 248, ${alphaI})`;
+        heroBgCtx.lineWidth = 1.4;
+        heroBgCtx.stroke();
+
+        // Croix — segments courts aux 4 directions
+        const gap = innerR + 4;
+        const len = 10 + boost * 6;
+        heroBgCtx.strokeStyle = `rgba(56, 189, 248, ${alphaI * 0.7})`;
+        heroBgCtx.lineWidth = 0.9;
+        [[-1, 0], [1, 0], [0, -1], [0, 1]].forEach(([dx, dy]) => {
+            heroBgCtx.beginPath();
+            heroBgCtx.moveTo(mx + dx * gap,       my + dy * gap);
+            heroBgCtx.lineTo(mx + dx * (gap + len), my + dy * (gap + len));
+            heroBgCtx.stroke();
+        });
+
+        // Point central
+        heroBgCtx.beginPath();
+        heroBgCtx.arc(mx, my, 2 + boost * 2.5, 0, Math.PI * 2);
+        heroBgCtx.fillStyle = `rgba(56, 189, 248, ${alphaI * 1.3})`;
+        heroBgCtx.fill();
+
+        heroBgCtx.restore();
     }
 }
 
@@ -185,31 +534,56 @@ function initBgStars() {
 // =========================================================
 
 function resizeCanvases() {
-    heroCanvas.width = window.innerWidth;
-    heroCanvas.height = window.innerHeight;
     bgCanvas.width = window.innerWidth;
     bgCanvas.height = window.innerHeight;
-    initHeroParticles();
     initBgStars();
+    initHeroBg();
+    resizeNeuralCanvas();
 }
 
-function animate() {
-    heroCtx.clearRect(0, 0, heroCanvas.width, heroCanvas.height);
-    for (let i = 0; i < heroParticlesArray.length; i++) {
-        heroParticlesArray[i].update();
+// --- Hero parallax on scroll ---
+const heroSplitEl = document.querySelector('.hero-split');
+const heroEl = document.querySelector('.hero');
+window.addEventListener('scroll', () => {
+    if (!heroEl || !heroSplitEl) return;
+    const scrollY = window.scrollY;
+    const heroH = heroEl.offsetHeight;
+    if (scrollY < heroH) {
+        const p = scrollY / heroH;
+        const ease = 1 - Math.pow(1 - p, 2);
+        heroSplitEl.style.transform = `translateY(${ease * -35}px)`;
+        heroSplitEl.style.opacity = Math.max(0, 1 - p * 2.2);
+    } else {
+        heroSplitEl.style.opacity = '0';
     }
+}, { passive: true });
+
+function animate(timestamp) {
+    // Update shockwave progress
+    if (shockwaveT >= 0) {
+        shockwaveFrame++;
+        shockwaveT = shockwaveFrame / SHOCKWAVE_DUR;
+        if (shockwaveT > 1) shockwaveT = -1;
+    }
+    // Smooth boost curve: 0 → peak → 0 (bell curve)
+    heroClickBoost = shockwaveT >= 0
+        ? Math.pow(Math.sin(shockwaveT * Math.PI), 0.65)
+        : 0;
 
     bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
     for (let i = 0; i < bgStarsArray.length; i++) {
         bgStarsArray[i].update();
     }
 
+    animateHeroBg(timestamp);
+    animateNeural(timestamp);
+
     requestAnimationFrame(animate);
 }
 
 window.addEventListener('resize', resizeCanvases);
 resizeCanvases();
-animate();
+animate(0);
 
 // =========================================================
 // INTERNATIONALISATION (i18n) EN / FR

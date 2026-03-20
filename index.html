@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
 </head>
 
 <body>
@@ -31,11 +32,23 @@
     </nav>
 
     <header class="hero" id="hero">
-        <canvas id="particles-canvas"></canvas>
-        <div class="hero-content">
-            <h1>Thomas <span>Lacombe</span></h1>
-            <p data-i18n="hero.subtitle">Machine Learning Engineer (AI & Software Systems)</p>
-            <a onclick="handleClickHero(event)" class="hero-btn" data-i18n="hero.btn">Discover my profile</a>
+        <canvas id="hero-bg-canvas"></canvas>
+        <div class="hero-split">
+            <div class="hero-left">
+                <span class="hero-badge">Machine Learning Engineer</span>
+                <h1>Thomas <span>Lacombe</span></h1>
+                <p data-i18n="hero.subtitle">Machine Learning Engineer (AI & Software Systems)</p>
+                <div class="hero-ctas">
+                    <a onclick="handleClickHero(event)" class="hero-btn-primary" data-i18n="hero.btn">Discover my profile</a>
+                    <a href="Thomas_Lacombe_CV.pdf" download class="hero-btn-secondary">
+                        <i class="fas fa-download"></i>
+                        <span data-i18n="contact.resume">Download CV</span>
+                    </a>
+                </div>
+            </div>
+            <div class="hero-right">
+                <canvas id="neural-canvas"></canvas>
+            </div>
         </div>
 
         <div class="scroll-down">
