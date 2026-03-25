@@ -50,14 +50,14 @@ timelineItems.forEach(item => {
 // Shockwave click system — smooth bell-curve boost
 let shockwaveT  = -1;   // -1 = inactive, 0→1 = active
 let shockwaveFrame = 0;
-const SHOCKWAVE_DUR = 75; // frames (~1.25s at 60fps)
+const SHOCKWAVE_DUR = 150; // frames (~2.5s at 60fps)
 let heroClickBoost = 0;   // derived each frame from shockwaveT
 
 function handleClickHero(e) {
     e.preventDefault();
     shockwaveFrame = 0;
     shockwaveT = 0;
-    smoothScrollTo('about');
+    setTimeout(() => smoothScrollTo('about'), 1200);
 }
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -108,64 +108,125 @@ LAYER_COUNTS.forEach((count, li) => {
     positionsByLayer.push(layerPositions);
 });
 
+// --- Texture glow radial (canvas → THREE.Texture) pour un halo doux ---
+function makeGlowTexture() {
+    const size = 128;
+    const c = document.createElement('canvas');
+    c.width = c.height = size;
+    const ctx = c.getContext('2d');
+    const grad = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
+    grad.addColorStop(0,    'rgba(255,255,255,1)');
+    grad.addColorStop(0.25, 'rgba(255,255,255,0.6)');
+    grad.addColorStop(0.6,  'rgba(255,255,255,0.15)');
+    grad.addColorStop(1,    'rgba(255,255,255,0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, size, size);
+    return new THREE.CanvasTexture(c);
+}
+const glowTexture = makeGlowTexture();
+
 // --- Node meshes ---
 const nodeObjects = [];
 let cumCount = 0;
 LAYER_COUNTS.forEach((count, li) => {
     const isSingle = count === 1;
-    const isEdgeGroup = li === 1 || li === LAYER_COUNTS.length - 2;
-    const color = isSingle ? 0x38bdf8 : isEdgeGroup ? 0x38bdf8 : 0x818cf8;
-    const radius = isSingle ? 0.09 : 0.055;
+    const radius = isSingle ? 0.15 : 0.09;
+
     for (let i = 0; i < count; i++) {
         const pos = allNodePositions[cumCount + i];
-        const geo = new THREE.SphereGeometry(radius, 12, 12);
-        const mat = new THREE.MeshBasicMaterial({ color });
+
+        // Core node
+        const geo = new THREE.SphereGeometry(radius, 16, 16);
+        const mat = new THREE.MeshBasicMaterial({ color: 0x818cf8 });
         const mesh = new THREE.Mesh(geo, mat);
         mesh.position.copy(pos);
         neuralGroup.add(mesh);
-        nodeObjects.push({ mesh, pulseOffset: Math.random() * Math.PI * 2, isSingle });
+
+        // Glow halo — sprite avec texture gradient radial (face caméra, fondu doux)
+        const glowMat = new THREE.SpriteMaterial({
+            map: glowTexture,
+            color: 0x818cf8,
+            transparent: true,
+            opacity: 0,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
+        });
+        const glowSprite = new THREE.Sprite(glowMat);
+        glowSprite.position.copy(pos);
+        const spriteSize = radius * 9;
+        glowSprite.scale.set(spriteSize, spriteSize, 1);
+        neuralGroup.add(glowSprite);
+
+        nodeObjects.push({
+            mesh, glowMesh: glowSprite,
+            pulseOffset: Math.random() * Math.PI * 2,
+            isSingle,
+            activation: 0,
+            freq: 0.6 + Math.random() * 1.2,
+            phase: Math.random() * Math.PI * 2,
+        });
     }
     cumCount += count;
 });
 
-// --- Full connections: each node → 4 nearest in next layer ---
+// --- Full connections ---
+// Nœuds I/O (couches 0 et dernière) → connectés à TOUS les nœuds de la couche adjacente
+// Autres couches → 4 plus proches voisins
 const connectionObjects = [];
-const CONNS_PER_NODE = 4;
 
 positionsByLayer.forEach((layerA, li) => {
     if (li >= positionsByLayer.length - 1) return;
     const layerB = positionsByLayer[li + 1];
+    const isIOLayer = (li === 0 || li === LAYER_COUNTS.length - 2);
 
     layerA.forEach(posA => {
         const sorted = [...layerB].sort((a, b) => posA.distanceTo(a) - posA.distanceTo(b));
-        const numConn = Math.min(CONNS_PER_NODE, layerB.length);
+        // I/O layers : toutes les connexions ; autres : 4 plus proches
+        const numConn = isIOLayer ? layerB.length : Math.min(4, layerB.length);
 
         sorted.slice(0, numConn).forEach(posB => {
+            const weight = 0.3 + Math.random() * 0.7;
             const lineGeo = new THREE.BufferGeometry().setFromPoints([posA.clone(), posB.clone()]);
-            const lineMat = new THREE.LineBasicMaterial({ color: 0x818cf8, transparent: true, opacity: 0.08 });
+            const lineMat = new THREE.LineBasicMaterial({
+                color: 0x818cf8,
+                transparent: true,
+                opacity: weight * 0.28, // plus visible au repos
+            });
             const line = new THREE.Line(lineGeo, lineMat);
             neuralGroup.add(line);
-
-            // Sparse particles — ~35% of edges
-            const edgeParticles = [];
-            if (Math.random() < 0.35) {
-                const pgeo = new THREE.SphereGeometry(0.022, 8, 8);
-                const pColor = Math.random() > 0.5 ? 0x38bdf8 : 0xa78bfa;
-                const pmat = new THREE.MeshBasicMaterial({ color: pColor });
-                const pmesh = new THREE.Mesh(pgeo, pmat);
-                const t0 = Math.random();
-                pmesh.position.lerpVectors(posA, posB, t0);
-                neuralGroup.add(pmesh);
-                edgeParticles.push({
-                    mesh: pmesh, t: t0,
-                    baseSpeed: 0.003 + Math.random() * 0.004,
-                    posA, posB
-                });
-            }
-            connectionObjects.push({ line, edgeParticles });
+            connectionObjects.push({ line, lineMat, weight, posA, posB });
         });
     });
 });
+
+// --- Système de particules dynamiques ---
+// Pool de particules qui se déplacent sur des connexions aléatoires
+// Chaque particule choisit une nouvelle connexion aléatoire après chaque traversée
+const PARTICLE_POOL_SIZE = 18;
+const particlePool = [];
+
+(function initParticles() {
+    const pgeo = new THREE.SphereGeometry(0.06, 8, 8);
+    for (let i = 0; i < PARTICLE_POOL_SIZE; i++) {
+        const pmat = new THREE.MeshBasicMaterial({
+            color: 0x38bdf8,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
+        });
+        const pmesh = new THREE.Mesh(pgeo.clone(), pmat);
+        neuralGroup.add(pmesh);
+
+        // Connexion aléatoire + délai de départ décalé pour éviter la synchronisation
+        const conn = connectionObjects[Math.floor(Math.random() * connectionObjects.length)];
+        particlePool.push({
+            mesh: pmesh,
+            conn,
+            t: Math.random(),                        // position initiale décalée
+            speed: 0.004 + Math.random() * 0.006,    // vitesse propre à chaque particule
+            waitFrames: Math.floor(Math.random() * 90), // délai avant départ
+        });
+    }
+})();
 
 // --- Mouse + rotation state ---
 // neuralMouseNX/NY: relative to full window (for vertical tilt)
@@ -177,6 +238,9 @@ let neuralRotX = 0;    // tilt X (limité)
 let heroRightRect = null;
 // Cursor halo position (in heroBgCanvas coords)
 let heroBgMouseX = -2000, heroBgMouseY = -2000;
+
+// Seuil de proximité pour l'activation des nœuds par les particules (3D units)
+const NODE_ACTIVATION_RADIUS = 0.55;
 
 function updateHeroRightRect() {
     const el = document.querySelector('.hero-right');
@@ -235,40 +299,94 @@ function resizeNeuralCanvas() {
 
 // --- Neural animate ---
 function animateNeural(timestamp) {
-    // Rotation Y : vitesse angulaire pilotée par la souris, friction pour la douceur
     if (!prefersReducedMotion) {
-        neuralVelY += neuralMouseRelX * 0.0011; // accélération proportionnelle au curseur
-        neuralVelY *= 0.93;                      // friction — décélère naturellement au centre
-        neuralAngleY += neuralVelY;              // angle libre : 360° complets possibles
+        neuralVelY += neuralMouseRelX * 0.0011;
+        neuralVelY *= 0.93;
+        neuralAngleY += neuralVelY;
     }
-    // Tilt X suivi doux de la souris (limité ±25°)
     const targetRotX = -neuralMouseNY * 0.28;
     neuralRotX += (targetRotX - neuralRotX) * 0.05;
-
     neuralGroup.rotation.x = neuralRotX;
     neuralGroup.rotation.y = neuralAngleY;
     neuralGroup.updateMatrixWorld();
 
-    // Pulse nodes — spring-like scale on click, gentle idle pulse
     const t = timestamp * 0.001;
-    const clickSpring = heroClickBoost > 0
-        ? Math.pow(Math.sin(heroClickBoost * Math.PI), 0.6) * 1.4
-        : 0;
-    nodeObjects.forEach(n => {
-        const idlePulse = n.isSingle ? 0.3 : 0.18;
-        const s = (1 + Math.sin(t + n.pulseOffset) * idlePulse) + clickSpring;
-        n.mesh.scale.setScalar(Math.max(0.1, s));
+    const clickSpeedBoost = 1 + heroClickBoost * 4;
+
+    // --- Reset cible d'activation des connexions ---
+    connectionObjects.forEach(conn => { conn.actTarget = 0; });
+
+    // --- Déplacer les particules du pool dynamique ---
+    particlePool.forEach(p => {
+        if (p.waitFrames > 0) {
+            p.waitFrames--;
+            p.mesh.visible = false;
+            return;
+        }
+        p.mesh.visible = true;
+        const proximityBoost = prefersReducedMotion ? 1 : getParticleBoost(p.mesh);
+        p.t += p.speed * proximityBoost * clickSpeedBoost;
+        if (p.t >= 1) {
+            p.conn = connectionObjects[Math.floor(Math.random() * connectionObjects.length)];
+            p.t = 0;
+            p.speed = 0.004 + Math.random() * 0.006;
+            p.waitFrames = Math.floor(Math.random() * 40);
+        }
+        p.mesh.position.lerpVectors(p.conn.posA, p.conn.posB, p.t);
+        p.mesh.material.color.setHSL(194 / 360, 1.0, 0.75);
+
+        // Courbe bell : activation maximale au milieu du trajet, nulle aux extrémités
+        const bell = Math.sin(p.t * Math.PI);
+        if (bell > p.conn.actTarget) p.conn.actTarget = bell;
     });
 
-    // Animate data-flow particles
+    // --- Connexions : lerp progressif vers la cible (attaque rapide, déclin lent) ---
     connectionObjects.forEach(conn => {
-        conn.edgeParticles.forEach(p => {
-            const proximityBoost = prefersReducedMotion ? 1 : getParticleBoost(p.mesh);
-            const clickSpeedBoost = 1 + heroClickBoost * 4;
-            p.t += p.baseSpeed * proximityBoost * clickSpeedBoost;
-            if (p.t > 1) p.t = 0;
-            p.mesh.position.lerpVectors(p.posA, p.posB, p.t);
+        if (conn.act === undefined) conn.act = 0;
+        const lerpRate = conn.actTarget > conn.act ? 0.18 : 0.035;
+        conn.act += (conn.actTarget - conn.act) * lerpRate;
+        const a = conn.act;
+
+        // Opacité : base visible + boost selon activation
+        conn.lineMat.opacity = conn.weight * (0.28 + a * 0.60);
+        // Couleur : glisse progressivement du violet au cyan
+        conn.lineMat.color.setHSL((245 - a * 51) / 360, 0.75 + a * 0.25, 0.52 + a * 0.18);
+    });
+
+    // --- Activation des nœuds : SEULEMENT quand une particule est proche ---
+    nodeObjects.forEach(n => {
+        let maxAct = 0;
+        particlePool.forEach(p => {
+            if (!p.mesh.visible) return;
+            const dist = n.mesh.position.distanceTo(p.mesh.position);
+            if (dist < NODE_ACTIVATION_RADIUS) {
+                const contrib = Math.exp(-(dist * dist) / (2 * 0.12));
+                if (contrib > maxAct) maxAct = contrib;
+            }
         });
+
+        // Attaque rapide, décroissance lente — seulement quand particule présente
+        const lerpRate = maxAct > n.activation ? 0.35 : 0.04;
+        n.activation += (maxAct - n.activation) * lerpRate;
+        const act = n.activation;
+
+        // Couleur core : violet au repos → cyan à l'activation
+        n.mesh.material.color.setHSL(
+            (245 - act * 51) / 360,
+            0.85 + act * 0.15,
+            0.48 + act * 0.32
+        );
+
+        // Glow sprite : opacity 0 au repos, monte doucement à l'activation
+        n.glowMesh.material.color.setHSL(194 / 360, 1.0, 0.70);
+        n.glowMesh.material.opacity = act * 0.55;
+
+        // Scale pulse
+        const clickSpring = heroClickBoost > 0
+            ? Math.pow(Math.sin(heroClickBoost * Math.PI), 0.6) * 1.4 : 0;
+        const idlePulse = n.isSingle ? 0.3 : 0.18;
+        const s = Math.max(0.1, (1 + Math.sin(t + n.pulseOffset) * idlePulse) + clickSpring);
+        n.mesh.scale.setScalar(s);
     });
 
     neuralRenderer.render(neuralScene, neuralCamera);
@@ -281,7 +399,7 @@ function animateNeural(timestamp) {
 const heroBgCanvas = document.getElementById('hero-bg-canvas');
 const heroBgCtx = heroBgCanvas.getContext('2d');
 let heroBgParticles = [];
-const HERO_BG_COUNT = 80;
+const HERO_BG_COUNT = 110;
 const HERO_BG_CONNECT_DIST = 115;
 
 // Ambient glow blobs — slow-drifting radial light fields
@@ -301,7 +419,7 @@ class HeroBgParticle {
             : (Math.random() < 0.5 ? -5 : heroBgCanvas.height + 5);
         this.vx = (Math.random() - 0.5) * 0.38;
         this.vy = (Math.random() - 0.5) * 0.38;
-        this.baseSize = Math.random() * 2.0 + 0.4;
+        this.baseSize = Math.random() * 2.6 + 0.5;
         this.hue = Math.floor(Math.random() * 70) + 185;
         this.alpha = Math.random() * 0.5 + 0.2;
         this.twinkleSpeed = Math.random() * 0.018 + 0.006; // slower = subtler
@@ -422,62 +540,6 @@ function animateHeroBg(t) {
     }
 
     heroBgParticles.forEach(p => { p.update(boost, t); p.draw(boost); });
-
-    // Réticule de scan — curseur stylisé (scan-target)
-    if (heroBgMouseX > -1000 && !prefersReducedMotion) {
-        const ts = t * 0.001;
-        const pulse   = Math.sin(ts * 2.8) * 0.12;
-        const innerR  = 26 * (1 + pulse) + boost * 12;
-        const outerR  = 54 + boost * 22;
-        const alphaI  = 0.28 + boost * 0.22;
-        const alphaO  = 0.14 + boost * 0.14;
-        const mx = heroBgMouseX, my = heroBgMouseY;
-
-        heroBgCtx.save();
-
-        // Diffuse glow derrière le réticule
-        const glow = heroBgCtx.createRadialGradient(mx, my, outerR * 0.5, mx, my, outerR * 2.2);
-        glow.addColorStop(0, `rgba(129, 140, 248, ${alphaO * 0.35})`);
-        glow.addColorStop(1, `rgba(129, 140, 248, 0)`);
-        heroBgCtx.fillStyle = glow;
-        heroBgCtx.beginPath();
-        heroBgCtx.arc(mx, my, outerR * 2.2, 0, Math.PI * 2);
-        heroBgCtx.fill();
-
-        // Anneau extérieur
-        heroBgCtx.beginPath();
-        heroBgCtx.arc(mx, my, outerR, 0, Math.PI * 2);
-        heroBgCtx.strokeStyle = `rgba(129, 140, 248, ${alphaO})`;
-        heroBgCtx.lineWidth = 0.8;
-        heroBgCtx.stroke();
-
-        // Anneau intérieur
-        heroBgCtx.beginPath();
-        heroBgCtx.arc(mx, my, innerR, 0, Math.PI * 2);
-        heroBgCtx.strokeStyle = `rgba(56, 189, 248, ${alphaI})`;
-        heroBgCtx.lineWidth = 1.4;
-        heroBgCtx.stroke();
-
-        // Croix — segments courts aux 4 directions
-        const gap = innerR + 4;
-        const len = 10 + boost * 6;
-        heroBgCtx.strokeStyle = `rgba(56, 189, 248, ${alphaI * 0.7})`;
-        heroBgCtx.lineWidth = 0.9;
-        [[-1, 0], [1, 0], [0, -1], [0, 1]].forEach(([dx, dy]) => {
-            heroBgCtx.beginPath();
-            heroBgCtx.moveTo(mx + dx * gap,       my + dy * gap);
-            heroBgCtx.lineTo(mx + dx * (gap + len), my + dy * (gap + len));
-            heroBgCtx.stroke();
-        });
-
-        // Point central
-        heroBgCtx.beginPath();
-        heroBgCtx.arc(mx, my, 2 + boost * 2.5, 0, Math.PI * 2);
-        heroBgCtx.fillStyle = `rgba(56, 189, 248, ${alphaI * 1.3})`;
-        heroBgCtx.fill();
-
-        heroBgCtx.restore();
-    }
 }
 
 // =========================================================
@@ -492,8 +554,8 @@ class Star {
     constructor() {
         this.x = Math.random() * bgCanvas.width;
         this.y = Math.random() * bgCanvas.height;
-        this.size = Math.random() * 1.5;
-        this.baseAlpha = Math.random();
+        this.size = Math.random() * 1.8 + 0.2;
+        this.baseAlpha = Math.random() * 0.55 + 0.05;
         this.speedAlpha = Math.random() * 0.02 + 0.005;
         this.increasing = true;
         // Couleur aléatoire entre Cyan (190) et Violet (250)
@@ -524,7 +586,7 @@ class Star {
 
 function initBgStars() {
     bgStarsArray = [];
-    for (let i = 0; i < 80; i++) {
+    for (let i = 0; i < 100; i++) {
         bgStarsArray.push(new Star());
     }
 }
@@ -565,9 +627,9 @@ function animate(timestamp) {
         shockwaveT = shockwaveFrame / SHOCKWAVE_DUR;
         if (shockwaveT > 1) shockwaveT = -1;
     }
-    // Smooth boost curve: 0 → peak → 0 (bell curve)
+    // Smooth boost curve: 0 → peak → 0 — exposant 0.12 = plateau long (~75% de la durée)
     heroClickBoost = shockwaveT >= 0
-        ? Math.pow(Math.sin(shockwaveT * Math.PI), 0.65)
+        ? Math.pow(Math.sin(shockwaveT * Math.PI), 0.12)
         : 0;
 
     bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
@@ -577,12 +639,82 @@ function animate(timestamp) {
 
     animateHeroBg(timestamp);
     animateNeural(timestamp);
+    drawCursor(timestamp);
 
     requestAnimationFrame(animate);
 }
 
+// =========================================================
+// CURSEUR — DOT + RING GRADIENT FLOU
+// =========================================================
+
+const cursorCanvas = document.getElementById('cursor-canvas');
+const cursorCtx = cursorCanvas.getContext('2d');
+
+let cursorTargetX = -500, cursorTargetY = -500;
+let cursorX = -500, cursorY = -500;
+let cursorAlpha = 1;
+let cursorTargetAlpha = 1;
+
+window.addEventListener('mousemove', (e) => {
+    cursorTargetX = e.clientX;
+    cursorTargetY = e.clientY;
+
+    // Détecter si on survole un élément de contenu → estomper l'aura
+    const el = document.elementFromPoint(e.clientX, e.clientY);
+    if (el) {
+        const tag = el.tagName.toLowerCase();
+        cursorTargetAlpha = ['canvas', 'body', 'html'].includes(tag) ? 1.0 : 0.0;
+    }
+});
+
+function resizeCursorCanvas() {
+    cursorCanvas.width  = window.innerWidth;
+    cursorCanvas.height = window.innerHeight;
+}
+
+function drawCursor(ts) {
+    cursorCtx.clearRect(0, 0, cursorCanvas.width, cursorCanvas.height);
+
+    if (cursorTargetX < -400) return;
+
+    cursorX += (cursorTargetX - cursorX) * 0.15;
+    cursorY += (cursorTargetY - cursorY) * 0.15;
+    cursorAlpha += (cursorTargetAlpha - cursorAlpha) * 0.10;
+
+    if (cursorAlpha < 0.01) return;
+
+    cursorCtx.save();
+    cursorCtx.globalAlpha = cursorAlpha;
+
+    // Aura externe large et très douce
+    const outer = cursorCtx.createRadialGradient(cursorX, cursorY, 0, cursorX, cursorY, 55);
+    outer.addColorStop(0,    'rgba(56,189,248,0.12)');
+    outer.addColorStop(0.35, 'rgba(56,189,248,0.07)');
+    outer.addColorStop(0.65, 'rgba(129,140,248,0.04)');
+    outer.addColorStop(1,    'rgba(129,140,248,0)');
+    cursorCtx.fillStyle = outer;
+    cursorCtx.beginPath();
+    cursorCtx.arc(cursorX, cursorY, 55, 0, Math.PI * 2);
+    cursorCtx.fill();
+
+    // Halo intérieur plus concentré
+    const inner = cursorCtx.createRadialGradient(cursorX, cursorY, 0, cursorX, cursorY, 20);
+    inner.addColorStop(0,   'rgba(56,189,248,0.22)');
+    inner.addColorStop(0.5, 'rgba(56,189,248,0.08)');
+    inner.addColorStop(1,   'rgba(56,189,248,0)');
+    cursorCtx.fillStyle = inner;
+    cursorCtx.beginPath();
+    cursorCtx.arc(cursorX, cursorY, 20, 0, Math.PI * 2);
+    cursorCtx.fill();
+
+    cursorCtx.restore();
+}
+
 window.addEventListener('resize', resizeCanvases);
+window.addEventListener('resize', resizeCursorCanvas);
 resizeCanvases();
+resizeCursorCanvas();
 animate(0);
 
 // =========================================================
