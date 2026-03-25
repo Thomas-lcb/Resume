@@ -171,7 +171,7 @@ nav {
     border-radius: 30px;
     background: rgba(56, 189, 248, 0.07);
     color: var(--primary);
-    font-size: 0.75rem;
+    font-size: 0.82rem;
     font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -195,7 +195,7 @@ nav {
 }
 
 .hero-left h1 {
-    font-size: 4.8rem;
+    font-size: 5.2rem;
     line-height: 1.05;
     margin-bottom: 18px;
     text-shadow: 0 0 40px rgba(56, 189, 248, 0.08);
@@ -207,7 +207,7 @@ nav {
 }
 
 .hero-left p {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     color: var(--text-dim);
     margin-bottom: 40px;
     line-height: 1.7;
@@ -230,7 +230,7 @@ nav {
     border-radius: 30px;
     color: #0f172a;
     font-weight: 700;
-    font-size: 0.95rem;
+    font-size: 1.05rem;
     cursor: pointer;
     text-decoration: none;
     box-shadow: 0 8px 24px rgba(56, 189, 248, 0.3);
@@ -252,7 +252,7 @@ nav {
     border-radius: 30px;
     color: var(--text-light);
     font-weight: 600;
-    font-size: 0.95rem;
+    font-size: 1.05rem;
     cursor: pointer;
     text-decoration: none;
     backdrop-filter: blur(12px);

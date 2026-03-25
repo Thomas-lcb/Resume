@@ -52,11 +52,22 @@ let shockwaveT  = -1;   // -1 = inactive, 0→1 = active
 let shockwaveFrame = 0;
 const SHOCKWAVE_DUR = 150; // frames (~2.5s at 60fps)
 let heroClickBoost = 0;   // derived each frame from shockwaveT
+let heroClickBoostNode = 0; // smoothly lerped version for node scale
+let heroClickBoostAmbient = 0; // slowly lerped version for ambient bg effects
+let shockwaveCX = 0, shockwaveCY = 0, shockwaveMaxR = 0; // coords fixes en canvas px (calculées au clic)
 
 function handleClickHero(e) {
     e.preventDefault();
     shockwaveFrame = 0;
     shockwaveT = 0;
+    updateHeroRightRect();
+    // Fixer les coords en coordonnées canvas au moment du clic (avant que le scroll ne bouge tout)
+    if (heroRightRect && heroBgCanvas) {
+        const heroBgRect = heroBgCanvas.getBoundingClientRect();
+        shockwaveCX    = heroRightRect.left + heroRightRect.width  / 2 - heroBgRect.left;
+        shockwaveCY    = heroRightRect.top  + heroRightRect.height / 2 - heroBgRect.top;
+        shockwaveMaxR  = Math.max(heroRightRect.width, heroRightRect.height) * 0.9;
+    }
     setTimeout(() => smoothScrollTo('about'), 1200);
 }
 
@@ -164,6 +175,7 @@ LAYER_COUNTS.forEach((count, li) => {
             activation: 0,
             freq: 0.6 + Math.random() * 1.2,
             phase: Math.random() * Math.PI * 2,
+            clickFactor: 0.5 + Math.random() * 1.0,
         });
     }
     cumCount += count;
@@ -300,7 +312,7 @@ function resizeNeuralCanvas() {
 // --- Neural animate ---
 function animateNeural(timestamp) {
     if (!prefersReducedMotion) {
-        neuralVelY += neuralMouseRelX * 0.0011;
+        neuralVelY += neuralMouseRelX * 0.0007;
         neuralVelY *= 0.93;
         neuralAngleY += neuralVelY;
     }
@@ -312,6 +324,12 @@ function animateNeural(timestamp) {
 
     const t = timestamp * 0.001;
     const clickSpeedBoost = 1 + heroClickBoost * 4;
+
+    // Boost global quand le curseur survole la zone du réseau neuronal
+    const isHoveringNeural = heroRightRect &&
+        cursorTargetX >= heroRightRect.left && cursorTargetX <= heroRightRect.right &&
+        cursorTargetY >= heroRightRect.top  && cursorTargetY <= heroRightRect.bottom;
+    const hoverAreaBoost = isHoveringNeural ? 2.2 : 1.0;
 
     // --- Reset cible d'activation des connexions ---
     connectionObjects.forEach(conn => { conn.actTarget = 0; });
@@ -325,7 +343,7 @@ function animateNeural(timestamp) {
         }
         p.mesh.visible = true;
         const proximityBoost = prefersReducedMotion ? 1 : getParticleBoost(p.mesh);
-        p.t += p.speed * proximityBoost * clickSpeedBoost;
+        p.t += p.speed * proximityBoost * clickSpeedBoost * hoverAreaBoost;
         if (p.t >= 1) {
             p.conn = connectionObjects[Math.floor(Math.random() * connectionObjects.length)];
             p.t = 0;
@@ -382,8 +400,8 @@ function animateNeural(timestamp) {
         n.glowMesh.material.opacity = act * 0.55;
 
         // Scale pulse
-        const clickSpring = heroClickBoost > 0
-            ? Math.pow(Math.sin(heroClickBoost * Math.PI), 0.6) * 1.4 : 0;
+        const clickSpring = heroClickBoostNode > 0.001
+            ? Math.pow(Math.sin(heroClickBoostNode * Math.PI), 0.6) * 1.4 * n.clickFactor : 0;
         const idlePulse = n.isSingle ? 0.3 : 0.18;
         const s = Math.max(0.1, (1 + Math.sin(t + n.pulseOffset) * idlePulse) + clickSpring);
         n.mesh.scale.setScalar(s);
@@ -399,7 +417,7 @@ function animateNeural(timestamp) {
 const heroBgCanvas = document.getElementById('hero-bg-canvas');
 const heroBgCtx = heroBgCanvas.getContext('2d');
 let heroBgParticles = [];
-const HERO_BG_COUNT = 110;
+const HERO_BG_COUNT = 150;
 const HERO_BG_CONNECT_DIST = 115;
 
 // Ambient glow blobs — slow-drifting radial light fields
@@ -417,12 +435,13 @@ class HeroBgParticle {
         this.y = initial
             ? Math.random() * heroBgCanvas.height
             : (Math.random() < 0.5 ? -5 : heroBgCanvas.height + 5);
-        this.vx = (Math.random() - 0.5) * 0.38;
-        this.vy = (Math.random() - 0.5) * 0.38;
+        // Drift autonome persistant (vitesse constante, quasi pas d'amortissement)
+        this.vx = (Math.random() - 0.5) * 0.30;
+        this.vy = (Math.random() - 0.5) * 0.30;
         this.baseSize = Math.random() * 2.6 + 0.5;
         this.hue = Math.floor(Math.random() * 70) + 185;
         this.alpha = Math.random() * 0.5 + 0.2;
-        this.twinkleSpeed = Math.random() * 0.018 + 0.006; // slower = subtler
+        this.twinkleSpeed = Math.random() * 0.018 + 0.006;
         this.twinkleOffset = Math.random() * Math.PI * 2;
     }
     update(boost, t) {
@@ -439,22 +458,33 @@ class HeroBgParticle {
                 this.vy += (dy / dist) * force;
             }
         }
-        // Velocity damping + boost
-        this.vx *= 0.988;
-        this.vy *= 0.988;
+        // Très faible amortissement → dérive persistante
+        this.vx *= 0.9998;
+        this.vy *= 0.9998;
         const speed = 1 + boost * 2.2;
         this.x += this.vx * speed;
         this.y += this.vy * speed;
-        if (this.x < -10 || this.x > heroBgCanvas.width + 10 ||
-            this.y < -10 || this.y > heroBgCanvas.height + 10) {
-            this.reset();
-        }
-        // Subtle twinkle — amplitude reduced
+        // Wrap-around au lieu de reset → dérive continue sans disparition
+        if (this.x < -10) this.x = heroBgCanvas.width + 10;
+        if (this.x > heroBgCanvas.width + 10) this.x = -10;
+        if (this.y < -10) this.y = heroBgCanvas.height + 10;
+        if (this.y > heroBgCanvas.height + 10) this.y = -10;
+        // Subtle twinkle
         this.currentAlpha = this.alpha * (0.88 + 0.12 * Math.sin(t * this.twinkleSpeed + this.twinkleOffset));
     }
-    draw(boost) {
+    draw(boost, clipCX = -1, clipCY = -1, clipR = 0) {
+        // Fade circulaire : invisible au centre du réseau, visible partout ailleurs
+        let fade = 1;
+        if (clipR > 0) {
+            const dx = this.x - clipCX;
+            const dy = this.y - clipCY;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            const innerR = clipR * 0.62;
+            if (dist < innerR) return;
+            if (dist < clipR) fade = (dist - innerR) / (clipR - innerR);
+        }
         const s = this.baseSize * (1 + boost * 1.0);
-        const a = this.currentAlpha + boost * 0.14;
+        const a = (this.currentAlpha + boost * 0.14) * fade;
         heroBgCtx.beginPath();
         heroBgCtx.arc(this.x, this.y, s, 0, Math.PI * 2);
         heroBgCtx.fillStyle = `hsla(${this.hue}, 100%, 72%, ${a})`;
@@ -479,7 +509,7 @@ function initHeroBg() {
 }
 
 function animateHeroBg(t) {
-    const boost = heroClickBoost;
+    const boost = heroClickBoostAmbient;
     heroBgCtx.clearRect(0, 0, heroBgCanvas.width, heroBgCanvas.height);
 
     if (!prefersReducedMotion) blobTime += 0.0008;
@@ -498,21 +528,25 @@ function animateHeroBg(t) {
         heroBgCtx.fillRect(0, 0, W, H);
     });
 
-    // Shockwave rings — expand from neural network center on click
-    if (shockwaveT >= 0 && heroRightRect) {
-        const heroBgRect = heroBgCanvas.getBoundingClientRect();
-        const cx = heroRightRect.left + heroRightRect.width  / 2 - heroBgRect.left;
-        const cy = heroRightRect.top  + heroRightRect.height / 2 - heroBgRect.top;
-        const maxR = Math.max(heroRightRect.width, heroRightRect.height) * 0.9;
+    // Shockwave rings — coords fixes calculées au clic, ne bougent pas pendant le scroll
+    if (shockwaveT >= 0 && shockwaveMaxR > 0) {
+        const cx = shockwaveCX, cy = shockwaveCY, maxR = shockwaveMaxR;
 
-        // Two staggered rings
-        [[1.0, 0.0], [0.72, 0.12]].forEach(([scale, delay]) => {
+        [[1.0, 0.0], [0.72, 0.09], [0.45, 0.18]].forEach(([scale, delay]) => {
             const pt = Math.max(0, (shockwaveT - delay) / (1 - delay));
             if (pt <= 0 || pt > 1) return;
             const eased = 1 - Math.pow(1 - pt, 2.8);
             const r     = eased * maxR * scale;
-            const alpha = Math.pow(1 - pt, 1.8) * 0.6;
-            const lw    = (1 - pt) * 2.5 + 0.3;
+
+            const alpha = Math.min(pt / 0.12, 1) * Math.pow(1 - pt, 1.8) * 0.6;
+            const lw    = (1 - pt) * 4.0 + 0.6;
+            // Halo violet
+            heroBgCtx.beginPath();
+            heroBgCtx.arc(cx, cy, r, 0, Math.PI * 2);
+            heroBgCtx.strokeStyle = `rgba(129, 140, 248, ${alpha * 0.4})`;
+            heroBgCtx.lineWidth = lw * 3;
+            heroBgCtx.stroke();
+            // Anneau cyan principal
             heroBgCtx.beginPath();
             heroBgCtx.arc(cx, cy, r, 0, Math.PI * 2);
             heroBgCtx.strokeStyle = `rgba(56, 189, 248, ${alpha})`;
@@ -521,14 +555,46 @@ function animateHeroBg(t) {
         });
     }
 
-    // Connexions entre particules proches
+    // Zone de clip CIRCULAIRE serrée autour du réseau neuronal
+    let clipCX = -1, clipCY = -1, clipR = 0, textZoneRight = 0;
+    if (heroRightRect) {
+        const heroBgRect = heroBgCanvas.getBoundingClientRect();
+        clipCX = heroRightRect.left + heroRightRect.width  / 2 - heroBgRect.left;
+        clipCY = heroRightRect.top  + heroRightRect.height / 2 - heroBgRect.top;
+        clipR = Math.min(heroRightRect.width, heroRightRect.height) * 0.56;
+        textZoneRight = heroRightRect.left - heroBgRect.left; // bord droit de la zone de texte
+    }
+
+    // Léger voile sur la zone de texte (gauche) pour atténuer les particules sans les supprimer
+    if (textZoneRight > 0) {
+        const tg = heroBgCtx.createLinearGradient(0, 0, textZoneRight + 100, 0);
+        tg.addColorStop(0,    'rgba(15, 23, 42, 0.28)');
+        tg.addColorStop(0.65, 'rgba(15, 23, 42, 0.22)');
+        tg.addColorStop(1,    'rgba(15, 23, 42, 0)');
+        heroBgCtx.fillStyle = tg;
+        heroBgCtx.fillRect(0, 0, textZoneRight + 100, heroBgCanvas.height);
+    }
+
+    // Connexions entre particules proches (avec fade circulaire)
     for (let i = 0; i < heroBgParticles.length; i++) {
         for (let j = i + 1; j < heroBgParticles.length; j++) {
             const dx = heroBgParticles[i].x - heroBgParticles[j].x;
             const dy = heroBgParticles[i].y - heroBgParticles[j].y;
             const dist = Math.sqrt(dx * dx + dy * dy);
             if (dist < HERO_BG_CONNECT_DIST) {
-                const op = (1 - dist / HERO_BG_CONNECT_DIST) * (0.11 + boost * 0.10);
+                let fadeI = 1, fadeJ = 1;
+                if (clipR > 0) {
+                    const dxi = heroBgParticles[i].x - clipCX, dyi = heroBgParticles[i].y - clipCY;
+                    const di = Math.sqrt(dxi*dxi + dyi*dyi);
+                    const inner = clipR * 0.62;
+                    fadeI = di < inner ? 0 : di < clipR ? (di - inner) / (clipR - inner) : 1;
+                    const dxj = heroBgParticles[j].x - clipCX, dyj = heroBgParticles[j].y - clipCY;
+                    const dj = Math.sqrt(dxj*dxj + dyj*dyj);
+                    fadeJ = dj < inner ? 0 : dj < clipR ? (dj - inner) / (clipR - inner) : 1;
+                }
+                const fade = Math.min(fadeI, fadeJ);
+                if (fade <= 0) continue;
+                const op = (1 - dist / HERO_BG_CONNECT_DIST) * (0.11 + boost * 0.10) * fade;
                 heroBgCtx.strokeStyle = `rgba(129, 140, 248, ${op})`;
                 heroBgCtx.lineWidth = 0.55;
                 heroBgCtx.beginPath();
@@ -539,7 +605,7 @@ function animateHeroBg(t) {
         }
     }
 
-    heroBgParticles.forEach(p => { p.update(boost, t); p.draw(boost); });
+    heroBgParticles.forEach(p => { p.update(boost, t); p.draw(boost, clipCX, clipCY, clipR); });
 }
 
 // =========================================================
@@ -558,8 +624,9 @@ class Star {
         this.baseAlpha = Math.random() * 0.55 + 0.05;
         this.speedAlpha = Math.random() * 0.02 + 0.005;
         this.increasing = true;
-        // Couleur aléatoire entre Cyan (190) et Violet (250)
         this.hue = Math.floor(Math.random() * 60) + 190;
+        this.vx = (Math.random() - 0.5) * 0.12;
+        this.vy = (Math.random() - 0.5) * 0.12;
     }
     draw() {
         bgCtx.fillStyle = `hsla(${this.hue}, 100%, 70%, ${this.baseAlpha})`;
@@ -568,6 +635,12 @@ class Star {
         bgCtx.fill();
     }
     update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        if (this.x < 0) this.x = bgCanvas.width;
+        if (this.x > bgCanvas.width) this.x = 0;
+        if (this.y < 0) this.y = bgCanvas.height;
+        if (this.y > bgCanvas.height) this.y = 0;
         if (this.increasing) {
             this.baseAlpha += this.speedAlpha;
             if (this.baseAlpha >= 1) this.increasing = false;
@@ -575,8 +648,6 @@ class Star {
             this.baseAlpha -= this.speedAlpha;
             if (this.baseAlpha <= 0.1) {
                 this.increasing = true;
-                this.x = Math.random() * bgCanvas.width;
-                this.y = Math.random() * bgCanvas.height;
                 this.hue = Math.floor(Math.random() * 60) + 190;
             }
         }
@@ -586,7 +657,7 @@ class Star {
 
 function initBgStars() {
     bgStarsArray = [];
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 160; i++) {
         bgStarsArray.push(new Star());
     }
 }
@@ -631,6 +702,8 @@ function animate(timestamp) {
     heroClickBoost = shockwaveT >= 0
         ? Math.pow(Math.sin(shockwaveT * Math.PI), 0.12)
         : 0;
+    heroClickBoostNode += (heroClickBoost - heroClickBoostNode) * 0.12;
+    heroClickBoostAmbient += (heroClickBoost - heroClickBoostAmbient) * 0.04;
 
     bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
     for (let i = 0; i < bgStarsArray.length; i++) {
@@ -675,8 +748,7 @@ function resizeCursorCanvas() {
 
 function drawCursor(ts) {
     cursorCtx.clearRect(0, 0, cursorCanvas.width, cursorCanvas.height);
-
-    if (cursorTargetX < -400) return;
+    return; // aura curseur désactivée
 
     cursorX += (cursorTargetX - cursorX) * 0.15;
     cursorY += (cursorTargetY - cursorY) * 0.15;
