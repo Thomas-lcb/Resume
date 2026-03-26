@@ -96,68 +96,140 @@
 
     <section id="skills">
         <h2 class="section-title reveal" data-i18n="skills.title">Skills</h2>
-        <div class="skills-grid reveal">
-            <div class="skill-card">
-                <h3><i class="fas fa-brain"></i> <span data-i18n="skills.ai">AI & Data Science</span></h3>
+        <div class="skills-bento reveal">
+
+            <!-- AI & Data Science — hero card -->
+            <div class="sk-card c-cyan span-7">
+                <div class="sk-head">
+                    <div class="sk-ico"><i class="fas fa-brain"></i></div>
+                    <h3 data-i18n="skills.ai">AI &amp; Data Science</h3>
+                </div>
                 <div class="tags">
-                    <span class="tag">Machine Learning</span>
+                    <span class="tag tag-hero">Machine Learning</span>
+                    <span class="tag tag-hero">Deep Learning</span>
+                    <span class="tag tag-hero">LLM</span>
                     <span class="tag">NLP</span>
-                    <span class="tag">Deep Learning</span>
                     <span class="tag">RAG Systems</span>
                     <span class="tag">Computer Vision</span>
-                    <span class="tag">RL</span>
-                    <span class="tag">LLM</span>
+                    <span class="tag">Reinforcement Learning</span>
                     <span class="tag">Statistics</span>
                     <span class="tag">Prediction</span>
+                    <span class="tag">OCR</span>
+                    <span class="tag">XGBoost</span>
+                    <span class="tag">VLM</span>
+                    <span class="tag">Time Series</span>
                 </div>
             </div>
-            <div class="skill-card">
-                <h3><i class="fas fa-code"></i> <span data-i18n="skills.programming">Programming</span></h3>
+
+            <!-- Programming -->
+            <div class="sk-card c-indigo span-5">
+                <div class="sk-head">
+                    <div class="sk-ico"><i class="fas fa-code"></i></div>
+                    <h3 data-i18n="skills.programming">Programming</h3>
+                </div>
                 <div class="tags">
-                    <span class="tag">Python ♥</span>
+                    <span class="tag tag-hero">Python ♥</span>
                     <span class="tag">SQL</span>
+                    <span class="tag">TypeScript</span>
                     <span class="tag">C</span>
                     <span class="tag">Java</span>
                     <span class="tag">R</span>
                     <span class="tag">HTML</span>
                     <span class="tag">CSS</span>
-                    <span class="tag">TypeScript</span>
                 </div>
             </div>
-            <div class="skill-card">
-                <h3><i class="fas fa-layer-group"></i> Frameworks</h3>
+
+            <!-- Frameworks -->
+            <div class="sk-card c-violet span-4">
+                <div class="sk-head">
+                    <div class="sk-ico"><i class="fas fa-layer-group"></i></div>
+                    <h3>Frameworks &amp; Libs</h3>
+                </div>
                 <div class="tags">
                     <span class="tag">TensorFlow / PyTorch</span>
                     <span class="tag">Scikit-learn</span>
                     <span class="tag">Pandas</span>
                     <span class="tag">OpenCV</span>
-                    <span class="tag">Numpy</span>
+                    <span class="tag">NumPy</span>
                     <span class="tag">Streamlit</span>
                     <span class="tag">Matplotlib</span>
                     <span class="tag">Selenium</span>
+                    <span class="tag">Stable-Baselines3</span>
+                    <span class="tag">Gymnasium</span>
+                    <span class="tag">React</span>
+                    <span class="tag">LangChain</span>
+                    <span class="tag">FAISS</span>
+                    <span class="tag">Hugging Face</span>
                 </div>
             </div>
-            <div class="skill-card">
-                <h3><i class="fas fa-tools"></i> Tools</h3>
+
+            <!-- Tools -->
+            <div class="sk-card c-emerald span-4">
+                <div class="sk-head">
+                    <div class="sk-ico"><i class="fas fa-tools"></i></div>
+                    <h3>Tools &amp; DevOps</h3>
+                </div>
                 <div class="tags">
                     <span class="tag">Docker</span>
                     <span class="tag">Git</span>
+                    <span class="tag">CI/CD</span>
+                    <span class="tag">CUDA</span>
+                    <span class="tag">Linux</span>
+                    <span class="tag">Multithreading</span>
+                    <span class="tag">WandB</span>
+                    <span class="tag">GitHub Actions</span>
+                    <span class="tag">Jupyter</span>
+                    <span class="tag">n8n</span>
                     <span class="tag">Expo</span>
                     <span class="tag">Poetry</span>
                     <span class="tag">Conda</span>
                 </div>
             </div>
-            <div class="skill-card">
-                <h3><i class="fas fa-globe"></i> Languages</h3>
-                <div class="tags">
-                    <span class="tag" data-i18n="skills.french">French (Native)</span>
-                    <span class="tag" data-i18n="skills.english">English (C1)</span>
-                    <span class="tag" data-i18n="skills.spanish">Spanish (B2)</span>
-                    <span class="tag" data-i18n="skills.japanese">Japanese (A1)</span>
+
+            <!-- Languages — gauges -->
+            <div class="sk-card c-rose span-4">
+                <div class="sk-head">
+                    <div class="sk-ico"><i class="fas fa-globe"></i></div>
+                    <h3>Languages</h3>
+                </div>
+                <div class="lang-list">
+                    <div class="lang-item">
+                        <div class="lang-row">
+                            <span class="lang-name" data-i18n="skills.french.name">French</span>
+                            <span class="lang-level" data-i18n="skills.french.level">Native</span>
+                        </div>
+                        <div class="gauge-track"><div class="gauge-fill fill-native" data-w="100"></div></div>
+                    </div>
+                    <div class="lang-item">
+                        <div class="lang-row">
+                            <span class="lang-name" data-i18n="skills.english.name">English</span>
+                            <span class="lang-level">C1</span>
+                        </div>
+                        <div class="gauge-track"><div class="gauge-fill fill-c1" data-w="85"></div></div>
+                    </div>
+                    <div class="lang-item">
+                        <div class="lang-row">
+                            <span class="lang-name" data-i18n="skills.spanish.name">Spanish</span>
+                            <span class="lang-level">B2</span>
+                        </div>
+                        <div class="gauge-track"><div class="gauge-fill fill-b2" data-w="64"></div></div>
+                    </div>
+                    <div class="lang-item">
+                        <div class="lang-row">
+                            <span class="lang-name" data-i18n="skills.japanese.name">Japanese</span>
+                            <span class="lang-level">A1</span>
+                        </div>
+                        <div class="gauge-track"><div class="gauge-fill fill-a1" data-w="16"></div></div>
+                    </div>
                 </div>
             </div>
-            <div class="skill-card">
-                <h3><i class="fa-solid fa-gear"></i> <span data-i18n="skills.office">Office & Others</span></h3>
+
+            <!-- Office & Other — full width -->
+            <div class="sk-card c-amber span-12">
+                <div class="sk-head">
+                    <div class="sk-ico"><i class="fas fa-briefcase"></i></div>
+                    <h3 data-i18n="skills.office">Office &amp; Others</h3>
+                </div>
                 <div class="tags">
                     <span class="tag">Power BI</span>
                     <span class="tag">Microsoft Suite</span>
@@ -166,6 +238,7 @@
                     <span class="tag" data-i18n="skills.driving">Driving License (B) - Vehicle Owner</span>
                 </div>
             </div>
+
         </div>
     </section>
 

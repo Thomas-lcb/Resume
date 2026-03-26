@@ -73,6 +73,17 @@ There is no package.json, no npm, no bundler.
 
 11. **Photo tilt (section About)** — effet pièce de monnaie au survol de `.profile-ring-wrapper`. Loop `requestAnimationFrame` + lerp (0.06) pour suivi progressif. MAX_TILT = 6°. Le transform (`perspective rotateX/Y`) et le box-shadow directionnel sont appliqués directement via JS, sans transition CSS.
 
+12. **Gauge animation (section Skills)** — `IntersectionObserver` anime la largeur des `.gauge-fill` de 0 → `data-w%` au scroll (stagger 110ms par barre). Le sweep lumineux (`.gauge-fill::after`) est déclenché uniquement au hover de la carte `.c-rose`, stagger CSS de 120ms par langue.
+
+**Section Skills — structure actuelle :**
+- `.skills-bento` : CSS Grid 12 colonnes, gap 16px. Cartes : AI (span-7) | Code (span-5) | Frameworks (span-4) | Tools (span-4) | Languages (span-4) | Office (span-12).
+- `.sk-card` : liquid glass — `background: rgba(255,255,255,0.028)`, `backdrop-filter: blur(3px)` au repos. Au hover : `blur(10px) saturate(150%)` + lift 6px + glow coloré. `backdrop-filter` retiré du state par défaut pour éviter le conflit avec l'animation `.reveal` (opacity 0→1 crée un stacking context qui rend le blur opaque).
+- Chaque carte a une couleur d'accent via `--sk-accent` / `--sk-rgb` : cyan (AI), indigo (Code), violet (Frameworks), emerald (Tools), rose (Languages), amber (Office).
+- Shimmer sweep (`.sk-card::after`) traverse la carte au hover (skewX -18deg).
+- Accent line top (`.sk-card::before`) s'étend en pleine largeur au hover.
+- Tags (`.tag`) : `border-radius: 8px`, couleur héritée de `--sk-accent`/`--sk-rgb` de la carte parente.
+- Carte Languages : barres de niveau (`.gauge-fill`) avec `overflow: hidden` — sweep lumineux clipé à la largeur colorée.
+
 **Section About — structure actuelle :**
 - `.about-card` : fond transparent, pas de border, grid `1fr 2fr`, `align-items: center`.
 - Colonne gauche (`.about-left`) : photo avec anneau animé uniquement.

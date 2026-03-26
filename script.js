@@ -947,9 +947,14 @@ const translations = {
         'skills.programming': 'Programmation',
         'skills.office': 'Bureautique & Autres',
         'skills.french': 'Français (Natif)',
+        'skills.french.name': 'Français',
+        'skills.french.level': 'Natif',
         'skills.english': 'Anglais (C1)',
+        'skills.english.name': 'Anglais',
         'skills.spanish': 'Espagnol (B2)',
+        'skills.spanish.name': 'Espagnol',
         'skills.japanese': 'Japonais (A1)',
+        'skills.japanese.name': 'Japonais',
         'skills.driving': 'Permis B - Véhiculé',
         // Experience
         'exp.title': 'Expérience',
@@ -1087,4 +1092,24 @@ if (currentLang !== 'en') applyLang(currentLang);
         targetRy = 0;
         if (!raf) raf = requestAnimationFrame(tick);
     });
+})();
+
+// =========================================================
+// SKILLS — gauge animation on scroll reveal
+// =========================================================
+(function () {
+    const fills = document.querySelectorAll('.gauge-fill');
+    if (!fills.length) return;
+
+    const io = new IntersectionObserver(entries => {
+        entries.forEach(e => {
+            if (!e.isIntersecting) return;
+            const el = e.target;
+            const idx = [...fills].indexOf(el);
+            setTimeout(() => { el.style.width = el.dataset.w + '%'; }, 120 + idx * 110);
+            io.unobserve(el);
+        });
+    }, { threshold: 0.4 });
+
+    fills.forEach(f => io.observe(f));
 })();
