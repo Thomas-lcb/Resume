@@ -930,10 +930,17 @@ const translations = {
         'hero.btn': 'Découvrir mon profil',
         // About
         'about.title': 'À propos',
-        'about.p1': 'Diplômé ingénieur spécialisé en Data Science et Intelligence Artificielle, je recherche ma première opportunité professionnelle à partir de février 2026, à la suite de mon stage de fin d\'études.',
-        'about.p2': 'Mon parcours hybride m\'a permis de mener divers projets concrets en Computer Vision, NLP, systèmes RAG (Retrieval-Augmented Generation) et classification.',
-        'about.p3': 'Curieux et motivé, je suis impatient de mettre mes compétences en Data Science au service de défis variés et concrets.',
+        'about.p1': 'Diplômé ingénieur des <strong class="about-highlight">Mines de Saint-Étienne</strong>, spécialisé en Data Science & IA, je recherche ma première opportunité dans ce domaine à partir de février 2026, à la suite de mon stage de fin d\'études chez <strong class="about-highlight">Dassault Aviation</strong>.',
+        'about.p2': 'Mon <strong class="about-highlight">parcours technique</strong> m\'a permis de mener des projets concrets en Computer Vision, NLP, RAG, classification, LLM, Reinforcement Learning, développement logiciel et déploiement (Docker, CI/CD).',
+        'about.p3': '<strong class="about-highlight">Curieux et motivé</strong>, je cherche à mettre mes compétences en Data Science au service de projets ambitieux où la technique rencontre un impact concret.',
+        'about.p4': 'Disponible <strong class="about-highlight">immédiatement</strong>, je suis ouvert aux opportunités en région parisienne, lyonnaise ou à Genève — en présentiel, remote ou hybride.',
         'about.location': 'Boulogne Billancourt (92100)',
+        'about.badge': 'Disponible',
+        'about.stat1': 'ans de form.',
+        'about.stat2': 'projets',
+        'about.stat3': 'domaines',
+        'about.available': 'Disponible fév. 2026',
+        'about.remote': 'Remote / Hybride',
         // Skills
         'skills.title': 'Compétences',
         'skills.ai': 'IA & Data Science',
@@ -1034,3 +1041,50 @@ function toggleLang() {
 }
 
 if (currentLang !== 'en') applyLang(currentLang);
+
+// =========================================================
+// PHOTO TILT (effet pièce de monnaie au hover)
+// =========================================================
+(function () {
+    const wrapper = document.querySelector('.profile-ring-wrapper');
+    if (!wrapper) return;
+
+    const MAX_TILT = 6;   // degrés max (léger)
+    const LERP = 0.06;    // vitesse de suivi — plus petit = plus progressif
+
+    let targetRx = 0, targetRy = 0;
+    let currentRx = 0, currentRy = 0;
+    let isOver = false;
+    let raf = null;
+
+    function tick() {
+        currentRx += (targetRx - currentRx) * LERP;
+        currentRy += (targetRy - currentRy) * LERP;
+
+        const ax = Math.abs(currentRx), ay = Math.abs(currentRy);
+        wrapper.style.transform = `perspective(700px) rotateX(${currentRx.toFixed(3)}deg) rotateY(${currentRy.toFixed(3)}deg)`;
+        wrapper.style.boxShadow = `${(-currentRy * 0.8).toFixed(1)}px ${(currentRx * 0.8).toFixed(1)}px 36px rgba(56,189,248,${(0.22 + (ax + ay) * 0.008).toFixed(3)})`;
+
+        // Continuer tant qu'on est loin de la cible
+        if (Math.abs(currentRx - targetRx) > 0.02 || Math.abs(currentRy - targetRy) > 0.02) {
+            raf = requestAnimationFrame(tick);
+        } else {
+            raf = null;
+        }
+    }
+
+    wrapper.addEventListener('mousemove', (e) => {
+        const rect = wrapper.getBoundingClientRect();
+        const dx = (e.clientX - rect.left - rect.width / 2) / (rect.width / 2);
+        const dy = (e.clientY - rect.top - rect.height / 2) / (rect.height / 2);
+        targetRy = dx * MAX_TILT;
+        targetRx = -dy * MAX_TILT;
+        if (!raf) raf = requestAnimationFrame(tick);
+    });
+
+    wrapper.addEventListener('mouseleave', () => {
+        targetRx = 0;
+        targetRy = 0;
+        if (!raf) raf = requestAnimationFrame(tick);
+    });
+})();
