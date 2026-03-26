@@ -58,6 +58,7 @@ let shockwaveCX = 0, shockwaveCY = 0, shockwaveMaxR = 0; // coords fixes en canv
 
 function handleClickHero(e) {
     e.preventDefault();
+    e.currentTarget.classList.add('pulse-off');
     shockwaveFrame = 0;
     shockwaveT = 0;
     updateHeroRightRect();

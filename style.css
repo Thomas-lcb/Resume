@@ -387,7 +387,14 @@ nav.nav-compact:hover .nav-contact-btn {
     display: flex;
     gap: 14px;
     flex-wrap: wrap;
+    margin-top: -8px;
     animation: fadeInUp 1s ease-out 0.8s backwards;
+}
+
+@keyframes btn-pulse-glow {
+    0%   { opacity: 0.55; transform: scale(1);    filter: blur(6px); }
+    70%  { opacity: 0;    transform: scale(1.22); filter: blur(12px); }
+    100% { opacity: 0;    transform: scale(1.22); filter: blur(12px); }
 }
 
 .hero-btn-primary {
@@ -405,11 +412,28 @@ nav.nav-compact:hover .nav-contact-btn {
     display: inline-flex;
     align-items: center;
     gap: 8px;
+    position: relative;
+}
+
+/* Gradient halo — pseudo-element indépendant du hover */
+.hero-btn-primary::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 32px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    z-index: -1;
+    opacity: 0;
+    animation: btn-pulse-glow 2.4s ease-out infinite;
 }
 
 .hero-btn-primary:hover {
     transform: translateY(-3px);
     box-shadow: 0 14px 32px rgba(56, 189, 248, 0.5);
+}
+
+.hero-btn-primary.pulse-off::before {
+    animation: none;
 }
 
 .hero-btn-secondary {
@@ -1111,7 +1135,7 @@ footer {
 .tag {
     padding: 5px 13px;
     border-radius: 8px;
-    font-size: 0.81rem;
+    font-size: 0.875rem;
     font-weight: 500;
     border: 1px solid rgba(var(--sk-rgb), 0.16);
     background: rgba(var(--sk-rgb), 0.07);
@@ -1126,7 +1150,7 @@ footer {
     box-shadow: 0 4px 12px rgba(var(--sk-rgb), 0.15);
 }
 .tag-hero {
-    font-size: 0.86rem;
+    font-size: 0.93rem;
     font-weight: 600;
     padding: 6px 15px;
 }
