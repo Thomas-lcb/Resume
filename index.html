@@ -16,20 +16,23 @@
     <canvas id="bg-stars"></canvas>
     <canvas id="cursor-canvas"></canvas>
 
-    <nav>
-        <div style="display: flex; align-items: center; gap: 12px;">
-            <img src="PP.JPG" alt="Logo" class="logo" onerror="this.style.display='none'">
-            <button class="lang-toggle" onclick="toggleLang()" title="Switch language">EN</button>
+    <nav id="nav-wrapper">
+        <!-- Langue à gauche -->
+        <button class="lang-toggle" onclick="toggleLang()" title="Switch language">EN</button>
+
+        <!-- Île flottante centrale -->
+        <div class="nav-island" id="nav-island">
+            <div class="nav-indicator" id="nav-indicator"></div>
+            <a onclick="smoothScrollTo('hero')"       data-i18n="nav.home"       data-section="hero">Home</a>
+            <a onclick="smoothScrollTo('about')"      data-i18n="nav.about"      data-section="about">About</a>
+            <a onclick="smoothScrollTo('skills')"     data-i18n="nav.skills"     data-section="skills">Skills</a>
+            <a onclick="smoothScrollTo('experience')" data-i18n="nav.experience" data-section="experience">Experience</a>
+            <a onclick="smoothScrollTo('education')"  data-i18n="nav.education"  data-section="education">Education</a>
+            <a onclick="smoothScrollTo('projects')"   data-i18n="nav.projects"   data-section="projects">Projects</a>
         </div>
-        <div class="nav-links">
-            <a onclick="smoothScrollTo('hero')" data-i18n="nav.home">Home</a>
-            <a onclick="smoothScrollTo('about')" data-i18n="nav.about">About</a>
-            <a onclick="smoothScrollTo('skills')" data-i18n="nav.skills">Skills</a>
-            <a onclick="smoothScrollTo('experience')" data-i18n="nav.experience">Experience</a>
-            <a onclick="smoothScrollTo('education')" data-i18n="nav.education">Education</a>
-            <a onclick="smoothScrollTo('projects')" data-i18n="nav.projects">Projects</a>
-            <a onclick="smoothScrollTo('contact')" data-i18n="nav.contact">Contact/CV</a>
-        </div>
+
+        <!-- Contact/CV à droite -->
+        <a class="nav-contact-btn" onclick="smoothScrollTo('contact')" data-i18n="nav.contact">Contact / CV</a>
     </nav>
 
     <header class="hero" id="hero">
@@ -37,13 +40,9 @@
         <div class="hero-split">
             <div class="hero-left">
                 <h1>Thomas <span>Lacombe</span></h1>
-                <p data-i18n-html="hero.subtitle">Machine Learning Engineer<br>(AI & Software Systems)</p>
+                <p data-i18n-html="hero.subtitle"><strong>Machine Learning Engineer</strong><br>(AI & Software Systems)</p>
                 <div class="hero-ctas">
                     <a onclick="handleClickHero(event)" class="hero-btn-primary" data-i18n="hero.btn">Discover my profile</a>
-                    <a href="Thomas_Lacombe_CV.pdf" download class="hero-btn-secondary">
-                        <i class="fas fa-download"></i>
-                        <span data-i18n="contact.resume">Download CV</span>
-                    </a>
                 </div>
             </div>
             <div class="hero-right">

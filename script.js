@@ -811,6 +811,105 @@ resizeCursorCanvas();
 animate(0);
 
 // =========================================================
+// NAVIGATION — FLOATING ISLAND
+// =========================================================
+
+(function initNavIsland() {
+    const navEl     = document.getElementById('nav-wrapper');
+    const island    = document.getElementById('nav-island');
+    const indicator = document.getElementById('nav-indicator');
+    const links     = island ? island.querySelectorAll('a[data-section]') : [];
+
+    if (!island || !indicator || !links.length) return;
+
+    const sections = ['hero', 'about', 'skills', 'experience', 'education', 'projects', 'contact'];
+
+    // Verrou : click manuel bloque le scroll-tracking pendant 1.8s
+    let manualLock = false;
+    let manualLockTimer = null;
+    function lockManual() {
+        manualLock = true;
+        clearTimeout(manualLockTimer);
+        manualLockTimer = setTimeout(() => { manualLock = false; }, 1800);
+    }
+
+    function getActive() {
+        return island.querySelector('a.active');
+    }
+
+    // Active un lien (sans toucher à l'indicateur — géré par le lerp)
+    function setActive(sectionId) {
+        links.forEach(l => l.classList.toggle('active', l.dataset.section === sectionId));
+    }
+
+    // Init
+    requestAnimationFrame(() => setActive('hero'));
+
+    // Lien survolé
+    let hoveredLink = null;
+    links.forEach(link => {
+        link.addEventListener('mouseenter', () => { hoveredLink = link; });
+        link.addEventListener('mouseleave', () => { hoveredLink = null; });
+        link.addEventListener('click', () => {
+            setActive(link.dataset.section);
+            lockManual();
+        });
+    });
+
+    // Lerp : l'indicateur suit en temps réel le lien cible (hover ou actif).
+    // Gère à la fois la navigation fluide ET le suivi dynamique de la taille
+    // de la nav bar (compact ↔ hover) sans conflit de transition CSS.
+    let indX = null, indW = null, indO = 0;
+    const LERP = 0.10;
+    (function lerpLoop() {
+        const target = hoveredLink || getActive();
+        if (target) {
+            const iRect = island.getBoundingClientRect();
+            const eRect = target.getBoundingClientRect();
+            const tL = eRect.left - iRect.left;
+            const tW = eRect.width;
+            if (indX === null) { indX = tL; indW = tW; }
+            indX += (tL - indX) * LERP;
+            indW += (tW - indW) * LERP;
+            indO += (1 - indO) * 0.12;
+        } else {
+            indO += (0 - indO) * 0.12;
+        }
+        indicator.style.left    = (indX ?? 0) + 'px';
+        indicator.style.width   = (indW ?? 0) + 'px';
+        indicator.style.opacity = indO;
+        requestAnimationFrame(lerpLoop);
+    })();
+
+    // Scroll : section active + compact
+    const heroSection = document.getElementById('hero');
+    let ticking = false;
+    window.addEventListener('scroll', () => {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(() => {
+            const heroBottom = heroSection ? heroSection.offsetTop + heroSection.offsetHeight * 0.3 : 300;
+            const isCompact  = window.scrollY > heroBottom;
+            navEl.classList.toggle('nav-scrolled', window.scrollY > 50);
+            navEl.classList.toggle('nav-compact',  isCompact);
+
+            // Mettre à jour la section active seulement si pas de verrou manuel
+            if (!manualLock) {
+                let current = sections[0];
+                sections.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el && window.scrollY >= el.offsetTop - window.innerHeight * 0.35) current = id;
+                });
+                setActive(current === 'contact' ? null : current);
+            }
+            ticking = false;
+        });
+    }, { passive: true });
+
+    window.addEventListener('resize', () => trackActive(500));
+})();
+
+// =========================================================
 // INTERNATIONALISATION (i18n) EN / FR
 // =========================================================
 
@@ -827,7 +926,7 @@ const translations = {
         'nav.projects': 'Projets',
         'nav.contact': 'Contact/CV',
         // Hero
-        'hero.subtitle': 'Ingénieur Machine Learning<br>(IA & Systèmes Logiciels)',
+        'hero.subtitle': '<strong>Ingénieur Machine Learning</strong><br>(IA & Software Systems)',
         'hero.btn': 'Découvrir mon profil',
         // About
         'about.title': 'À propos',

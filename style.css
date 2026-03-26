@@ -47,60 +47,224 @@ body {
     pointer-events: none;
 }
 
-/* --- NAVIGATION (liquid glass) --- */
+/* --- NAVIGATION — FLOATING ISLAND --- */
 nav {
     position: fixed;
     top: 0;
+    left: 0;
     width: 100%;
-    padding: 12px 50px;
-    display: flex;
-    justify-content: space-between;
+    padding: 14px 40px;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    background: rgba(15, 23, 42, 0.25);
-    backdrop-filter: blur(28px) saturate(200%);
-    -webkit-backdrop-filter: blur(28px) saturate(200%);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-    box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.06),
-        0 4px 32px rgba(0, 0, 0, 0.35);
     z-index: 1000;
+    pointer-events: none;
+    transition: padding 0.45s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.logo {
-    height: 45px;
-    width: 45px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid var(--primary);
+.lang-toggle   { justify-self: start; }
+.nav-island    { justify-self: center; }
+.nav-contact-btn { justify-self: end; }
+
+nav.nav-scrolled {
+    padding: 10px 40px;
 }
 
-.nav-links a {
-    color: var(--text-light);
-    text-decoration: none;
-    margin-left: 25px;
-    font-size: 0.9rem;
-    transition: var(--transition);
-    position: relative;
-    cursor: pointer;
+/* Compact : nav plus fine quand on quitte le hero */
+nav.nav-compact {
+    padding: 6px 40px;
 }
 
-.nav-links a:hover {
-    color: var(--primary);
+/* Hover sur la nav : on regonfle légèrement */
+nav.nav-compact:hover {
+    padding: 11px 40px;
 }
 
-.nav-links a::after {
+/* Zone invisible full-width pour détecter le hover nav sans bloquer les clicks canvas */
+nav::after {
     content: '';
     position: absolute;
-    width: 0;
-    height: 2px;
-    bottom: -5px;
-    left: 0;
-    background-color: var(--primary);
-    transition: width 0.3s;
+    inset: 0;
+    pointer-events: all;
+    z-index: -1;
 }
 
-.nav-links a:hover::after {
-    width: 100%;
+
+/* Île flottante centrale */
+.nav-island {
+    pointer-events: all;
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    background: rgba(15, 23, 42, 0.60);
+    backdrop-filter: blur(28px) saturate(200%) brightness(1.08);
+    -webkit-backdrop-filter: blur(28px) saturate(200%) brightness(1.08);
+    border: 1px solid rgba(56, 189, 248, 0.20);
+    border-radius: 50px;
+    padding: 6px 8px;
+    box-shadow:
+        inset 0 1px 0 rgba(56, 189, 248, 0.10),
+        inset 0 -1px 0 rgba(129, 140, 248, 0.05),
+        0 8px 32px rgba(0, 0, 0, 0.45),
+        0 0 40px rgba(56, 189, 248, 0.07);
+    transition: padding    0.45s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.35s ease,
+                transform  0.3s ease;
+}
+
+/* Reflet irisé interne — visible même quand canvas non capturé */
+.nav-island::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50px;
+    background: linear-gradient(
+        135deg,
+        rgba(56, 189, 248, 0.06) 0%,
+        rgba(129, 140, 248, 0.04) 40%,
+        transparent 70%
+    );
+    pointer-events: none;
+    z-index: 0;
+}
+
+nav.nav-scrolled .nav-island {
+    padding: 4px 8px;
+}
+
+/* Compact : île plus petite */
+nav.nav-compact .nav-island {
+    padding: 3px 6px;
+    box-shadow:
+        inset 0 1px 0 rgba(56, 189, 248, 0.08),
+        0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+nav.nav-compact .nav-island a {
+    font-size: 0.78rem;
+    padding: 5px 12px;
+}
+
+/* Hover sur nav compact : regonfler l'île */
+nav.nav-compact:hover .nav-island {
+    padding: 5px 8px;
+    transform: translateY(-1px);
+    box-shadow:
+        inset 0 1px 0 rgba(56, 189, 248, 0.12),
+        0 10px 36px rgba(0, 0, 0, 0.50),
+        0 0 50px rgba(56, 189, 248, 0.09);
+}
+
+nav.nav-compact:hover .nav-island a {
+    font-size: 0.82rem;
+    padding: 7px 15px;
+}
+
+/* Indicateur capsule glissant */
+.nav-indicator {
+    position: absolute;
+    height: calc(100% - 12px);
+    top: 6px;
+    left: 8px;
+    border-radius: 40px;
+    background: rgba(56, 189, 248, 0.13);
+    border: 1px solid rgba(56, 189, 248, 0.32);
+    box-shadow: 0 0 14px rgba(56, 189, 248, 0.18);
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0;
+    /* left/width animés en JS par lerp — pas de transition CSS */
+}
+
+.nav-island a {
+    position: relative;
+    z-index: 1;
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 0.82rem;
+    font-weight: 500;
+    padding: 7px 15px;
+    border-radius: 40px;
+    cursor: pointer;
+    white-space: nowrap;
+    letter-spacing: 0.01em;
+    user-select: none;
+    transition: color 0.2s,
+                font-size 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+                padding   0.45s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-island a:hover  { color: var(--text-light); }
+.nav-island a.active { color: var(--primary); font-weight: 600; }
+
+/* Bouton Contact/CV — droite */
+.nav-contact-btn {
+    pointer-events: all;
+    padding: 9px 22px;
+    border-radius: 50px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    color: #0f172a;
+    font-size: 0.82rem;
+    font-weight: 700;
+    font-family: 'Poppins', sans-serif;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    letter-spacing: 0.02em;
+    flex-shrink: 0;
+    box-shadow: 0 0 18px rgba(56, 189, 248, 0.30);
+    transition: opacity 0.2s, transform 0.2s, box-shadow 0.2s;
+    user-select: none;
+}
+
+.nav-contact-btn:hover {
+    opacity: 0.88;
+    transform: translateY(-1px);
+    box-shadow: 0 0 30px rgba(56, 189, 248, 0.48);
+}
+
+/* Compact : lang + contact btn plus petits */
+nav.nav-compact .lang-toggle,
+nav.nav-compact .nav-contact-btn {
+    transform: scale(0.9);
+    opacity: 0.85;
+    transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity   0.35s ease;
+}
+
+nav.nav-compact:hover .lang-toggle,
+nav.nav-compact:hover .nav-contact-btn {
+    transform: scale(1);
+    opacity: 1;
+}
+
+/* Lang toggle — gauche */
+.lang-toggle {
+    pointer-events: all;
+    padding: 8px 18px;
+    border-radius: 50px;
+    background: rgba(15, 23, 42, 0.58);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    border: 1px solid rgba(56, 189, 248, 0.22);
+    color: var(--primary);
+    font-size: 0.80rem;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.08em;
+    flex-shrink: 0;
+    transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.lang-toggle:hover {
+    background: rgba(56, 189, 248, 0.12);
+    border-color: rgba(56, 189, 248, 0.42);
+    box-shadow: 0 0 18px rgba(56, 189, 248, 0.2);
+    color: var(--primary);
+    text-shadow: none;
 }
 
 /* --- HERO SECTION --- */
@@ -143,14 +307,13 @@ nav {
 
 .hero-split {
     display: grid;
-    grid-template-columns: 45fr 55fr;
+    grid-template-columns: 43fr 57fr;
     width: 100%;
     height: 100%;
-    padding: 70px 6% 0 8%;
+    padding: 55px 6% 0 8%;
     align-items: center;
     position: relative;
     z-index: 1;
-    will-change: transform, opacity;
     transition: opacity 0.05s linear;
 }
 
@@ -215,6 +378,10 @@ nav {
     animation: fadeInUp 1s ease-out 0.5s backwards;
 }
 
+.hero-left p strong {
+    font-size: 1.65rem;
+}
+
 /* --- HERO CTAs --- */
 .hero-ctas {
     display: flex;
@@ -224,13 +391,13 @@ nav {
 }
 
 .hero-btn-primary {
-    padding: 14px 30px;
+    padding: 17px 42px;
     background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
     border: none;
     border-radius: 30px;
     color: #0f172a;
     font-weight: 700;
-    font-size: 1.05rem;
+    font-size: 1.18rem;
     cursor: pointer;
     text-decoration: none;
     box-shadow: 0 8px 24px rgba(56, 189, 248, 0.3);
@@ -706,29 +873,6 @@ footer {
     color: var(--bg-color);
 }
 
-/* --- LANG TOGGLE --- */
-.lang-toggle {
-    background: transparent;
-    border: none;
-    color: var(--text-dim);
-    padding: 8px 12px;
-    border-radius: 50%;
-    font-size: 0.85rem;
-    font-family: 'Poppins', sans-serif;
-    font-weight: 600;
-    cursor: pointer;
-    transition: var(--transition);
-    letter-spacing: 1px;
-    margin-left: 10px;
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
-}
-
-.lang-toggle:hover {
-    color: var(--primary);
-    background: radial-gradient(circle, rgba(56, 189, 248, 0.1) 0%, transparent 90%);
-    text-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
-}
 
 /* --- MEDIA QUERIES --- */
 @media (max-width: 1024px) {
@@ -764,8 +908,12 @@ footer {
         grid-template-columns: 1fr;
     }
 
-    .nav-links {
+    .nav-island {
         display: none;
+    }
+
+    nav {
+        padding: 12px 20px;
     }
 
     .profile-img-container {
