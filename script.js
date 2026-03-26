@@ -248,6 +248,7 @@ let neuralVelY = 0;    // vitesse angulaire Y (rad/frame)
 let neuralAngleY = 0;  // angle accumulé libre — rotation complète possible
 let neuralRotX = 0;    // tilt X (limité)
 let heroRightRect = null;
+let heroLeftRect  = null;
 // Cursor halo position (in heroBgCanvas coords)
 let heroBgMouseX = -2000, heroBgMouseY = -2000;
 
@@ -257,6 +258,8 @@ const NODE_ACTIVATION_RADIUS = 0.55;
 function updateHeroRightRect() {
     const el = document.querySelector('.hero-right');
     if (el) heroRightRect = el.getBoundingClientRect();
+    const elLeft = document.querySelector('.hero-left');
+    if (elLeft) heroLeftRect = elLeft.getBoundingClientRect();
 }
 
 window.addEventListener('mousemove', (e) => {
@@ -472,8 +475,8 @@ class HeroBgParticle {
         // Subtle twinkle
         this.currentAlpha = this.alpha * (0.88 + 0.12 * Math.sin(t * this.twinkleSpeed + this.twinkleOffset));
     }
-    draw(boost, clipCX = -1, clipCY = -1, clipR = 0) {
-        // Fade circulaire : invisible au centre du réseau, visible partout ailleurs
+    draw(boost, clipCX = -1, clipCY = -1, clipR = 0, textCX = -1, textCY = -1, textRX = 0, textRY = 0) {
+        // Fade circulaire : invisible au centre du réseau neuronal
         let fade = 1;
         if (clipR > 0) {
             const dx = this.x - clipCX;
@@ -482,6 +485,15 @@ class HeroBgParticle {
             const innerR = clipR * 0.62;
             if (dist < innerR) return;
             if (dist < clipR) fade = (dist - innerR) / (clipR - innerR);
+        }
+        // Fade elliptique : particules légèrement visibles dans la zone de texte
+        if (textRX > 0) {
+            const ndx = (this.x - textCX) / textRX;
+            const ndy = (this.y - textCY) / textRY;
+            const nd = Math.sqrt(ndx * ndx + ndy * ndy);
+            const minFade = 0.18;
+            if (nd < 0.70) fade *= minFade;
+            else if (nd < 1.0) fade *= minFade + (1 - minFade) * (nd - 0.70) / 0.30;
         }
         const s = this.baseSize * (1 + boost * 1.0);
         const a = (this.currentAlpha + boost * 0.14) * fade;
@@ -556,26 +568,23 @@ function animateHeroBg(t) {
     }
 
     // Zone de clip CIRCULAIRE serrée autour du réseau neuronal
-    let clipCX = -1, clipCY = -1, clipR = 0, textZoneRight = 0;
+    let clipCX = -1, clipCY = -1, clipR = 0;
+    let textCX = -1, textCY = -1, textRX = 0, textRY = 0;
+    const bgRect = heroBgCanvas.getBoundingClientRect();
     if (heroRightRect) {
-        const heroBgRect = heroBgCanvas.getBoundingClientRect();
-        clipCX = heroRightRect.left + heroRightRect.width  / 2 - heroBgRect.left;
-        clipCY = heroRightRect.top  + heroRightRect.height / 2 - heroBgRect.top;
-        clipR = Math.min(heroRightRect.width, heroRightRect.height) * 0.56;
-        textZoneRight = heroRightRect.left - heroBgRect.left; // bord droit de la zone de texte
+        clipCX = heroRightRect.left + heroRightRect.width  / 2 - bgRect.left;
+        clipCY = heroRightRect.top  + heroRightRect.height / 2 - bgRect.top;
+        clipR  = Math.min(heroRightRect.width, heroRightRect.height) * 0.56;
+    }
+    // Zone de texte gauche — ellipse collée au texte, fade dans draw()
+    if (heroLeftRect) {
+        textCX = (heroLeftRect.left + heroLeftRect.right)  / 2 - bgRect.left;
+        textCY = (heroLeftRect.top  + heroLeftRect.bottom) / 2 - bgRect.top;
+        textRX = heroLeftRect.width  / 2 + 24;
+        textRY = heroLeftRect.height / 2 + 20;
     }
 
-    // Léger voile sur la zone de texte (gauche) pour atténuer les particules sans les supprimer
-    if (textZoneRight > 0) {
-        const tg = heroBgCtx.createLinearGradient(0, 0, textZoneRight + 100, 0);
-        tg.addColorStop(0,    'rgba(15, 23, 42, 0.28)');
-        tg.addColorStop(0.65, 'rgba(15, 23, 42, 0.22)');
-        tg.addColorStop(1,    'rgba(15, 23, 42, 0)');
-        heroBgCtx.fillStyle = tg;
-        heroBgCtx.fillRect(0, 0, textZoneRight + 100, heroBgCanvas.height);
-    }
-
-    // Connexions entre particules proches (avec fade circulaire)
+    // Connexions entre particules proches (avec fade circulaire + fade zone texte)
     for (let i = 0; i < heroBgParticles.length; i++) {
         for (let j = i + 1; j < heroBgParticles.length; j++) {
             const dx = heroBgParticles[i].x - heroBgParticles[j].x;
@@ -592,6 +601,18 @@ function animateHeroBg(t) {
                     const dj = Math.sqrt(dxj*dxj + dyj*dyj);
                     fadeJ = dj < inner ? 0 : dj < clipR ? (dj - inner) / (clipR - inner) : 1;
                 }
+                // Fade zone texte pour les connexions
+                if (textRX > 0) {
+                    const minFadeT = 0.18;
+                    const niX = (heroBgParticles[i].x - textCX) / textRX;
+                    const niY = (heroBgParticles[i].y - textCY) / textRY;
+                    const ndI = Math.sqrt(niX*niX + niY*niY);
+                    fadeI *= ndI < 0.70 ? minFadeT : ndI < 1.0 ? minFadeT + (1 - minFadeT) * (ndI - 0.70) / 0.30 : 1;
+                    const njX = (heroBgParticles[j].x - textCX) / textRX;
+                    const njY = (heroBgParticles[j].y - textCY) / textRY;
+                    const ndJ = Math.sqrt(njX*njX + njY*njY);
+                    fadeJ *= ndJ < 0.70 ? minFadeT : ndJ < 1.0 ? minFadeT + (1 - minFadeT) * (ndJ - 0.70) / 0.30 : 1;
+                }
                 const fade = Math.min(fadeI, fadeJ);
                 if (fade <= 0) continue;
                 const op = (1 - dist / HERO_BG_CONNECT_DIST) * (0.11 + boost * 0.10) * fade;
@@ -605,7 +626,7 @@ function animateHeroBg(t) {
         }
     }
 
-    heroBgParticles.forEach(p => { p.update(boost, t); p.draw(boost, clipCX, clipCY, clipR); });
+    heroBgParticles.forEach(p => { p.update(boost, t); p.draw(boost, clipCX, clipCY, clipR, textCX, textCY, textRX, textRY); });
 }
 
 // =========================================================
@@ -703,7 +724,7 @@ function animate(timestamp) {
         ? Math.pow(Math.sin(shockwaveT * Math.PI), 0.12)
         : 0;
     heroClickBoostNode += (heroClickBoost - heroClickBoostNode) * 0.12;
-    heroClickBoostAmbient += (heroClickBoost - heroClickBoostAmbient) * 0.04;
+    heroClickBoostAmbient += (heroClickBoost - heroClickBoostAmbient) * 0.08;
 
     bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
     for (let i = 0; i < bgStarsArray.length; i++) {
@@ -806,7 +827,7 @@ const translations = {
         'nav.projects': 'Projets',
         'nav.contact': 'Contact/CV',
         // Hero
-        'hero.subtitle': 'Ingénieur Machine Learning (IA & Systèmes Logiciels)',
+        'hero.subtitle': 'Ingénieur Machine Learning<br>(IA & Systèmes Logiciels)',
         'hero.btn': 'Découvrir mon profil',
         // About
         'about.title': 'À propos',

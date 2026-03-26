@@ -195,9 +195,9 @@ nav {
 }
 
 .hero-left h1 {
-    font-size: 5.2rem;
+    font-size: 6.2rem;
     line-height: 1.05;
-    margin-bottom: 18px;
+    margin-bottom: 22px;
     text-shadow: 0 0 40px rgba(56, 189, 248, 0.08);
     animation: fadeInDown 1s ease-out 0.2s backwards;
 }
@@ -207,9 +207,9 @@ nav {
 }
 
 .hero-left p {
-    font-size: 1.2rem;
+    font-size: 1.42rem;
     color: var(--text-dim);
-    margin-bottom: 40px;
+    margin-bottom: 44px;
     line-height: 1.7;
     max-width: 480px;
     animation: fadeInUp 1s ease-out 0.5s backwards;
