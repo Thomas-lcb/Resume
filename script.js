@@ -33,15 +33,155 @@ function smoothScrollTo(targetId) {
 }
 
 // =========================================================
-// TIMELINE (expand / collapse)
+// TIMELINE — new tl-* system
 // =========================================================
 
-const timelineItems = document.querySelectorAll('.timeline-item');
-timelineItems.forEach(item => {
+// Click expand / collapse (new tl-* system — experience)
+document.querySelectorAll('.tl-item').forEach(item => {
+    item.querySelector('.tl-card').addEventListener('click', () => {
+        item.classList.toggle('open');
+    });
+});
+
+// Click expand / collapse (legacy — education & projects)
+document.querySelectorAll('.timeline-item').forEach(item => {
     item.addEventListener('click', () => {
         item.classList.toggle('expanded');
     });
 });
+
+// Scroll reveal
+(function() {
+    const tlItems = document.querySelectorAll('#tl-exp .tl-item');
+    const obs = new IntersectionObserver(entries => {
+        entries.forEach(e => {
+            if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
+        });
+    }, { threshold: .1 });
+    tlItems.forEach((el, i) => setTimeout(() => obs.observe(el), i * 160));
+    setTimeout(() => tlItems.forEach((el, i) => setTimeout(() => el.classList.add('visible'), 280 + i * 240)), 80);
+})();
+
+// Particle system + dot energize + border light sweep
+(function() {
+    const tlEl  = document.getElementById('tl-exp');
+    const pCont = document.getElementById('tl-exp-particles');
+    if (!tlEl || !pCont) return;
+
+    const DURATION = 6200;
+
+    // Inject card-bg and border-light elements
+    document.querySelectorAll('#tl-exp .tl-card').forEach(card => {
+        const bg = document.createElement('div');
+        bg.className = 'tl-card-bg';
+        card.prepend(bg);
+        const glow = document.createElement('div');
+        glow.className = 'tl-border-light';
+        card.appendChild(glow);
+    });
+
+    // Create single particle
+    const pEl = document.createElement('div');
+    pEl.className = 'tl-p';
+    pCont.appendChild(pEl);
+
+    let dotData = [];
+    let itemData = [];
+
+    function cachePositions() {
+        const tlAbs = tlEl.getBoundingClientRect().top + window.scrollY;
+        const tlH   = tlEl.offsetHeight;
+        dotData = Array.from(document.querySelectorAll('#tl-exp .tl-marker')).map(marker => {
+            const dot   = marker.querySelector('.tl-dot');
+            const dRect = dot.getBoundingClientRect();
+            const dAbs  = dRect.top + window.scrollY + dRect.height / 2;
+            return { marker, progress: (dAbs - tlAbs) / tlH };
+        });
+        itemData = Array.from(document.querySelectorAll('#tl-exp .tl-item')).map(item => {
+            const rect = item.getBoundingClientRect();
+            return {
+                item,
+                top:    rect.top + window.scrollY - tlAbs,
+                bottom: rect.top + window.scrollY + rect.height - tlAbs,
+                sweeping: false
+            };
+        });
+    }
+
+    setTimeout(cachePositions, 300);
+    window.addEventListener('resize', cachePositions);
+    document.querySelectorAll('#tl-exp .tl-item').forEach(item => {
+        item.addEventListener('click', () => setTimeout(cachePositions, 1000));
+    });
+
+    const t0 = performance.now();
+    let prevEnergized = new Set();
+
+    function loop(now) {
+        const elapsed = now - t0;
+        const tlH = tlEl.offsetHeight;
+
+        // Move particle
+        const t = (elapsed / DURATION) % 1;
+        const y = t * tlH;
+        let alpha = 1;
+        if (t < 0.07) alpha = t / 0.07;
+        if (t > 0.93) alpha = (1 - t) / 0.07;
+        pEl.style.transform = `translateY(${y}px)`;
+        pEl.style.opacity   = alpha;
+
+        // Border light sweep
+        itemData.forEach(d => {
+            if (!d.item.classList.contains('open')) { d.sweeping = false; return; }
+            const cardH = d.bottom - d.top;
+            const partY = t * tlH;
+            const inCard = partY >= d.top - 30 && partY <= d.top + 60;
+
+            if (inCard && !d.sweeping) {
+                d.sweeping = true;
+                const glowEl = d.item.querySelector('.tl-border-light');
+                if (glowEl) {
+                    const speed = tlH / (DURATION / 1000);
+                    const sweepDur = (cardH / speed) + 0.4;
+                    glowEl.style.setProperty('--sweep-duration', sweepDur.toFixed(2) + 's');
+                    glowEl.classList.remove('sweeping');
+                    void glowEl.offsetHeight;
+                    glowEl.classList.add('sweeping');
+                }
+            } else if (!inCard && d.sweeping && (partY > d.bottom + 100 || partY < d.top - 100)) {
+                d.sweeping = false;
+            }
+        });
+
+        // Energize dots
+        const nowEnergized = new Set();
+        if (dotData.length) {
+            dotData.forEach(({ marker, progress }) => {
+                const hit = Math.abs(t - progress) < 0.046;
+                if (hit) nowEnergized.add(marker);
+                const wasOn = prevEnergized.has(marker);
+                if (hit && !wasOn)  marker.classList.add('energized');
+                if (!hit && wasOn)  marker.classList.remove('energized');
+            });
+        }
+        prevEnergized = nowEnergized;
+        requestAnimationFrame(loop);
+    }
+    requestAnimationFrame(loop);
+
+    // Auto-collapse when user scrolls away
+    const section = document.getElementById('experience');
+    if (section) {
+        new IntersectionObserver(entries => {
+            entries.forEach(e => {
+                if (!e.isIntersecting) {
+                    document.querySelectorAll('#tl-exp .tl-item.open').forEach(i => i.classList.remove('open'));
+                    setTimeout(cachePositions, 1000);
+                }
+            });
+        }, { threshold: 0.05 }).observe(section);
+    }
+})();
 
 // =========================================================
 // RÉSEAU DE NEURONES 3D (Three.js)
@@ -958,9 +1098,10 @@ const translations = {
         'skills.japanese.name': 'Japonais',
         'skills.driving': 'Permis B - Véhiculé',
         // Experience
+        'exp.hint': '<i class="fas fa-chevron-down"></i> Voir les détails',
         'exp.title': 'Expérience',
         'exp.dassault.date': 'Mars 2025 - Sept 2025 (6 mois)',
-        'exp.dassault.role': 'Stagiaire Data Scientist – Intelligence Artificielle',
+        'exp.dassault.role': 'Stagiaire Data &amp; IA Scientist',
         'exp.dassault.desc': '<li>Développement et déploiement de solutions IA pour améliorer la performance de la Direction des Achats.</li><li>Mise en place de modèles de classification (arbres de décision, gradient boosting, réseaux de neurones), extraction de données via OCR, et développement de programmes pour simplifier les processus.</li><li>Travail sur des projets LLM, notamment la mise en œuvre de systèmes RAG (et auto-RAG) pour faciliter l\'accès à l\'information et optimiser la prise de décision.</li><li>Outil conteneurisé et déployé via Docker, avec une interface simple (Streamlit) accessible via navigateur web.</li><li>Web scraping (avec Selenium) pour alimenter les bases de connaissances.</li><li>Présentation des résultats dans Power BI lié aux données Dassault via des requêtes SQL.</li>',
         'exp.mgf.date': 'Mai 2024 - Août 2024 (3 mois)',
         'exp.mgf.role': 'Stagiaire Ingénieur Conception CAO',
