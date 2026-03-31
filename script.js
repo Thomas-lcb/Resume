@@ -37,9 +37,12 @@ function smoothScrollTo(targetId) {
 // =========================================================
 
 // Click expand / collapse (new tl-* system — experience)
-document.querySelectorAll('.tl-item').forEach(item => {
+const tlItems = document.querySelectorAll('.tl-item');
+tlItems.forEach(item => {
     item.querySelector('.tl-card').addEventListener('click', () => {
-        item.classList.toggle('open');
+        const isOpen = item.classList.contains('open');
+        tlItems.forEach(i => i.classList.remove('open'));
+        if (!isOpen) item.classList.add('open');
     });
 });
 
@@ -87,10 +90,12 @@ document.querySelectorAll('.timeline-item').forEach(item => {
 
     let dotData = [];
     let itemData = [];
+    let cachedTlH = 0;
 
     function cachePositions() {
+        cachedTlH = tlEl.offsetHeight;
         const tlAbs = tlEl.getBoundingClientRect().top + window.scrollY;
-        const tlH   = tlEl.offsetHeight;
+        const tlH   = cachedTlH;
         dotData = Array.from(document.querySelectorAll('#tl-exp .tl-marker')).map(marker => {
             const dot   = marker.querySelector('.tl-dot');
             const dRect = dot.getBoundingClientRect();
@@ -111,7 +116,10 @@ document.querySelectorAll('.timeline-item').forEach(item => {
     setTimeout(cachePositions, 300);
     window.addEventListener('resize', cachePositions);
     document.querySelectorAll('#tl-exp .tl-item').forEach(item => {
-        item.addEventListener('click', () => setTimeout(cachePositions, 1000));
+        item.addEventListener('click', () => {
+            setTimeout(cachePositions, 500);
+            setTimeout(cachePositions, 1100);
+        });
     });
 
     const t0 = performance.now();
@@ -119,7 +127,7 @@ document.querySelectorAll('.timeline-item').forEach(item => {
 
     function loop(now) {
         const elapsed = now - t0;
-        const tlH = tlEl.offsetHeight;
+        const tlH = cachedTlH || tlEl.offsetHeight;
 
         // Move particle
         const t = (elapsed / DURATION) % 1;
@@ -1101,7 +1109,7 @@ const translations = {
         'exp.hint': '<i class="fas fa-chevron-down"></i> Voir les détails',
         'exp.title': 'Expérience',
         'exp.dassault.date': 'Mars 2025 - Sept 2025 (6 mois)',
-        'exp.dassault.role': 'Stagiaire Data &amp; IA Scientist',
+        'exp.dassault.role': 'Stagiaire Data Scientist – Intelligence Artificielle',
         'exp.dassault.desc': '<li>Développement et déploiement de solutions IA pour améliorer la performance de la Direction des Achats.</li><li>Mise en place de modèles de classification (arbres de décision, gradient boosting, réseaux de neurones), extraction de données via OCR, et développement de programmes pour simplifier les processus.</li><li>Travail sur des projets LLM, notamment la mise en œuvre de systèmes RAG (et auto-RAG) pour faciliter l\'accès à l\'information et optimiser la prise de décision.</li><li>Outil conteneurisé et déployé via Docker, avec une interface simple (Streamlit) accessible via navigateur web.</li><li>Web scraping (avec Selenium) pour alimenter les bases de connaissances.</li><li>Présentation des résultats dans Power BI lié aux données Dassault via des requêtes SQL.</li>',
         'exp.mgf.date': 'Mai 2024 - Août 2024 (3 mois)',
         'exp.mgf.role': 'Stagiaire Ingénieur Conception CAO',
