@@ -431,299 +431,250 @@
 
     <section id="education">
         <h2 class="section-title reveal" data-i18n="edu.title">Education</h2>
-        <div class="timeline reveal">
+        <div class="edu-list reveal" id="edu-list">
 
-            <div class="timeline-item">
-                <div class="timeline-marker">
-                    <svg class="hex-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-                        <polygon points="50 5, 95 27.5, 95 72.5, 50 95, 5 72.5, 5 27.5" />
-                    </svg>
-                </div>
-                <div class="timeline-content">
-                    <div class="card-header">
-                        <div class="company-group">
-                            <span class="company-name">École Nationale Supérieure des Mines de Saint-Étienne</span>
-                            <a href="https://www.linkedin.com/school/mines-st-etienne/" target="_blank"
-                                class="linkedin-link" title="View on LinkedIn" onclick="event.stopPropagation()">
-                                <i class="fab fa-linkedin"></i>
-                            </a>
+            <!-- ══ MINES · odd (left-lean) ══ -->
+            <div class="edu-item" style="--ac:var(--c1);--ac-rgb:var(--c1-rgb)">
+                <div class="edu-card">
+                    <div class="edu-glass">
+                        <div class="edu-year-mark">2022–2025</div>
+
+                        <p class="edu-role" data-i18n="edu.mines.role">Major in Data Science & AI - Mechanics Option (MSc in Engineering)</p>
+                        <div class="edu-company-row">
+                            <h3 class="edu-company">École Nationale Supérieure des Mines de Saint-Étienne</h3>
+                            <a href="https://www.linkedin.com/school/mines-st-etienne/" target="_blank" class="edu-li" onclick="event.stopPropagation()"><i class="fab fa-linkedin"></i></a>
                         </div>
-                        <span class="date" data-i18n="edu.mines.date">September 2022 - October 2025</span>
+                        <div class="edu-meta">
+                            <span class="edu-meta-item"><i class="fas fa-location-dot"></i> Saint-Étienne</span>
+                            <span class="edu-date"><i class="fas fa-calendar-days"></i> <span data-i18n="edu.mines.date">September 2022 - October 2025</span></span>
+                        </div>
+                        <div class="edu-div"></div>
+                        <span class="edu-hint"><i class="fas fa-chevron-down"></i> <span data-i18n="exp.hint">View details</span></span>
+                        <div class="edu-body"><div class="edu-body-inner">
+                            <div class="edu-desc" data-i18n-html="edu.mines.desc">
+                                <strong>3rd Year – Data Science Major:</strong><br>
+                                Courses: Probabilistic foundations, statistical learning, machine learning, metamodeling and
+                                optimization, artificial intelligence.<br>
+                                Projects: Pedestrian detection for Thales via ML, reconstruction of radiation-noised images
+                                using deep learning.<br><br>
+
+                                <strong>2nd Year:</strong><br>
+                                Courses: Semester at Seoul National University, transition management.<br>
+                                Electives: Entrepreneurship, economics, design thinking.<br>
+                                Project: CAD design of an autonomous production and breeding module.<br><br>
+
+                                <strong>1st Year – Core Curriculum:</strong><br>
+                                Courses: Physics (materials, thermodynamics, fluid mechanics, continuum mechanics), Computer
+                                Science (C, Java, Python, SQL, algorithms), Mathematics (statistics, OR, signal processing),
+                                marketing, economics, corporate law, sustainable development.<br>
+                                Projects: Solar power plant study (PRO II software), mechanical energy vehicle design, app
+                                creation for HPSE charity.
+                            </div>
+                            <div class="edu-tags">
+                                <span class="edu-tag">Machine Learning</span>
+                                <span class="edu-tag">Deep Learning</span>
+                                <span class="edu-tag">Python</span>
+                                <span class="edu-tag">Data Science</span>
+                                <span class="edu-tag">Statistics</span>
+                                <span class="edu-tag">SolidWorks</span>
+                            </div>
+                        </div></div>
                     </div>
-                    <span class="role" data-i18n="edu.mines.role">Major in Data Science & AI - Mechanics Option (MSc in
-                        Engineering)</span>
-                    <div class="description" style="color: var(--text-dim);" data-i18n-html="edu.mines.desc">
-                        <strong>3rd Year – Data Science Major:</strong><br>
-                        Courses: Probabilistic foundations, statistical learning, machine learning, metamodeling and
-                        optimization, artificial intelligence.<br>
-                        Projects: Pedestrian detection for Thales via ML, reconstruction of radiation-noised images
-                        using deep learning.<br><br>
-
-                        <strong>2nd Year:</strong><br>
-                        Courses: Semester at Seoul National University, transition management.<br>
-                        Electives: Entrepreneurship, economics, design thinking.<br>
-                        Project: CAD design of an autonomous production and breeding module.<br><br>
-
-                        <strong>1st Year – Core Curriculum:</strong><br>
-                        Courses: Physics (materials, thermodynamics, fluid mechanics, continuum mechanics), Computer
-                        Science (C, Java, Python, SQL, algorithms), Mathematics (statistics, OR, signal processing),
-                        marketing, economics, corporate law, sustainable development.<br>
-                        Projects: Solar power plant study (PRO II software), mechanical energy vehicle design, app
-                        creation for HPSE charity.
+                    <div class="edu-pillar">
+                        <i class="fas fa-graduation-cap edu-pillar-icon"></i>
+                        <span class="edu-pillar-label">Mines</span>
                     </div>
                 </div>
             </div>
 
-            <div class="timeline-item">
-                <div class="timeline-marker">
-                    <svg class="hex-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-                        <polygon points="50 5, 95 27.5, 95 72.5, 50 95, 5 72.5, 5 27.5" />
-                    </svg>
-                </div>
-                <div class="timeline-content">
-                    <div class="card-header">
-                        <div class="company-group">
-                            <span class="company-name">Seoul National University (South Korea)</span>
-                            <a href="https://www.linkedin.com/school/seoulnational-university/" target="_blank"
-                                class="linkedin-link" title="View on LinkedIn" onclick="event.stopPropagation()">
-                                <i class="fab fa-linkedin"></i>
-                            </a>
-                        </div>
-                        <span class="date" data-i18n="edu.snu.date">September 2023 - January 2024</span>
+            <!-- ══ SNU · even (right-lean) ══ -->
+            <div class="edu-item" style="--ac:var(--c2);--ac-rgb:var(--c2-rgb)">
+                <div class="edu-card">
+                    <div class="edu-pillar">
+                        <i class="fas fa-earth-asia edu-pillar-icon"></i>
+                        <span class="edu-pillar-label">SNU</span>
                     </div>
-                    <span class="role" data-i18n="edu.snu.role">International Exchange (6 months)</span>
-                    <div class="description" style="color: var(--text-dim);" data-i18n-html="edu.snu.desc">Academic
-                        exchange semester in the
-                        Mechanical Engineering department:<br>
-                        - Numerical analysis in mechanical engineering<br>
-                        - Robot mechanics<br>
-                        - Market finance</div>
+                    <div class="edu-glass">
+                        <div class="edu-year-mark">2023–2024</div>
+
+                        <p class="edu-role" data-i18n="edu.snu.role">International Exchange (6 months)</p>
+                        <div class="edu-company-row">
+                            <h3 class="edu-company">Seoul National University (South Korea)</h3>
+                            <a href="https://www.linkedin.com/school/seoulnational-university/" target="_blank" class="edu-li" onclick="event.stopPropagation()"><i class="fab fa-linkedin"></i></a>
+                        </div>
+                        <div class="edu-meta">
+                            <span class="edu-meta-item"><i class="fas fa-location-dot"></i> Seoul, South Korea</span>
+                            <span class="edu-date"><i class="fas fa-calendar-days"></i> <span data-i18n="edu.snu.date">September 2023 - January 2024</span></span>
+                        </div>
+                        <div class="edu-div"></div>
+                        <span class="edu-hint"><i class="fas fa-chevron-down"></i> <span data-i18n="exp.hint">View details</span></span>
+                        <div class="edu-body"><div class="edu-body-inner">
+                            <div class="edu-desc" data-i18n-html="edu.snu.desc">Academic
+                                exchange semester in the
+                                Mechanical Engineering department:<br>
+                                - Numerical analysis in mechanical engineering<br>
+                                - Robot mechanics<br>
+                                - Market finance</div>
+                            <div class="edu-tags">
+                                <span class="edu-tag">Numerical Analysis</span>
+                                <span class="edu-tag">Robotics</span>
+                                <span class="edu-tag">Finance</span>
+                                <span class="edu-tag">International</span>
+                            </div>
+                        </div></div>
+                    </div>
                 </div>
             </div>
 
-            <div class="timeline-item">
-                <div class="timeline-marker">
-                    <svg class="hex-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-                        <polygon points="50 5, 95 27.5, 95 72.5, 50 95, 5 72.5, 5 27.5" />
-                    </svg>
-                </div>
-                <div class="timeline-content">
-                    <div class="card-header">
-                        <div class="company-group">
-                            <span class="company-name" data-i18n="edu.vaucanson.name">Lycée Vaucanson Prep School
-                                (Grenoble)</span>
-                            <a href="https://www.linkedin.com/school/lycee-vaucanson/" target="_blank"
-                                class="linkedin-link" title="View on LinkedIn" onclick="event.stopPropagation()">
-                                <i class="fab fa-linkedin"></i>
-                            </a>
+            <!-- ══ VAUCANSON · odd (left-lean) ══ -->
+            <div class="edu-item" style="--ac:var(--c3);--ac-rgb:var(--c3-rgb)">
+                <div class="edu-card">
+                    <div class="edu-glass">
+                        <div class="edu-year-mark">2020–2022</div>
+                        <p class="edu-role" data-i18n="edu.vaucanson.role">CPGE Scientific Preparatory Classes PTSI-PT*</p>
+                        <div class="edu-company-row">
+                            <h3 class="edu-company" data-i18n="edu.vaucanson.name">Lycée Vaucanson Prep School (Grenoble)</h3>
+                            <a href="https://www.linkedin.com/school/lycee-vaucanson/" target="_blank" class="edu-li" onclick="event.stopPropagation()"><i class="fab fa-linkedin"></i></a>
                         </div>
-                        <span class="date" data-i18n="edu.vaucanson.date">September 2020 - July 2022</span>
+                        <div class="edu-meta">
+                            <span class="edu-meta-item"><i class="fas fa-location-dot"></i> Grenoble</span>
+                            <span class="edu-date"><i class="fas fa-calendar-days"></i> <span data-i18n="edu.vaucanson.date">September 2020 - July 2022</span></span>
+                        </div>
+                        <div class="edu-div"></div>
+                        <span class="edu-hint"><i class="fas fa-chevron-down"></i> <span data-i18n="exp.hint">View details</span></span>
+                        <div class="edu-body"><div class="edu-body-inner">
+                            <div class="edu-desc" data-i18n-html="edu.vaucanson.desc">
+                                Fundamentals in engineering fields
+                                (Mathematics, Physics, Engineering Sciences, Computer Science) to prepare for competitive
+                                entrance exams for French "Grandes Écoles".</div>
+                            <div class="edu-tags">
+                                <span class="edu-tag">Mathematics</span>
+                                <span class="edu-tag">Physics</span>
+                                <span class="edu-tag">Engineering Sciences</span>
+                                <span class="edu-tag">Computer Science</span>
+                                <span class="edu-tag">Algorithms</span>
+                            </div>
+                        </div></div>
                     </div>
-                    <span class="role" data-i18n="edu.vaucanson.role">CPGE Scientific Preparatory Classes
-                        PTSI-PT*</span>
-                    <div class="description" style="color: var(--text-dim);" data-i18n-html="edu.vaucanson.desc">
-                        Fundamentals in engineering fields
-                        (Mathematics, Physics, Engineering Sciences, Computer Science) to prepare for competitive
-                        entrance exams for French "Grandes Écoles".</div>
+                    <div class="edu-pillar">
+                        <i class="fas fa-book-open edu-pillar-icon"></i>
+                        <span class="edu-pillar-label">Prépa PT*</span>
+                    </div>
                 </div>
             </div>
 
         </div>
     </section>
 
-    <section id="projects">
-        <h2 class="section-title reveal" data-i18n="proj.title">Projects</h2>
-        <div class="timeline reveal">
-            <div class="timeline-item">
-                <div class="timeline-marker">
-                    <svg class="hex-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-                        <polygon points="50 5, 95 27.5, 95 72.5, 50 95, 5 72.5, 5 27.5" />
-                    </svg>
-                </div>
-                <div class="timeline-content">
-                    <div class="card-header">
-                        <div class="company-group">
-                            <span class="company-name">Personal Project | Paris</span>
-                            <a href="https://github.com/Thomas-lcb" target="_blank" class="linkedin-link"
-                                title="View on GitHub" onclick="event.stopPropagation()">
-                                <i class="fab fa-github"></i>
-                            </a>
-                        </div>
-                        <span class="date" data-i18n="proj.music.date">May 2025 - Present</span>
-                    </div>
-                    <span class="role" data-i18n="proj.music.role">Music Recommendation App (Dev & AI)</span>
-                    <ul class="description" data-i18n-html="proj.music.desc">
-                        <li>Development in React (with Expo), backend setup, and testing of recommendation algorithms
-                            (similarity, clustering).
-                            Reflection on UI/UX and implementation of the complete recommendation system.
-                            Management of app cache/data and data pipelines.</li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="timeline-item">
-                <div class="timeline-marker">
-                    <svg class="hex-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-                        <polygon points="50 5, 95 27.5, 95 72.5, 50 95, 5 72.5, 5 27.5" />
-                    </svg>
-                </div>
-                <div class="timeline-content">
-                    <div class="card-header">
-                        <div class="company-group">
-                            <span class="company-name">Personal Project | Paris</span>
-                            <a href="https://github.com/Thomas-lcb/Deep-Reinforcemen-tLearning-Trading-Agent"
-                                target="_blank" class="linkedin-link" title="View on GitHub"
-                                onclick="event.stopPropagation()">
-                                <i class="fab fa-github"></i>
-                            </a>
-                        </div>
-                        <span class="date" data-i18n="proj.trading.date">January 2026 - Present</span>
-                    </div>
-                    <span class="role" data-i18n="proj.trading.role">Autonomous Crypto Trading Agent (Deep Reinforcement
-                        Learning)</span>
-                    <ul class="description" data-i18n-html="proj.trading.desc">
-                        <li>Design and development of an autonomous trading agent using Deep Reinforcement Learning
-                            (PPO/SAC, PyTorch, Stable-Baselines3).</li>
-                        <li>Construction of a custom Gym environment with continuous action space, multi-asset support
-                            (10 crypto pairs), and domain randomization.</li>
-                        <li>Implementation of a multi-component reward function (log-return, drawdown penalty, trend
-                            alignment, unrealized PnL).</li>
-                        <li>Data pipeline with multi-timeframe feature engineering (1H/4H/1D/1W), rolling z-score
-                            normalization, and sentiment integration.</li>
-                        <li>Progressive training via curriculum learning with GPU-optimized batch processing (CUDA).
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="timeline-item">
-                <div class="timeline-marker">
-                    <svg class="hex-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-                        <polygon points="50 5, 95 27.5, 95 72.5, 50 95, 5 72.5, 5 27.5" />
-                    </svg>
-                </div>
-                <div class="timeline-content">
-                    <div class="card-header">
-                        <div class="company-group">
-                            <span class="company-name">EMSE | Saint-Étienne</span>
-                            <a href="https://www.linkedin.com/school/mines-st-etienne/" target="_blank"
-                                class="linkedin-link" title="View on LinkedIn" onclick="event.stopPropagation()">
-                                <i class="fab fa-linkedin"></i>
-                            </a>
-                        </div>
-                        <span class="date" data-i18n="proj.research.date">January 2025 - March 2025</span>
-                    </div>
-                    <span class="role" data-i18n="proj.research.role">Research Project (École des Mines)</span>
-                    <ul class="description" data-i18n-html="proj.research.desc">
-                        <li>Development and training of a deep learning model to denoise images damaged by ionizing
-                            radiation (nuclear reactor).
-                            Use of encoder-decoder networks and noise reproduction to generate training data.
-                            Drafting of a research paper and poster to present results.
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="timeline-item">
-                <div class="timeline-marker">
-                    <svg class="hex-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-                        <polygon points="50 5, 95 27.5, 95 72.5, 50 95, 5 72.5, 5 27.5" />
-                    </svg>
-                </div>
-                <div class="timeline-content">
-                    <div class="card-header">
-                        <div class="company-group">
-                            <span class="company-name">Thales | Saint-Étienne</span>
-                            <a href="https://www.linkedin.com/company/thales/" target="_blank" class="linkedin-link"
-                                title="View on LinkedIn" onclick="event.stopPropagation()">
-                                <i class="fab fa-linkedin"></i>
-                            </a>
-                        </div>
-                        <span class="date" data-i18n="proj.thales.date">Sept 2024 - Jan 2025</span>
-                    </div>
-                    <span class="role" data-i18n="proj.thales.role">Industrial Project (École des Mines)</span>
-                    <ul class="description" data-i18n-html="proj.thales.desc">
-                        <li>Training of a constrained image classification AI for infrared pedestrian detection.
-                            Benchmarking existing models and training CNN models using TensorFlow and PyTorch (MobileNet
-                            and YOLO). Testing and analysis of evaluation and training metrics.
-                            Model training on Linux cluster with GPU resource management.
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="timeline-item">
-                <div class="timeline-marker">
-                    <svg class="hex-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-                        <polygon points="50 5, 95 27.5, 95 72.5, 50 95, 5 72.5, 5 27.5" />
-                    </svg>
-                </div>
-                <div class="timeline-content">
-                    <div class="card-header">
-                        <div class="company-group">
-                            <span class="company-name">Fermavers | Saint-Étienne</span>
-                            <a href="https://www.linkedin.com/company/fermavers/" target="_blank" class="linkedin-link"
-                                title="View on LinkedIn" onclick="event.stopPropagation()">
-                                <i class="fab fa-linkedin"></i>
-                            </a>
-                        </div>
-                        <span class="date" data-i18n="proj.fermavers.date">February 2024 - June 2024</span>
-                    </div>
-                    <span class="role" data-i18n="proj.fermavers.role">PRICE Program (École des Mines)</span>
-                    <ul class="description" data-i18n-html="proj.fermavers.desc">
-                        <li>Development of a Black Soldier Fly larvae breeding tool for organic waste valorization into
-                            protein.
-                            Module design in CAD (Inventor), and resource flow management for larvae welfare.
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="timeline-item">
-                <div class="timeline-marker">
-                    <svg class="hex-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-                        <polygon points="50 5, 95 27.5, 95 72.5, 50 95, 5 72.5, 5 27.5" />
-                    </svg>
-                </div>
-                <div class="timeline-content">
-                    <div class="card-header">
-                        <div class="company-group">
-                            <span class="company-name">HEPSE | Saint-Étienne</span>
-                        </div>
-                        <span class="date" data-i18n="proj.hepse.date">September 2022 - May 2023</span>
-                    </div>
-                    <span class="role" data-i18n="proj.hepse.role">Civic Project (École des Mines)</span>
-                    <ul class="description" data-i18n-html="proj.hepse.desc">
-                        <li>Development of an application to promote Saint-Étienne's heritage via an interactive
-                            treasure hunt throughout the city.
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="timeline-item">
-                <div class="timeline-marker">
-                    <svg class="hex-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-                        <polygon points="50 5, 95 27.5, 95 72.5, 50 95, 5 72.5, 5 27.5" />
-                    </svg>
-                </div>
-                <div class="timeline-content">
-                    <div class="card-header">
-                        <div class="company-group">
-                            <span class="company-name">TIPE (CPGE) | Grenoble</span>
-                        </div>
-                        <span class="date" data-i18n="proj.tipe.date">September 2020 - July 2022</span>
-                    </div>
-                    <span class="role" data-i18n="proj.tipe.role">Preparatory Class Project (TIPE)</span>
-                    <ul class="description" data-i18n-html="proj.tipe.desc">
-                        <li>Study, simulation, and modeling of an insulin pump and its effect on the human body
-                            (mechanically represented).
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
+    <section id="projects" class="projects-section">
+        <div class="section-header">
+            <h2 class="section-title reveal" data-i18n="proj.title">Projects</h2>
         </div>
+
+        <div id="proj-expand-overlay"></div>
+        <div class="carousel-outer reveal" id="projCarouselOuter">
+            <div class="carousel-track" id="projCarouselTrack">
+
+                <div class="proj-card acc-c1" data-idx="0">
+                    <div class="proj-visual"><canvas class="card-canvas" data-type="trading"></canvas><div class="proj-visual-overlay"></div><span class="proj-type-badge">Deep RL</span><span class="proj-year">2026</span></div>
+                    <div class="proj-body">
+                        <div class="proj-title-row">
+                            <h3 class="proj-title" data-i18n="proj.trading.role">Autonomous Crypto Trading Agent</h3>
+                            <a class="proj-gh-link" href="https://github.com/Thomas-lcb/Deep-Reinforcemen-tLearning-Trading-Agent" target="_blank" onclick="event.stopPropagation()" title="GitHub"><i class="fab fa-github"></i></a>
+                        </div>
+                        <p class="proj-desc-short" data-i18n="proj.trading.short">Agent de trading autonome par Deep RL (PPO/SAC). Environnement Gym custom, 10 crypto-paires, reward multi-composants.</p>
+                        <div class="proj-tags-short"><span class="proj-tag">PPO/SAC</span><span class="proj-tag">PyTorch</span><span class="proj-tag">CUDA</span><span class="proj-tag">SB3</span></div>
+                        <div class="proj-extra"></div>
+                        <div class="proj-expand-hint"><i class="fas fa-chevron-down arrow"></i><span class="hint-expand" data-i18n="proj.hint.expand">See project</span><span class="hint-collapse" data-i18n="proj.hint.collapse">Collapse</span></div>
+                    </div>
+                </div>
+
+                <div class="proj-card acc-c1c2" data-idx="1">
+                    <div class="proj-visual"><canvas class="card-canvas" data-type="music"></canvas><div class="proj-visual-overlay"></div><span class="proj-type-badge">Dev &amp; AI</span><span class="proj-year">2025</span></div>
+                    <div class="proj-body">
+                        <div class="proj-title-row">
+                            <h3 class="proj-title" data-i18n="proj.music.role">Music Recommendation App</h3>
+                            <a class="proj-gh-link" href="https://github.com/Thomas-lcb" target="_blank" onclick="event.stopPropagation()" title="GitHub"><i class="fab fa-github"></i></a>
+                        </div>
+                        <p class="proj-desc-short" data-i18n="proj.music.short">Application mobile de recommandation musicale avec algorithmes de similarité, clustering et pipeline de données complet.</p>
+                        <div class="proj-tags-short"><span class="proj-tag">React/Expo</span><span class="proj-tag">Clustering</span><span class="proj-tag">NLP</span></div>
+                        <div class="proj-extra"></div>
+                        <div class="proj-expand-hint"><i class="fas fa-chevron-down arrow"></i><span class="hint-expand" data-i18n="proj.hint.expand">See project</span><span class="hint-collapse" data-i18n="proj.hint.collapse">Collapse</span></div>
+                    </div>
+                </div>
+
+                <div class="proj-card acc-c2" data-idx="2">
+                    <div class="proj-visual"><canvas class="card-canvas" data-type="noise"></canvas><div class="proj-visual-overlay"></div><span class="proj-type-badge">Computer Vision</span><span class="proj-year">2025</span></div>
+                    <div class="proj-body">
+                        <div class="proj-title-row">
+                            <h3 class="proj-title" data-i18n="proj.research.role">Image Denoising — Nuclear Radiation</h3>
+                            <a class="proj-li-link" href="https://www.linkedin.com/school/mines-st-etienne/" target="_blank" onclick="event.stopPropagation()" title="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                        </div>
+                        <p class="proj-desc-short" data-i18n="proj.research.short">Réseau encodeur-décodeur pour débruiter des images endommagées par rayonnement ionisant (réacteur nucléaire).</p>
+                        <div class="proj-tags-short"><span class="proj-tag">U-Net</span><span class="proj-tag">PyTorch</span><span class="proj-tag">Research</span></div>
+                        <div class="proj-extra"></div>
+                        <div class="proj-expand-hint"><i class="fas fa-chevron-down arrow"></i><span class="hint-expand" data-i18n="proj.hint.expand">See project</span><span class="hint-collapse" data-i18n="proj.hint.collapse">Collapse</span></div>
+                    </div>
+                </div>
+
+                <div class="proj-card acc-c2c3" data-idx="3">
+                    <div class="proj-visual"><canvas class="card-canvas" data-type="detection"></canvas><div class="proj-visual-overlay"></div><span class="proj-type-badge">Computer Vision</span><span class="proj-year">2024</span></div>
+                    <div class="proj-body">
+                        <div class="proj-title-row">
+                            <h3 class="proj-title" data-i18n="proj.thales.role">Pedestrian Detection — Thales</h3>
+                            <a class="proj-li-link" href="https://www.linkedin.com/company/thales/" target="_blank" onclick="event.stopPropagation()" title="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                        </div>
+                        <p class="proj-desc-short" data-i18n="proj.thales.short">Classification infrarouge de piétons sous contraintes embarquées. Benchmark MobileNet/YOLO, cluster Linux GPU.</p>
+                        <div class="proj-tags-short"><span class="proj-tag">YOLO</span><span class="proj-tag">TensorFlow</span><span class="proj-tag">MobileNet</span></div>
+                        <div class="proj-extra"></div>
+                        <div class="proj-expand-hint"><i class="fas fa-chevron-down arrow"></i><span class="hint-expand" data-i18n="proj.hint.expand">See project</span><span class="hint-collapse" data-i18n="proj.hint.collapse">Collapse</span></div>
+                    </div>
+                </div>
+
+                <div class="proj-card acc-c3" data-idx="4">
+                    <div class="proj-visual"><canvas class="card-canvas" data-type="organic"></canvas><div class="proj-visual-overlay"></div><span class="proj-type-badge">CAO</span><span class="proj-year">2024</span></div>
+                    <div class="proj-body">
+                        <div class="proj-title-row">
+                            <h3 class="proj-title" data-i18n="proj.fermavers.role">BSF Larvae Breeding — Fermavers</h3>
+                            <a class="proj-li-link" href="https://www.linkedin.com/company/fermavers/" target="_blank" onclick="event.stopPropagation()" title="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                        </div>
+                        <p class="proj-desc-short" data-i18n="proj.fermavers.short">Module de valorisation de déchets organiques par élevage de larves. Conception CAO Inventor, gestion des flux.</p>
+                        <div class="proj-tags-short"><span class="proj-tag">CAD</span><span class="proj-tag">Systems Design</span><span class="proj-tag">Biotech</span></div>
+                        <div class="proj-extra"></div>
+                        <div class="proj-expand-hint"><i class="fas fa-chevron-down arrow"></i><span class="hint-expand" data-i18n="proj.hint.expand">See project</span><span class="hint-collapse" data-i18n="proj.hint.collapse">Collapse</span></div>
+                    </div>
+                </div>
+
+                <div class="proj-card acc-c3c4" data-idx="5">
+                    <div class="proj-visual"><canvas class="card-canvas" data-type="map"></canvas><div class="proj-visual-overlay"></div><span class="proj-type-badge">Mobile Dev</span><span class="proj-year">2023</span></div>
+                    <div class="proj-body">
+                        <div class="proj-title-row">
+                            <h3 class="proj-title" data-i18n="proj.hepse.role">Heritage App — HEPSE</h3>
+                        </div>
+                        <p class="proj-desc-short" data-i18n="proj.hepse.short">App mobile pour le patrimoine de Saint-Étienne via une chasse au trésor interactive géolocalisée.</p>
+                        <div class="proj-tags-short"><span class="proj-tag">Mobile Dev</span><span class="proj-tag">UI/UX</span><span class="proj-tag">Geolocation</span></div>
+                        <div class="proj-extra"></div>
+                        <div class="proj-expand-hint"><i class="fas fa-chevron-down arrow"></i><span class="hint-expand" data-i18n="proj.hint.expand">See project</span><span class="hint-collapse" data-i18n="proj.hint.collapse">Collapse</span></div>
+                    </div>
+                </div>
+
+                <div class="proj-card acc-c4" data-idx="6">
+                    <div class="proj-visual"><canvas class="card-canvas" data-type="wave"></canvas><div class="proj-visual-overlay"></div><span class="proj-type-badge">Simulation</span><span class="proj-year">2022</span></div>
+                    <div class="proj-body">
+                        <div class="proj-title-row">
+                            <h3 class="proj-title" data-i18n="proj.tipe.role">Insulin Pump — TIPE (CPGE)</h3>
+                        </div>
+                        <p class="proj-desc-short" data-i18n="proj.tipe.short">Étude, simulation et modélisation d'une pompe à insuline et de son effet sur le corps humain représenté mécaniquement.</p>
+                        <div class="proj-tags-short"><span class="proj-tag">Simulation</span><span class="proj-tag">MATLAB</span><span class="proj-tag">Biomedical</span></div>
+                        <div class="proj-extra"></div>
+                        <div class="proj-expand-hint"><i class="fas fa-chevron-down arrow"></i><span class="hint-expand" data-i18n="proj.hint.expand">See project</span><span class="hint-collapse" data-i18n="proj.hint.collapse">Collapse</span></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="carousel-dots" id="projDots"></div>
     </section>
 
     <section id="contact">

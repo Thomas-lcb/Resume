@@ -14,6 +14,28 @@ window.addEventListener('scroll', revealOnScroll);
 revealOnScroll();
 
 function smoothScrollTo(targetId) {
+    // If a project card is expanded, collapse it first then navigate
+    if (typeof window._projCollapseCard === 'function' && typeof window._projExpandedIdx !== 'undefined' && window._projExpandedIdx >= 0) {
+        window._projCollapseCard();
+        setTimeout(() => smoothScrollTo(targetId), 550);
+        return;
+    }
+
+    // Align carousel to the correct edge based on nav direction relative to projects
+    if (targetId !== 'projects' && typeof window._projSnapTo === 'function') {
+        const projEl = document.getElementById('projects');
+        const targetEl = document.getElementById(targetId);
+        if (projEl && targetEl) {
+            const projAbsTop = projEl.getBoundingClientRect().top + window.scrollY;
+            const targetAbsTop = targetEl.getBoundingClientRect().top + window.scrollY;
+            if (targetAbsTop > projAbsTop) {
+                window._projSnapTo(window._projLastIdx);  // below projects → last card
+            } else {
+                window._projSnapTo(0);                    // above projects → first card
+            }
+        }
+    }
+
     const target = document.getElementById(targetId);
     if (!target) return;
     const targetPosition = target.getBoundingClientRect().top + window.scrollY;
@@ -46,12 +68,7 @@ tlItems.forEach(item => {
     });
 });
 
-// Click expand / collapse (legacy — education & projects)
-document.querySelectorAll('.timeline-item').forEach(item => {
-    item.addEventListener('click', () => {
-        item.classList.toggle('expanded');
-    });
-});
+// (Legacy timeline click removed — projects now uses carousel)
 
 // Scroll reveal
 (function() {
@@ -1134,27 +1151,24 @@ const translations = {
         'edu.vaucanson.desc': 'Fondamentaux dans les domaines de l\'ingénierie (Mathématiques, Physique, Sciences de l\'Ingénieur, Informatique) pour préparer les concours d\'entrée aux Grandes Écoles.',
         // Projects
         'proj.title': 'Projets',
-        'proj.music.date': 'Mai 2025 - Présent',
-        'proj.music.role': 'Application de Recommandation Musicale (Dev & IA)',
-        'proj.music.desc': '<li>Développement en React (avec Expo), mise en place du backend, et test d\'algorithmes de recommandation (similarité, clustering). Réflexion UI/UX et implémentation du système complet de recommandation. Gestion du cache/données de l\'app et des pipelines de données.</li>',
-        'proj.trading.date': 'Janvier 2026 - Présent',
-        'proj.trading.role': 'Agent de Trading Crypto Autonome (Deep Reinforcement Learning)',
-        'proj.trading.desc': '<li>Conception et développement d\'un agent de trading autonome utilisant le Deep Reinforcement Learning (PPO/SAC, PyTorch, Stable-Baselines3).</li><li>Construction d\'un environnement Gym personnalisé avec espace d\'action continu, support multi-actifs (10 paires crypto) et randomisation de domaine.</li><li>Implémentation d\'une fonction de récompense multi-composantes (log-return, pénalité de drawdown, alignement de tendance, PnL latent).</li><li>Pipeline de données avec feature engineering multi-timeframe (1H/4H/1D/1W), normalisation z-score glissante et intégration de sentiment.</li><li>Entraînement progressif via curriculum learning avec traitement par batch optimisé GPU (CUDA).</li>',
-        'proj.research.date': 'Janvier 2025 - Mars 2025',
-        'proj.research.role': 'Projet de Recherche (École des Mines)',
-        'proj.research.desc': '<li>Développement et entraînement d\'un modèle de deep learning pour débruiter des images endommagées par des radiations ionisantes (réacteur nucléaire). Utilisation de réseaux encodeur-décodeur et reproduction de bruit pour générer des données d\'entraînement. Rédaction d\'un article de recherche et d\'un poster pour présenter les résultats.</li>',
-        'proj.thales.date': 'Sept 2024 - Jan 2025',
-        'proj.thales.role': 'Projet Industriel (École des Mines)',
-        'proj.thales.desc': '<li>Entraînement d\'une IA de classification d\'images contrainte pour la détection infrarouge de piétons. Benchmarking de modèles existants et entraînement de modèles CNN avec TensorFlow et PyTorch (MobileNet et YOLO). Tests et analyse des métriques d\'évaluation et d\'entraînement. Entraînement des modèles sur cluster Linux avec gestion des ressources GPU.</li>',
-        'proj.fermavers.date': 'Février 2024 - Juin 2024',
-        'proj.fermavers.role': 'Programme PRICE (École des Mines)',
-        'proj.fermavers.desc': '<li>Développement d\'un outil d\'élevage de larves de mouches soldat noires pour la valorisation des déchets organiques en protéines. Conception du module en CAO (Inventor) et gestion des flux de ressources pour le bien-être des larves.</li>',
-        'proj.hepse.date': 'Septembre 2022 - Mai 2023',
-        'proj.hepse.role': 'Projet Civique (École des Mines)',
-        'proj.hepse.desc': '<li>Développement d\'une application pour promouvoir le patrimoine de Saint-Étienne via une chasse au trésor interactive à travers la ville.</li>',
-        'proj.tipe.date': 'Septembre 2020 - Juillet 2022',
-        'proj.tipe.role': 'Projet de Classe Préparatoire (TIPE)',
-        'proj.tipe.desc': '<li>Étude, simulation et modélisation d\'une pompe à insuline et de son effet sur le corps humain (représenté mécaniquement).</li>',
+        'proj.subtitle': 'Des architectures conçues pour la performance et l\'échelle.',
+        'proj.hint.expand': 'Voir le projet',
+        'proj.hint.collapse': 'Réduire',
+        'proj.scroll.hint': 'Scroll ou glisser · Cliquer pour développer',
+        'proj.trading.role': 'Agent de Trading Crypto Autonome',
+        'proj.trading.short': 'Agent de trading autonome par Deep RL (PPO/SAC). Environnement Gym custom, 10 crypto-paires, reward multi-composants.',
+        'proj.music.role': 'Application de Recommandation Musicale',
+        'proj.music.short': 'Application mobile de recommandation musicale avec algorithmes de similarité, clustering et pipeline de données complet.',
+        'proj.research.role': 'Débruitage d\'Images — Radiation Nucléaire',
+        'proj.research.short': 'Réseau encodeur-décodeur pour débruiter des images endommagées par rayonnement ionisant (réacteur nucléaire).',
+        'proj.thales.role': 'Détection de Piétons — Thales',
+        'proj.thales.short': 'Classification infrarouge de piétons sous contraintes embarquées. Benchmark MobileNet/YOLO, cluster Linux GPU.',
+        'proj.fermavers.role': 'Élevage de Larves BSF — Fermavers',
+        'proj.fermavers.short': 'Module de valorisation de déchets organiques par élevage de larves. Conception CAO Inventor, gestion des flux.',
+        'proj.hepse.role': 'App Patrimoine — HEPSE',
+        'proj.hepse.short': 'App mobile pour le patrimoine de Saint-Étienne via une chasse au trésor interactive géolocalisée.',
+        'proj.tipe.role': 'Pompe à Insuline — TIPE (CPGE)',
+        'proj.tipe.short': 'Étude, simulation et modélisation d\'une pompe à insuline et de son effet sur le corps humain représenté mécaniquement.',
         // Contact
         'contact.title': 'Me Contacter / CV',
         'contact.resume': 'Mon CV',
@@ -1263,3 +1277,704 @@ if (currentLang !== 'en') applyLang(currentLang);
 
     fills.forEach(f => io.observe(f));
 })();
+
+// =========================================================
+// EDUCATION CARDS (Accordion + Animations)
+// =========================================================
+
+// Inject card-bg + border-spin into every card
+document.querySelectorAll('#edu-list .edu-card').forEach(card => {
+    const bg   = document.createElement('div'); bg.className   = 'edu-card-bg';     card.prepend(bg);
+    const spin = document.createElement('div'); spin.className = 'edu-border-spin'; card.appendChild(spin);
+});
+
+// Accordion
+const eduItems = document.querySelectorAll('#edu-list .edu-item');
+eduItems.forEach(item => {
+    item.querySelector('.edu-card').addEventListener('click', () => {
+        const isOpen = item.classList.contains('open');
+        eduItems.forEach(i => i.classList.remove('open'));
+        if (!isOpen) item.classList.add('open');
+    });
+});
+
+// Staggered scroll reveal
+(function() {
+    const items = document.querySelectorAll('#edu-list .edu-item');
+    items.forEach((el, i) => { el.style.transitionDelay = `${i * 0.13}s`; });
+    const obs = new IntersectionObserver(entries => {
+        entries.forEach(e => {
+            if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
+        });
+    }, { threshold: .08 });
+    items.forEach(el => setTimeout(() => obs.observe(el), 60));
+    setTimeout(() => items.forEach(el => el.classList.add('visible')), 900);
+})();
+
+// =========================================================
+// PROJECTS CAROUSEL
+// =========================================================
+(function() {
+    const projOuter = document.getElementById('projCarouselOuter');
+    const projTrack = document.getElementById('projCarouselTrack');
+    const projDotsEl = document.getElementById('projDots');
+    const projOverlay = document.getElementById('proj-expand-overlay');
+    if (!projOuter || !projTrack) return;
+
+    const projCards = Array.from(projTrack.querySelectorAll('.proj-card'));
+    if (!projCards.length) return;
+
+    // ── PROJECT DATA ──
+    const PROJECTS = [
+        { type:'trading', rgb:'56,189,248', accent:'#38bdf8',
+          period:'January 2026 — Present', context:'Personal Project · Paris',
+          periodFr:'Janvier 2026 — Présent', contextFr:'Projet Personnel · Paris',
+          desc:`<ul>
+            <li>Design and development of an autonomous trading agent using Deep RL (PPO/SAC, PyTorch, Stable-Baselines3).</li>
+            <li>Custom Gym environment: continuous action space, 10 crypto pairs, domain randomization.</li>
+            <li>Multi-component reward: log-return, drawdown penalty, trend alignment, unrealized PnL.</li>
+            <li>Multi-timeframe pipeline (1H/4H/1D/1W), z-score normalization, sentiment integration.</li>
+            <li>Curriculum learning with GPU-optimized batch (CUDA).</li>
+          </ul>`,
+          descFr:`<ul>
+            <li>Conception d'un agent de trading autonome par Deep RL (PPO/SAC, PyTorch, Stable-Baselines3).</li>
+            <li>Environnement Gym custom : espace d'action continu, 10 paires crypto, domain randomization.</li>
+            <li>Reward multi-composants : log-return, drawdown penalty, trend alignment, unrealized PnL.</li>
+            <li>Pipeline multi-timeframes (1H/4H/1D/1W), normalisation z-score, intégration de sentiment.</li>
+            <li>Curriculum learning avec batch GPU-optimisé (CUDA).</li>
+          </ul>`,
+          tags:['PPO/SAC','PyTorch','CUDA','Stable-Baselines3','Gym Env','Curriculum Learning','Multi-Timeframe','Feature Engineering'],
+        },
+        { type:'music', rgb:'167,139,250', accent:'#a78bfa',
+          period:'May 2025 — Present', context:'Personal Project · Paris',
+          periodFr:'Mai 2025 — Présent', contextFr:'Projet Personnel · Paris',
+          desc:`<ul>
+            <li>Complete mobile music recommendation app in React Native (Expo).</li>
+            <li>Recommendation algorithms: cosine similarity, K-Means, DBSCAN.</li>
+            <li>Backend architecture, app cache management and data pipelines.</li>
+            <li>UI/UX design and end-to-end recommendation system implementation.</li>
+          </ul>`,
+          descFr:`<ul>
+            <li>Application mobile de recommandation musicale complète en React Native (Expo).</li>
+            <li>Algorithmes de recommandation : similarité cosinus, K-Means, DBSCAN.</li>
+            <li>Architecture backend, gestion du cache applicatif et pipelines de données.</li>
+            <li>Réflexion UI/UX et implémentation du système de recommandation end-to-end.</li>
+          </ul>`,
+          tags:['React Native','Expo','K-Means','DBSCAN','Cosine Similarity','Data Pipeline','Cache','UI/UX'],
+        },
+        { type:'noise', rgb:'96,165,250', accent:'#60a5fa',
+          period:'January — March 2025', context:'EMSE · Saint-Étienne',
+          periodFr:'Janvier — Mars 2025', contextFr:'EMSE · Saint-Étienne',
+          desc:`<ul>
+            <li>Deep learning model to denoise images damaged by ionizing radiation.</li>
+            <li>U-Net encoder-decoder architecture with skip connections for image reconstruction.</li>
+            <li>Synthetic data generation by reproducing radiation noise.</li>
+            <li>Drafting of a research paper and scientific poster.</li>
+          </ul>`,
+          descFr:`<ul>
+            <li>Modèle deep learning pour débruiter des images endommagées par rayonnement ionisant.</li>
+            <li>Architecture U-Net encodeur-décodeur avec skip connections pour reconstruction d'images.</li>
+            <li>Génération de données synthétiques par reproduction du bruit de radiation.</li>
+            <li>Rédaction d'un article de recherche et d'un poster scientifique.</li>
+          </ul>`,
+          tags:['U-Net','Encoder-Decoder','Skip Connections','PyTorch','Synthetic Data','Research Paper'],
+        },
+        { type:'detection', rgb:'129,140,248', accent:'#818cf8',
+          period:'September 2024 — January 2025', context:'EMSE Project · Saint-Étienne',
+          periodFr:'Septembre 2024 — Janvier 2025', contextFr:'Projet EMSE · Saint-Étienne',
+          desc:`<ul>
+            <li>Constrained image classification AI for infrared pedestrian detection.</li>
+            <li>CNN benchmarking and training: MobileNet and YOLO (TensorFlow / PyTorch).</li>
+            <li>Metrics analysis: mAP, F1, precision/recall.</li>
+            <li>Training on Linux cluster with GPU resource management.</li>
+          </ul>`,
+          descFr:`<ul>
+            <li>IA de classification d'images infrarouge pour la détection de piétons sous contraintes embarquées.</li>
+            <li>Benchmark et entraînement CNN : MobileNet et YOLO (TensorFlow / PyTorch).</li>
+            <li>Analyse des métriques : mAP, F1, précision/rappel.</li>
+            <li>Entraînement sur cluster Linux avec gestion des ressources GPU.</li>
+          </ul>`,
+          tags:['YOLO','MobileNet','TensorFlow','PyTorch','Infrared','GPU Cluster','mAP'],
+        },
+        { type:'organic', rgb:'52,211,153', accent:'#34d399',
+          period:'February — June 2024', context:'PRICE Program · EMSE',
+          periodFr:'Février — Juin 2024', contextFr:'Programme PRICE · EMSE',
+          desc:`<ul>
+            <li>BSF larvae breeding module for organic waste valorization into protein.</li>
+            <li>Modular CAD design (Autodesk Inventor) of an autonomous production module.</li>
+            <li>Resource flow modeling for larval welfare (feeding, humidity, temperature).</li>
+          </ul>`,
+          descFr:`<ul>
+            <li>Module d'élevage de larves BSF pour la valorisation de déchets organiques en protéines.</li>
+            <li>Conception modulaire en CAO (Autodesk Inventor) d'un module de production autonome.</li>
+            <li>Modélisation des flux de ressources pour le bien-être larvaire (alimentation, humidité, T°).</li>
+          </ul>`,
+          tags:['CAD/Inventor','Systems Design','Biotech','Circular Economy','Resource Modeling'],
+        },
+        { type:'map', rgb:'251,191,36', accent:'#fbbf24',
+          period:'September 2022 — May 2023', context:'Civic Project · EMSE',
+          periodFr:'Septembre 2022 — Mai 2023', contextFr:'Projet Civique · EMSE',
+          desc:`<ul>
+            <li>Mobile app for Saint-Étienne heritage: interactive treasure hunt.</li>
+            <li>App architecture and full user experience design.</li>
+            <li>Geolocation, heritage content and gamified progression system.</li>
+          </ul>`,
+          descFr:`<ul>
+            <li>Application mobile pour le patrimoine de Saint-Étienne : chasse au trésor interactive.</li>
+            <li>Conception de l'architecture applicative et de l'expérience utilisateur complète.</li>
+            <li>Géolocalisation, contenus patrimoniaux et système de progression gamifiée.</li>
+          </ul>`,
+          tags:['Mobile Dev','Geolocation','UI/UX Design','Gamification','Cultural Heritage'],
+        },
+        { type:'wave', rgb:'251,113,133', accent:'#fb7185',
+          period:'September 2020 — July 2022', context:'TIPE · Lycée Vaucanson, Grenoble',
+          periodFr:'Septembre 2020 — Juillet 2022', contextFr:'TIPE · Lycée Vaucanson, Grenoble',
+          desc:`<ul>
+            <li>Study, simulation and modeling of an insulin pump and its effect on the human body.</li>
+            <li>Modeling of insulin and glycemic dynamics via differential equations.</li>
+            <li>Numerical implementation and validation under MATLAB/Simulink.</li>
+          </ul>`,
+          descFr:`<ul>
+            <li>Étude, simulation et modélisation d'une pompe à insuline et de son effet sur le corps humain.</li>
+            <li>Modélisation des dynamiques insuliniques et glycémiques par équations différentielles.</li>
+            <li>Implémentation et validation numérique sous MATLAB/Simulink.</li>
+          </ul>`,
+          tags:['Simulation','Modeling','MATLAB','Differential Equations','Biomedical'],
+        },
+    ];
+
+    // ── CANVAS ANIMATIONS ──
+    const CANVAS_W=540, CANVAS_H=240;
+    const projCvObserver = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+            e.target.__visible = e.isIntersecting;
+            if (e.isIntersecting && e.target.__paused && e.target.__loop) {
+                e.target.__paused = false;
+                requestAnimationFrame(e.target.__loop);
+            }
+        });
+    }, { threshold: 0.01 });
+
+    function startProjAnimation(canvas, type, idx){
+        canvas.__stopped=false;
+        canvas.width=CANVAS_W; canvas.height=CANVAS_H;
+        canvas.__visible=true; projCvObserver.observe(canvas);
+        const ctx=canvas.getContext('2d');
+        const card=canvas.closest('.proj-card');
+        const clr=getComputedStyle(card).getPropertyValue('--card-rgb').trim();
+        ({trading:animT,music:animM,noise:animN,detection:animD,organic:animO,map:animA,wave:animW})[type]?.(ctx,CANVAS_W,CANVAS_H,canvas,idx,clr);
+    }
+
+    function animT(ctx,w,h,cv,idx,clr){
+        const bg=ctx.createLinearGradient(0,0,0,h);bg.addColorStop(0,`rgba(${clr},.12)`);bg.addColorStop(1,'#080e1a');
+        const cols=15,cw=(w/cols)*.75;let t=0, candles=[];let curY=h*0.5;
+        for(let i=0;i<cols+2;i++){let op=curY,cl=curY+(Math.random()-.5)*70;if(cl<50)cl=50+Math.random()*20;if(cl>h-50)cl=h-50-Math.random()*20;let hi=Math.max(op,cl)+5+Math.random()*30,lo=Math.min(op,cl)-5-Math.random()*30;if(lo<10)lo=10;if(hi>h-10)hi=h-10;candles.push({op,cl,hi,lo});curY=cl;}
+        (function d(){
+            if(cv.__stopped)return;
+            if(!cv.__visible){cv.__paused=true;cv.__loop=d;return;}cv.__loop=d;
+            ctx.clearRect(0,0,w,h);ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);
+            ctx.strokeStyle=`rgba(${clr},.06)`;ctx.lineWidth=1;
+            for(let y=20;y<h;y+=h/4){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();}
+            for(let x=0;x<w;x+=w/cols){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();}
+            let last=candles[candles.length-1];last.cl+=(Math.random()-.5)*9;if(last.cl<50)last.cl=50;if(last.cl>h-50)last.cl=h-50;last.hi=Math.max(last.hi,Math.max(last.op,last.cl)+2);last.lo=Math.min(last.lo,Math.min(last.op,last.cl)-2);if(last.lo<10)last.lo=10;if(last.hi>h-10)last.hi=h-10;
+            if(t%40===0){let nextOp=last.cl,dY=(Math.random()-.5)*70,nextCl=nextOp+dY;if(nextCl<40)nextCl=40+Math.abs(dY)*.5;if(nextCl>h-40)nextCl=h-40-Math.abs(dY)*.5;let nhi=Math.max(nextOp,nextCl)+5+Math.random()*35,nlo=Math.min(nextOp,nextCl)-5-Math.random()*35;if(nlo<10)nlo=10;if(nhi>h-10)nhi=h-10;candles.push({op:nextOp,cl:nextCl,hi:nhi,lo:nlo});if(candles.length>cols+3)candles.shift();}
+            let offsetX=-(t%40)/40*(w/cols);
+            ctx.beginPath();let ma=[];
+            candles.forEach((c,i)=>{
+                const x=i*(w/cols)+offsetX;if(x<-cw||x>w+cw)return;
+                const isUp=c.cl<=c.op, col=isUp?'rgba(52,211,153,1)':'rgba(251,113,133,1)';
+                const bgCol=isUp?'rgba(52,211,153,.25)':'rgba(251,113,133,.25)';
+                const bodyH=Math.max(5,Math.abs(c.cl-c.op)), bodyY=Math.min(c.cl,c.op);
+                ctx.shadowBlur=12;ctx.shadowColor=col;ctx.fillStyle=bgCol;ctx.strokeStyle=col;ctx.lineWidth=2.5;
+                ctx.beginPath();ctx.moveTo(x,c.hi);ctx.lineTo(x,c.lo);ctx.stroke();
+                ctx.fillRect(x-cw/2,bodyY,cw,bodyH);ctx.strokeRect(x-cw/2,bodyY,cw,bodyH);ctx.shadowBlur=0;
+                let sum=0,cnt=0;for(let j=Math.max(0,i-3);j<=i;j++){sum+=candles[j].cl;cnt++;}ma.push({x:x,y:sum/cnt});
+            });
+            if(ma.length>0){ctx.beginPath();ma.forEach((pt,i)=>i===0?ctx.moveTo(pt.x,pt.y):ctx.lineTo(pt.x,pt.y));ctx.strokeStyle=`rgba(${clr},0.9)`;ctx.lineWidth=3.5;ctx.shadowBlur=15;ctx.shadowColor=`rgba(${clr},1)`;ctx.stroke();ctx.shadowBlur=0;}
+            const fade=ctx.createLinearGradient(0,h-40,0,h);fade.addColorStop(0,'transparent');fade.addColorStop(1,'#080e1a');
+            ctx.fillStyle=fade;ctx.fillRect(0,h-40,w,40);
+            t++;requestAnimationFrame(d);
+        })();
+    }
+    function animM(ctx,w,h,cv,idx,clr){
+        const bg=ctx.createLinearGradient(0,0,0,h);bg.addColorStop(0,`rgba(${clr},.14)`);bg.addColorStop(1,'#080818');
+        const num=40,bw=w/num;
+        const bars=Array.from({length:num},(_,i)=>({x:i*bw+bw*.1,w:bw*.8,ph:i*.15,fr:.05+Math.random()*.03}));
+        let t=0;(function d(){
+            if(cv.__stopped)return;
+            if(!cv.__visible){cv.__paused=true;cv.__loop=d;return;}cv.__loop=d;
+            ctx.clearRect(0,0,w,h);ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);
+            bars.forEach(b=>{
+                let env=Math.sin(b.x/w*Math.PI), amp=Math.max(0.1,Math.abs(Math.sin(t*b.fr+b.ph))*Math.abs(Math.cos(t*.02+b.ph*2)))*env, bh=amp*h*0.45;
+                const g=ctx.createLinearGradient(0,h*.55-bh,0,h*.55+bh);g.addColorStop(0,`rgba(${clr},1)`);g.addColorStop(0.5,`rgba(${clr},0.2)`);g.addColorStop(1,`rgba(${clr},0.7)`);
+                ctx.fillStyle=g;ctx.shadowBlur=amp*15;ctx.shadowColor=`rgba(${clr},1)`;
+                ctx.beginPath();ctx.roundRect(b.x,h*.55-bh,b.w,bh*2,[2]);ctx.fill();
+            });
+            ctx.shadowBlur=0;ctx.beginPath();
+            for(let x=0;x<w;x++){let y=h*.55+Math.sin(x*.02+t*.04)*25*Math.sin(x*Math.PI/w);x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}
+            ctx.strokeStyle='rgba(255,255,255,0.4)';ctx.lineWidth=1.5;ctx.stroke();
+            t++;requestAnimationFrame(d);
+        })();
+    }
+    function animN(ctx,w,h,cv,idx,clr){
+        const bg=ctx.createLinearGradient(0,0,w,h);bg.addColorStop(0,`rgba(${clr},.11)`);bg.addColorStop(1,'#0a0e1a');
+        let t=0;
+        const cn=[];for(let r=0;r<6;r++){let rd=20+r*20,c=12+r*8;for(let i=0;i<c;i++)cn.push({x:w/2+Math.cos(i*(Math.PI*2/c)+r*.2)*rd,y:h/2+Math.sin(i*(Math.PI*2/c)+r*.2)*rd*0.6,r:1.5});}
+        (function d(){
+            if(cv.__stopped)return;
+            if(!cv.__visible){cv.__paused=true;cv.__loop=d;return;}cv.__loop=d;
+            ctx.clearRect(0,0,w,h);ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);
+            let sX=(t*1.5)%(w*1.5)-w*.2;
+            ctx.strokeStyle=`rgba(${clr},.2)`;ctx.lineWidth=1;
+            cn.forEach(n=>{if(n.x>sX)return;
+                ctx.shadowBlur=8;ctx.shadowColor=`rgba(${clr},1)`;ctx.fillStyle=`rgba(${clr},.9)`;
+                ctx.beginPath();ctx.arc(n.x,n.y,n.r,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
+                if(Math.random()<.03){ctx.beginPath();ctx.moveTo(w/2,h/2);ctx.lineTo(n.x,n.y);ctx.stroke();}
+            });
+            if(w/2<=sX){
+                ctx.shadowBlur=20;ctx.shadowColor=`rgba(${clr},1)`;
+                const gr=ctx.createRadialGradient(w/2,h/2,0,w/2,h/2,15);
+                gr.addColorStop(0,'rgba(255,255,255,.9)');gr.addColorStop(1,'transparent');
+                ctx.fillStyle=gr;ctx.beginPath();ctx.arc(w/2,h/2,15,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
+            }
+            for(let i=0;i<400;i++){
+                let nx=Math.random()*w,ny=Math.random()*h;if(nx<=sX)continue;
+                let intense=Math.hypot(nx-w/2,ny-h/2)<130?Math.random()*.5:0;
+                ctx.fillStyle=`rgba(200,220,255,${.15+intense})`;
+                ctx.fillRect(nx,ny,1+Math.random()*3,1+Math.random()*2);
+            }
+            const g=ctx.createLinearGradient(sX-40,0,sX,0);g.addColorStop(0,'transparent');g.addColorStop(1,`rgba(${clr},0.8)`);
+            ctx.fillStyle=g;ctx.fillRect(sX-40,0,40,h);
+            ctx.fillStyle='#fff';ctx.shadowBlur=12;ctx.shadowColor=`rgba(${clr},1)`;ctx.fillRect(sX,0,2,h);ctx.shadowBlur=0;
+            t++;requestAnimationFrame(d);
+        })();
+    }
+    function animD(ctx,w,h,cv,idx,clr){
+        const bg=ctx.createLinearGradient(0,0,w,h);bg.addColorStop(0,`rgba(${clr},.10)`);bg.addColorStop(1,'#0a0e1a');
+        const boxes=[{x:w*.15,y:h*.3,w:w*.15,h:h*.4,ph:0},{x:w*.45,y:h*.2,w:w*.2,h:h*.6,ph:2},{x:w*.78,y:h*.4,w:w*.12,h:h*.35,ph:4}];
+        let t=0;(function d(){
+            if(cv.__stopped)return;
+            if(!cv.__visible){cv.__paused=true;cv.__loop=d;return;}cv.__loop=d;
+            ctx.clearRect(0,0,w,h);ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);
+            ctx.strokeStyle=`rgba(${clr},.05)`;ctx.lineWidth=1;
+            for(let x=0;x<w;x+=30){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();}
+            for(let y=0;y<h;y+=30){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();}
+            boxes.forEach(b=>{
+                let act=Math.sin(t*.03+b.ph)>0, a=act?.8:.2, col=`rgba(${clr},${a})`;
+                if(act){const grd=ctx.createRadialGradient(b.x+b.w*.5,b.y+b.h*.5,0,b.x+b.w*.5,b.y+b.h*.5,b.h*.6);grd.addColorStop(0,`rgba(${clr},.25)`);grd.addColorStop(1,'transparent');ctx.fillStyle=grd;ctx.fillRect(b.x,b.y,b.w,b.h);}
+                ctx.strokeStyle=col;ctx.lineWidth=1.5;ctx.shadowBlur=act?8:0;ctx.shadowColor=`rgba(${clr},1)`;
+                const cs=10;[[b.x,b.y,1,1],[b.x+b.w,b.y,-1,1],[b.x,b.y+b.h,1,-1],[b.x+b.w,b.y+b.h,-1,-1]].forEach(([x,y,dx,dy])=>{ctx.beginPath();ctx.moveTo(x+dx*cs,y);ctx.lineTo(x,y);ctx.lineTo(x,y+dy*cs);ctx.stroke();});
+                ctx.shadowBlur=0;
+                if(act){
+                    ctx.fillStyle=col;ctx.font='600 9px sans-serif';ctx.fillText('PERSON: '+(85+Math.round(Math.random()*14))+'%',b.x,b.y-6);
+                    ctx.beginPath();ctx.arc(b.x+b.w*.5+Math.sin(t*.1)*5,b.y+b.h*.5+Math.cos(t*.1)*5,3,0,Math.PI*2);ctx.fill();
+                }
+            });
+            let sY=(t*2)%h;ctx.fillStyle=`rgba(${clr},.5)`;ctx.fillRect(0,sY,w,1);
+            const sg=ctx.createLinearGradient(0,sY-40,0,sY);sg.addColorStop(0,'transparent');sg.addColorStop(1,`rgba(${clr},.15)`);
+            ctx.fillStyle=sg;ctx.fillRect(0,sY-40,w,40);
+            t++;requestAnimationFrame(d);
+        })();
+    }
+    function animO(ctx,w,h,cv,idx,clr){
+        const bg=ctx.createLinearGradient(0,0,w,h);bg.addColorStop(0,`rgba(${clr},.12)`);bg.addColorStop(1,'#080e14');
+        let t=0;
+        (function d(){
+            if(cv.__stopped)return;
+            if(!cv.__visible){cv.__paused=true;cv.__loop=d;return;}cv.__loop=d;
+            ctx.clearRect(0,0,w,h);ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);
+            ctx.strokeStyle=`rgba(${clr},.08)`; ctx.lineWidth=1;
+            for(let x=0;x<w;x+=15){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();}
+            for(let y=0;y<h;y+=15){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();}
+            const cx=w/2, cy=h/2;
+            let ang=t*0.01, radius=60+Math.sin(t*0.05)*5;
+            ctx.shadowBlur=12; ctx.shadowColor=`rgba(${clr},1)`;
+            ctx.strokeStyle=`rgba(${clr},.8)`; ctx.lineWidth=1.5;
+            let pts=[];
+            for(let i=0; i<6; i++) {
+                let a = ang + i*Math.PI/3;
+                pts.push({x: cx + Math.cos(a)*radius, y: cy + Math.sin(a)*radius*0.6});
+            }
+            ctx.beginPath();
+            for(let i=0; i<6; i++) {
+                if(i===0) ctx.moveTo(pts[i].x, pts[i].y);
+                else ctx.lineTo(pts[i].x, pts[i].y);
+            }
+            ctx.closePath(); ctx.stroke();
+            ctx.beginPath();
+            for(let i=0;i<6;i+=2) { ctx.moveTo(cx, cy); ctx.lineTo(pts[i].x, pts[i].y); }
+            ctx.stroke(); ctx.shadowBlur=0;
+            ctx.fillStyle=`rgba(${clr},.5)`; ctx.font='9px monospace';
+            ctx.fillText(`R: ${Math.round(radius)} mm`, cx+70, cy-30);
+            ctx.fillText(`0: ${Math.round((ang*180/Math.PI)%360)} deg`, cx-100, cy+40);
+            ctx.strokeStyle=`rgba(${clr},.3)`;
+            ctx.beginPath(); ctx.moveTo(cx-100, cy); ctx.lineTo(cx+100, cy); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(cx, cy-80); ctx.lineTo(cx, cy+80); ctx.stroke();
+            let edgePhase = (t*0.02) % 6, eIdx = Math.floor(edgePhase), eT = edgePhase - eIdx, nextIdx = (eIdx+1)%6;
+            let px = pts[eIdx].x + (pts[nextIdx].x - pts[eIdx].x)*eT, py = pts[eIdx].y + (pts[nextIdx].y - pts[eIdx].y)*eT;
+            ctx.fillStyle=`rgba(${clr},1)`; ctx.shadowBlur=10; ctx.shadowColor=`rgba(${clr},1)`;
+            ctx.beginPath(); ctx.arc(px,py, 3, 0, Math.PI*2); ctx.fill(); ctx.shadowBlur=0;
+            t++;requestAnimationFrame(d);
+        })();
+    }
+    function animA(ctx,w,h,cv,idx,clr){
+        const bg=ctx.createLinearGradient(0,0,w,h);bg.addColorStop(0,`rgba(${clr},.11)`);bg.addColorStop(1,'#0a0c14');
+        let t=0;const nodes=[{x:w*.2,y:h*.4},{x:w*.35,y:h*.7},{x:w*.5,y:h*.3},{x:w*.7,y:h*.6},{x:w*.85,y:h*.35}];
+        const routes=[[0,1],[1,2],[2,3],[3,4],[0,2],[1,3]];
+        (function d(){
+            if(cv.__stopped)return;
+            if(!cv.__visible){cv.__paused=true;cv.__loop=d;return;}cv.__loop=d;
+            ctx.clearRect(0,0,w,h);ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);
+            ctx.strokeStyle=`rgba(${clr},.03)`;ctx.lineWidth=1;
+            for(let i=10;i<w;i+=40){ctx.beginPath();for(let y=0;y<h;y+=20){let dx=Math.sin(y*.02+i)*15;if(y===0)ctx.moveTo(i+dx,y);else ctx.lineTo(i+dx,y);}ctx.stroke();}
+            routes.forEach(([i,j])=>{
+                const n1=nodes[i],n2=nodes[j],cx=(n1.x+n2.x)/2,cy=(n1.y+n2.y)/2-30;
+                ctx.strokeStyle=`rgba(${clr},.15)`;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(n1.x,n1.y);ctx.quadraticCurveTo(cx,cy,n2.x,n2.y);ctx.stroke();
+                let p=(t*.005+i*.1+j*.2)%1,px=(1-p)*(1-p)*n1.x+2*(1-p)*p*cx+p*p*n2.x,py=(1-p)*(1-p)*n1.y+2*(1-p)*p*cy+p*p*n2.y;
+                ctx.fillStyle=`rgba(${clr},.8)`;ctx.shadowBlur=10;ctx.shadowColor=`rgba(${clr},1)`;ctx.beginPath();ctx.arc(px,py,2,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
+            });
+            nodes.forEach((n,i)=>{
+                let pulse=1+.2*Math.sin(t*.05+i);
+                ctx.fillStyle=`rgba(${clr},.9)`;ctx.beginPath();ctx.arc(n.x,n.y,4,0,Math.PI*2);ctx.fill();
+                ctx.fillStyle=`rgba(${clr},${.3-.3*Math.sin(t*.05+i)})`;ctx.beginPath();ctx.arc(n.x,n.y,12*pulse,0,Math.PI*2);ctx.fill();
+                ctx.fillStyle='rgba(255,255,255,0.8)';ctx.font='10px Arial';ctx.fillText('▼',n.x-4,n.y-6);
+            });
+            t++;requestAnimationFrame(d);
+        })();
+    }
+    function animW(ctx,w,h,cv,idx,clr){
+        const bg=ctx.createLinearGradient(0,0,w,h);bg.addColorStop(0,`rgba(${clr},.13)`);bg.addColorStop(1,'#0c0a14');
+        let t=0;const pts=[];
+        (function d(){
+            if(cv.__stopped)return;
+            if(!cv.__visible){cv.__paused=true;cv.__loop=d;return;}cv.__loop=d;
+            ctx.clearRect(0,0,w,h);ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);
+            ctx.strokeStyle=`rgba(${clr},.05)`;ctx.lineWidth=1;
+            for(let y=0;y<h;y+=20){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();}
+            for(let x=0;x<w;x+=20){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();}
+            const bY=h*.55;let sX=(t*2.5)%w, y=bY;
+            if(sX%160<20)y=bY-15*Math.sin((sX%160)/20*Math.PI);else if(sX%160<40)y=bY+25*Math.sin((sX%160-20)/20*Math.PI);else if(sX%160<60)y=bY-45*Math.sin((sX%160-40)/20*Math.PI);else if(sX%160<80)y=bY+15*Math.sin((sX%160-60)/20*Math.PI);
+            pts.push({x:sX,y:y});if(pts.length>150)pts.shift();
+            if(pts.length>1){for(let i=1;i<pts.length;i++){if(pts[i].x<pts[i-1].x)continue;
+                ctx.beginPath();ctx.moveTo(pts[i-1].x,pts[i-1].y);ctx.lineTo(pts[i].x,pts[i].y);
+                let a=i/pts.length;ctx.strokeStyle=`rgba(${clr},${a})`;ctx.lineWidth=2+a/2;
+                ctx.shadowBlur=10*a;ctx.shadowColor=`rgba(${clr},1)`;ctx.stroke();ctx.shadowBlur=0;
+            }}
+            ctx.fillStyle='#fff';ctx.shadowBlur=12;ctx.shadowColor=`rgba(${clr},1)`;ctx.beginPath();ctx.arc(sX,y,3,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
+            ctx.strokeStyle=`rgba(${clr},0.3)`;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(sX,0);ctx.lineTo(sX,h);ctx.stroke();
+            t++;requestAnimationFrame(d);
+        })();
+    }
+
+    // ── CAROUSEL MECHANICS ──
+    const PROJ_CARD_W=370, PROJ_CARD_GAP=24, PROJ_STEP=PROJ_CARD_W+PROJ_CARD_GAP;
+    const PROJ_NORMAL_H=610, PROJ_EXPANDED_H=730;
+    let projSidePad=0;
+
+    function updateProjSidePad(){
+        projSidePad=Math.max(40,Math.floor((window.innerWidth-PROJ_CARD_W)/2));
+        projTrack.style.paddingLeft  = projSidePad+'px';
+        projTrack.style.paddingRight = projSidePad+'px';
+    }
+    updateProjSidePad();
+    window.addEventListener('resize', updateProjSidePad);
+
+    // Inject smooth grid wrappers
+    projCards.forEach((card)=>{
+        const pDesc = card.querySelector('.proj-desc-short');
+        const pTags = card.querySelector('.proj-tags-short');
+        const pExtra = card.querySelector('.proj-extra');
+
+        const colWrap = document.createElement('div'); colWrap.className = 'proj-grid-collapse-wrapper';
+        const colInner = document.createElement('div'); colInner.className = 'proj-grid-inner';
+        colWrap.appendChild(colInner);
+        pDesc.parentNode.insertBefore(colWrap, pDesc);
+        colInner.appendChild(pDesc);
+        colInner.appendChild(pTags);
+
+        const expWrap = document.createElement('div'); expWrap.className = 'proj-grid-expand-wrapper';
+        const expInner = document.createElement('div'); expInner.className = 'proj-grid-inner';
+        expWrap.appendChild(expInner);
+        pExtra.parentNode.insertBefore(expWrap, pExtra);
+        expInner.appendChild(pExtra);
+    });
+
+    // Dots
+    projCards.forEach((_,i)=>{
+        const d=document.createElement('div');
+        d.className='dot'+(i===0?' active':'');
+        d.addEventListener('click',()=>projSnapTo(i));
+        projDotsEl.appendChild(d);
+    });
+
+    let projPos=0, projTargetX=0, projVelX=0;
+    let projIsDrag=false, projDragStartX=0, projDragStartPos=0, projLastDragX=0, projLastDragT=0, projDragMoved=false;
+    let projActiveIdx=0, projExpandedIdx=-1;
+
+    function projClampPos(p){ return Math.max(-(projCards.length-1)*PROJ_STEP,Math.min(0,p)); }
+    function projGetActiveIdx(){ return Math.max(0,Math.min(projCards.length-1,Math.round(-projPos/PROJ_STEP))); }
+
+    function projUpdateActiveCard(){
+        const idx=projGetActiveIdx();
+        if(idx===projActiveIdx) return;
+        projActiveIdx=idx;
+        projCards.forEach((c,i)=>{ if(projExpandedIdx<0) c.classList.toggle('active',i===idx); });
+        projDotsEl.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
+    }
+
+    function projSnapTo(idx){ projTargetX=projClampPos(-(idx*PROJ_STEP)); projVelX=0; }
+
+    // ── SCROLL-LOCK SYSTEM ──
+    // When the projects section occupies a significant portion of the viewport,
+    // page scrolling is intercepted and drives the carousel instead.
+    // Once the carousel reaches first/last card, the lock releases.
+    const projSection = document.getElementById('projects');
+    let projScrollLocked = false;
+    let projAtStart = true;   // carousel at card 0
+    let projAtEnd = false;    // carousel at last card
+    let projLockCooldown = 0; // prevent immediate re-lock after release
+
+    function projIsInView() {
+        const r = projSection.getBoundingClientRect();
+        const vh = window.innerHeight;
+        // Lock as soon as section enters the viewport (top within lower 80% of screen)
+        return r.top < vh * 0.8 && r.bottom > vh * 0.2;
+    }
+
+    function projScrollToSection() {
+        const r = projSection.getBoundingClientRect();
+        const vh = window.innerHeight;
+        const targetScroll = window.scrollY + r.top - (vh - r.height) / 2;
+        window.scrollTo({ top: Math.max(0, targetScroll), behavior: 'smooth' });
+    }
+
+    function projCheckEdges() {
+        const maxOffset = (projCards.length - 1) * PROJ_STEP;
+        projAtStart = (-projTargetX) <= 2;
+        projAtEnd = (-projTargetX) >= maxOffset - 2;
+    }
+
+    // Global wheel handler for scroll-lock
+    window.addEventListener('wheel', function(e) {
+        if (projExpandedIdx >= 0) return; // expanded card has its own overlay
+        if (Date.now() < projLockCooldown) return; // cooldown after release
+
+        const scrollingDown = e.deltaY > 0;
+        const scrollingUp = e.deltaY < 0;
+
+        if (!projScrollLocked) {
+            // Check if we should lock
+            if (projIsInView()) {
+                // Don't lock if user is scrolling in the direction where carousel is already at edge
+                if (scrollingDown && projAtEnd) return;
+                if (scrollingUp && projAtStart) return;
+                projScrollLocked = true;
+                projScrollToSection();
+            }
+        }
+
+        if (projScrollLocked) {
+            e.preventDefault();
+            projCheckEdges();
+
+            // Release if at edge and user continues scrolling that direction
+            if (scrollingDown && projAtEnd) {
+                projScrollLocked = false;
+                projLockCooldown = Date.now() + 600;
+                return;
+            }
+            if (scrollingUp && projAtStart) {
+                projScrollLocked = false;
+                projLockCooldown = Date.now() + 600;
+                return;
+            }
+
+            // Drive the carousel
+            projVelX -= e.deltaY * 0.35;
+        }
+    }, { passive: false });
+
+    // Release lock if section scrolls out of view (e.g. via keyboard scroll)
+    window.addEventListener('scroll', function() {
+        if (projScrollLocked && !projIsInView()) {
+            projScrollLocked = false;
+        }
+    }, { passive: true });
+
+    // Mouse drag
+    projOuter.addEventListener('mousedown',e=>{
+        if(projExpandedIdx>=0) return;
+        projIsDrag=true; projDragMoved=false;
+        projDragStartX=e.clientX; projDragStartPos=projTargetX; projLastDragX=e.clientX; projLastDragT=performance.now(); projVelX=0;
+        projOuter.classList.add('dragging');
+    });
+    window.addEventListener('mousemove',e=>{
+        if(!projIsDrag) return;
+        if(Math.abs(e.clientX-projDragStartX)>4) projDragMoved=true;
+        projTargetX=projClampPos(projDragStartPos+(e.clientX-projDragStartX));
+        const now=performance.now(); projVelX=(e.clientX-projLastDragX)/Math.max(1,now-projLastDragT)*10;
+        projLastDragX=e.clientX; projLastDragT=now;
+    });
+    window.addEventListener('mouseup',()=>{
+        if(!projIsDrag) return; projIsDrag=false; projOuter.classList.remove('dragging');
+        if(!projDragMoved) return;
+        projSnapTo(Math.max(0,Math.min(projCards.length-1,Math.round(-projTargetX/PROJ_STEP)-Math.sign(projVelX))));
+    });
+
+    // Touch
+    projOuter.addEventListener('touchstart',e=>{
+        if(projExpandedIdx>=0) return;
+        projDragStartX=e.touches[0].clientX; projDragStartPos=projTargetX; projLastDragX=projDragStartX; projLastDragT=performance.now(); projVelX=0; projIsDrag=true; projDragMoved=false;
+    },{passive:true});
+    projOuter.addEventListener('touchmove',e=>{
+        if(!projIsDrag) return;
+        const dx=e.touches[0].clientX-projDragStartX; if(Math.abs(dx)>4) projDragMoved=true;
+        projTargetX=projClampPos(projDragStartPos+dx); const now=performance.now();
+        projVelX=(e.touches[0].clientX-projLastDragX)/Math.max(1,now-projLastDragT)*10; projLastDragX=e.touches[0].clientX; projLastDragT=now;
+    },{passive:true});
+    projOuter.addEventListener('touchend',()=>{
+        projIsDrag=false; if(!projDragMoved) return;
+        projSnapTo(Math.max(0,Math.min(projCards.length-1,Math.round(-projTargetX/PROJ_STEP)-Math.sign(projVelX))));
+    });
+
+    // Main loop
+    const PROJ_LERP=0.1, PROJ_FRICTION=0.75;
+    function projLoop(){
+        if(!projIsDrag && projExpandedIdx<0){
+            projTargetX=projClampPos(projTargetX+projVelX); projVelX*=PROJ_FRICTION;
+            if(Math.abs(projVelX)<.3){
+                projVelX=0;
+                const sn=projClampPos(-(Math.max(0,Math.min(projCards.length-1,Math.round(-projTargetX/PROJ_STEP)))*PROJ_STEP));
+                projTargetX+=(sn-projTargetX)*.06;
+            }
+        }
+        projPos+=(projTargetX-projPos)*PROJ_LERP;
+        projTrack.style.transform=`translateX(${projPos}px)`;
+        projUpdateActiveCard();
+        requestAnimationFrame(projLoop);
+    }
+
+    projCards[0].classList.add('active');
+    projTrack.querySelectorAll('.card-canvas').forEach((c, idx)=>startProjAnimation(c,c.dataset.type, idx));
+    projSnapTo(0);
+    projLoop();
+
+    // ── EXPAND / COLLAPSE ──
+    projOverlay.addEventListener('click', projCollapseCard);
+
+    function projPopulateExtra(card, idx){
+        const extra=card.querySelector('.proj-extra');
+        if(extra.dataset.loaded) return;
+        const p=PROJECTS[idx];
+        const isFr = (typeof currentLang !== 'undefined' && currentLang === 'fr');
+        const desc = isFr && p.descFr ? p.descFr : p.desc;
+        const period = isFr && p.periodFr ? p.periodFr : p.period;
+        const context = isFr && p.contextFr ? p.contextFr : p.context;
+        extra.innerHTML=`
+            <div class="proj-divider-exp"></div>
+            <div class="proj-meta-exp">
+                <span class="proj-meta-item"><i class="fas fa-calendar-alt"></i>${period}</span>
+                <span class="proj-meta-item"><i class="fas fa-map-marker-alt"></i>${context}</span>
+            </div>
+            <div class="proj-desc-full">${desc}</div>
+            <p class="proj-tags-title-exp">Technologies</p>
+            <div class="proj-tags-exp">${p.tags.map(t=>`<span class="proj-tag">${t}</span>`).join('')}</div>
+        `;
+        extra.dataset.loaded='1';
+    }
+
+    function projExpandCard(idx){
+        const card=projCards[idx];
+        projPopulateExtra(card,idx);
+        projExpandedIdx=idx;
+        window._projExpandedIdx = idx;
+
+        // Center expanded card vertically in viewport before locking scroll
+        // card top = outerAbsTop + track_pad(16) + expanded_margin_top(-170) = outerAbsTop - 154
+        // card center = outerAbsTop - 154 + expandedHeight(760)/2 = outerAbsTop + 226
+        const outerAbsTop = projOuter.getBoundingClientRect().top + window.scrollY;
+        const targetScrollY = outerAbsTop + 226 - window.innerHeight / 2;
+        window.scrollTo({ top: Math.max(0, targetScrollY) });
+
+        // Lock body scroll
+        document.body.style.overflow = 'hidden';
+
+        projPos=projClampPos(-(idx*PROJ_STEP));
+        projTargetX=projPos;
+        projTrack.style.transform=`translateX(${projPos}px)`;
+
+        projCards.forEach((c,i)=>{
+            c.classList.toggle('active', i===idx);
+            if(i < idx) { c.classList.add('shift-left'); }
+            else if(i > idx) { c.classList.add('shift-right'); }
+            if(i!==idx){ c.style.opacity='.28'; c.style.filter='blur(2.5px) brightness(0.6)'; }
+        });
+
+        projOverlay.classList.add('active');
+        card.classList.add('expanded');
+        projOuter.style.height=PROJ_EXPANDED_H+'px';
+    }
+
+    function projCollapseCard(){
+        if(projExpandedIdx<0) return;
+        const prevIdx=projExpandedIdx;
+        const card=projCards[prevIdx];
+        card.classList.remove('expanded');
+        projOuter.style.height=PROJ_NORMAL_H+'px';
+
+        // Unlock body scroll
+        document.body.style.overflow = '';
+
+        projPos=projClampPos(-(prevIdx*PROJ_STEP));
+        projTargetX=projPos;
+        projTrack.style.transform=`translateX(${projPos}px)`;
+
+        projCards.forEach(c=>{ 
+            c.style.opacity=''; c.style.filter=''; 
+            c.classList.remove('shift-left', 'shift-right'); 
+        });
+        projOverlay.classList.remove('active');
+        projExpandedIdx=-1;
+        window._projExpandedIdx = -1;
+
+        setTimeout(()=>{
+            const idx=projGetActiveIdx();
+            projCards.forEach((c,i)=>c.classList.toggle('active',i===idx));
+            projDotsEl.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
+        },100);
+    }
+
+    // Expose globally for smoothScrollTo nav integration
+    window._projCollapseCard = projCollapseCard;
+    window._projExpandedIdx = -1;
+    window._projSnapTo = projSnapTo;
+    window._projLastIdx = projCards.length - 1;
+
+    projCards.forEach((card,idx)=>{
+        // Inject spin element
+        const spin = document.createElement('div');
+        spin.className = 'proj-border-spin';
+        card.appendChild(spin);
+
+        card.addEventListener('click',()=>{
+            if(projDragMoved) return;
+            if(projExpandedIdx===idx){ projCollapseCard(); return; }
+            if(projExpandedIdx>=0){ projCollapseCard(); return; }
+            projDoExpand(idx);
+        });
+    });
+
+    function projDoExpand(idx){
+        const alreadyCentered = Math.abs(projPos - projClampPos(-(idx*PROJ_STEP))) < 2;
+        if(alreadyCentered){
+            projExpandCard(idx);
+        } else {
+            projSnapTo(idx);
+            setTimeout(()=>projExpandCard(idx), 520);
+        }
+    }
+
+    // ESC to collapse
+    document.addEventListener('keydown',e=>{ if(e.key==='Escape' && projExpandedIdx>=0) projCollapseCard(); });
+})();
+
