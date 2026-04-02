@@ -7,705 +7,47 @@
     <title>Thomas Lacombe | Data Scientist</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <style>
-        :root {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --primary: #38bdf8;
-            --secondary: #818cf8;
-            --text-light: #f1f5f9;
-            --text-dim: #94a3b8;
-            --transition: all 0.3s ease;
-        }
-
-        html {
-            scroll-behavior: auto;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-light);
-            overflow-x: hidden;
-            position: relative;
-            /* Pour le positionnement relatif du canvas de fond */
-        }
-
-        /* --- BACKGROUND SCINTILLANT --- */
-        #bg-stars {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -10;
-            /* Tout au fond */
-            pointer-events: none;
-            /* Ne bloque pas les clics */
-        }
-
-        /* --- NAVIGATION --- */
-        nav {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            padding: 15px 50px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(15, 23, 42, 0.95);
-            backdrop-filter: blur(10px);
-            z-index: 1000;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .logo {
-            height: 45px;
-            width: 45px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid var(--primary);
-        }
-
-        .nav-links a {
-            color: var(--text-light);
-            text-decoration: none;
-            margin-left: 25px;
-            font-size: 0.9rem;
-            transition: var(--transition);
-            position: relative;
-            cursor: pointer;
-        }
-
-        .nav-links a:hover {
-            color: var(--primary);
-        }
-
-        .nav-links a::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 2px;
-            bottom: -5px;
-            left: 0;
-            background-color: var(--primary);
-            transition: width 0.3s;
-        }
-
-        .nav-links a:hover::after {
-            width: 100%;
-        }
-
-        /* --- HERO SECTION --- */
-        .hero {
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-            /* Le Hero a son propre fond qui va masquer les étoiles scintillantes en dessous */
-            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
-        }
-
-        #particles-canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-        }
-
-        .hero-content {
-            z-index: 1;
-            pointer-events: none;
-        }
-
-        .hero-content * {
-            pointer-events: auto;
-        }
-
-        .hero h1 {
-            font-size: 4rem;
-            line-height: 1.1;
-            margin-bottom: 20px;
-            text-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-            animation: fadeInDown 1s ease-out;
-        }
-
-        .hero span {
-            color: var(--primary);
-        }
-
-        .hero p {
-            font-size: 1.5rem;
-            color: var(--text-dim);
-            margin-bottom: 40px;
-            animation: fadeInUp 1s ease-out 0.5s backwards;
-        }
-
-        .hero-btn {
-            padding: 15px 35px;
-            background: linear-gradient(45deg, var(--primary), var(--secondary));
-            border: none;
-            border-radius: 30px;
-            color: white;
-            font-weight: 600;
-            font-size: 1rem;
-            cursor: pointer;
-            text-decoration: none;
-            box-shadow: 0 10px 20px rgba(56, 189, 248, 0.3);
-            transition: var(--transition);
-            animation: fadeInUp 1s ease-out 0.8s backwards;
-        }
-
-        .hero-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 30px rgba(56, 189, 248, 0.5);
-        }
-
-        .scroll-down {
-            position: absolute;
-            bottom: 30px;
-            animation: bounce 2s infinite;
-            color: var(--text-dim);
-            z-index: 1;
-        }
-
-        /* --- GLOBAL SECTIONS --- */
-        section {
-            padding: 100px 10%;
-            min-height: auto;
-            position: relative;
-            z-index: 1;
-            /* Pour être au dessus des étoiles de fond */
-        }
-
-        .section-title {
-            font-size: 2.5rem;
-            margin-bottom: 60px;
-            text-align: center;
-            position: relative;
-        }
-
-        .section-title::after {
-            content: '';
-            display: block;
-            width: 60px;
-            height: 4px;
-            background: var(--primary);
-            margin: 10px auto;
-            border-radius: 2px;
-        }
-
-        /* --- ABOUT --- */
-        .about-content {
-            display: grid;
-            grid-template-columns: 1fr 2fr;
-            gap: 50px;
-            align-items: center;
-        }
-
-        .profile-img-container {
-            width: 100%;
-            aspect-ratio: 1;
-            border-radius: 50%;
-            overflow: hidden;
-            border: 3px solid var(--primary);
-            box-shadow: 0 0 30px rgba(56, 189, 248, 0.2);
-            background: #333;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 3rem;
-            color: #555;
-        }
-
-        .profile-img-container img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .about-text p {
-            font-size: 1.1rem;
-            color: var(--text-dim);
-            margin-bottom: 20px;
-            line-height: 1.6;
-        }
-
-        /* --- TIMELINE --- */
-        .timeline {
-            position: relative;
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-
-        .timeline::before {
-            content: '';
-            position: absolute;
-            left: 24px;
-            top: 25px;
-            bottom: 25px;
-            width: 2px;
-            background: linear-gradient(to bottom,
-                    var(--primary) 0%,
-                    var(--secondary) 50%,
-                    rgba(129, 140, 248, 0.1) 100%);
-            z-index: 0;
-        }
-
-        .timeline-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 50px;
-            position: relative;
-            cursor: pointer;
-        }
-
-        .description {
-            max-height: 55px;
-            overflow: hidden;
-            transition: max-height 0.5s ease-in-out;
-            position: relative;
-        }
-
-        .description::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 20px;
-            background: linear-gradient(transparent, var(--card-bg));
-            transition: opacity 0.3s;
-        }
-
-        .timeline-item.expanded .description {
-            max-height: 1000px;
-        }
-
-        .timeline-item.expanded .description::after {
-            opacity: 0;
-        }
-
-        .timeline-marker {
-            width: 50px;
-            height: 50px;
-            flex-shrink: 0;
-            z-index: 1;
-            background-color: var(--bg-color);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 30px;
-        }
-
-        .hex-svg {
-            width: 100%;
-            height: 100%;
-            fill: var(--bg-color);
-            stroke: var(--primary);
-            stroke-width: 2;
-            transition: all 0.4s ease;
-        }
-
-        .timeline-content {
-            background: var(--card-bg);
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            transition: var(--transition);
-            flex-grow: 1;
-            border: 1px solid transparent;
-        }
-
-        .timeline-item:hover .hex-svg {
-            fill: var(--primary);
-            stroke: var(--secondary);
-            filter: drop-shadow(0 0 10px var(--primary));
-            transform: scale(1.15);
-        }
-
-        .timeline-item:hover .timeline-content {
-            transform: translateY(-5px) translateX(5px);
-            border-color: rgba(56, 189, 248, 0.3);
-        }
-
-        .timeline-item.expanded .hex-svg {
-            fill: var(--primary);
-            stroke: var(--secondary);
-            filter: drop-shadow(0 0 10px var(--primary));
-            transform: scale(1.15);
-        }
-
-        .timeline-item.expanded .timeline-content {
-            border-color: var(--primary);
-            background: rgba(56, 189, 248, 0.05);
-        }
-
-        /* Styles Timeline Header */
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 5px;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .company-group {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .company-name {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--text-light);
-            font-style: normal;
-        }
-
-        .linkedin-link {
-            color: #0a66c2;
-            font-size: 1.2rem;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-        }
-
-        .linkedin-link:hover {
-            color: var(--text-light);
-            transform: scale(1.2);
-        }
-
-        .date {
-            color: var(--text-dim);
-            font-size: 0.9rem;
-            font-weight: 400;
-            white-space: nowrap;
-            margin-top: 5px;
-        }
-
-        .role {
-            font-size: 1.05rem;
-            font-weight: 500;
-            color: var(--primary);
-            display: block;
-            margin-bottom: 15px;
-        }
-
-        .description li {
-            list-style-position: inside;
-            color: var(--text-dim);
-            margin-bottom: 5px;
-            line-height: 1.5;
-        }
-
-        /* --- CONTACT --- */
-        .contact-container {
-            display: flex;
-            justify-content: center;
-            gap: 40px;
-            flex-wrap: wrap;
-            margin-top: 40px;
-        }
-
-        .contact-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-            color: var(--text-light);
-            text-decoration: none;
-            padding: 20px;
-            background: var(--card-bg);
-            border-radius: 15px;
-            width: 200px;
-            transition: var(--transition);
-        }
-
-        .contact-item:hover {
-            background: var(--primary);
-            color: var(--bg-color);
-        }
-
-        .contact-item i {
-            font-size: 2rem;
-        }
-
-        .back-to-top {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            gap: 5px;
-            margin-top: 170px;
-            margin-bottom: -50px;
-            cursor: pointer;
-            position: relative;
-            z-index: 10;
-        }
-
-        .back-to-top-label {
-            color: var(--text-dim);
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .back-to-top-label:hover {
-            color: var(--primary);
-        }
-
-        .back-to-top i {
-            color: var(--primary);
-            animation: bounce 2s infinite;
-            font-size: 1.5rem;
-        }
-
-        .back-to-top i:hover {
-            color: var(--secondary);
-        }
-
-        footer {
-            padding: 30px;
-            text-align: center;
-            color: var(--text-dim);
-            font-size: 0.8rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        /* --- ANIMATIONS --- */
-        .reveal {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: all 0.8s ease-out;
-        }
-
-        .reveal.active {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-50px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(50px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes bounce {
-
-            0%,
-            20%,
-            50%,
-            80%,
-            100% {
-                transform: translateY(0);
-            }
-
-            40% {
-                transform: translateY(-10px);
-            }
-
-            60% {
-                transform: translateY(-5px);
-            }
-        }
-
-        /* --- SKILLS --- */
-        .skills-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 25px;
-            margin-top: 40px;
-        }
-
-        .skill-card {
-            background: var(--card-bg);
-            padding: 30px;
-            border-radius: 15px;
-            border-left: 4px solid var(--primary);
-            transition: var(--transition);
-        }
-
-        .skill-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
-        }
-
-        .skill-card h3 {
-            font-size: 1.3rem;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: var(--text-light);
-        }
-
-        .skill-card h3 i {
-            color: var(--primary);
-        }
-
-        .tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .tag {
-            background: rgba(56, 189, 248, 0.1);
-            color: var(--primary);
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            border: 1px solid rgba(56, 189, 248, 0.2);
-            transition: var(--transition);
-        }
-
-        .tag:hover {
-            background: var(--primary);
-            color: var(--bg-color);
-        }
-
-        /* --- LANG TOGGLE --- */
-        .lang-toggle {
-            background: transparent;
-            border: none;
-            color: var(--text-dim);
-            padding: 8px 12px;
-            border-radius: 50%;
-            font-size: 0.85rem;
-            font-family: 'Poppins', sans-serif;
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-            letter-spacing: 1px;
-
-            margin-left: 10px;
-            /* Subtle glass effect without border */
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
-        }
-
-        .lang-toggle:hover {
-            color: var(--primary);
-            background: radial-gradient(circle, rgba(56, 189, 248, 0.1) 0%, transparent 90%);
-            text-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
-        }
-
-        /* --- MEDIA QUERIES --- */
-        @media (max-width: 768px) {
-            .hero h1 {
-                font-size: 2.5rem;
-            }
-
-            .about-content {
-                grid-template-columns: 1fr;
-            }
-
-            .nav-links {
-                display: none;
-            }
-
-            .profile-img-container {
-                width: 200px;
-                margin: 0 auto;
-            }
-
-            .timeline::before {
-                left: 19px;
-            }
-
-            .timeline-marker {
-                width: 40px;
-                height: 40px;
-                margin-right: 15px;
-            }
-
-            .timeline-content {
-                padding: 20px;
-            }
-
-            .card-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 5px;
-            }
-
-            .company-group {
-                width: 100%;
-                justify-content: space-between;
-            }
-
-            .role {
-                font-size: 1rem;
-            }
-
-            .date {
-                order: -1;
-                font-size: 0.8rem;
-                margin-bottom: 2px;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
 </head>
 
 <body>
 
     <canvas id="bg-stars"></canvas>
+    <canvas id="cursor-canvas"></canvas>
 
-    <nav>
-        <div style="display: flex; align-items: center; gap: 12px;">
-            <img src="PP.JPG" alt="Logo" class="logo" onerror="this.style.display='none'">
-            <button class="lang-toggle" onclick="toggleLang()" title="Switch language">EN</button>
+    <nav id="nav-wrapper">
+        <!-- Langue à gauche -->
+        <button class="lang-toggle" onclick="toggleLang()" title="Switch language">EN</button>
+
+        <!-- Île flottante centrale -->
+        <div class="nav-island" id="nav-island">
+            <div class="nav-indicator" id="nav-indicator"></div>
+            <a onclick="smoothScrollTo('hero')"       data-i18n="nav.home"       data-section="hero">Home</a>
+            <a onclick="smoothScrollTo('about')"      data-i18n="nav.about"      data-section="about">About</a>
+            <a onclick="smoothScrollTo('skills')"     data-i18n="nav.skills"     data-section="skills">Skills</a>
+            <a onclick="smoothScrollTo('experience')" data-i18n="nav.experience" data-section="experience">Experience</a>
+            <a onclick="smoothScrollTo('education')"  data-i18n="nav.education"  data-section="education">Education</a>
+            <a onclick="smoothScrollTo('projects')"   data-i18n="nav.projects"   data-section="projects">Projects</a>
         </div>
-        <div class="nav-links">
-            <a onclick="smoothScrollTo('hero')" data-i18n="nav.home">Home</a>
-            <a onclick="smoothScrollTo('about')" data-i18n="nav.about">About</a>
-            <a onclick="smoothScrollTo('skills')" data-i18n="nav.skills">Skills</a>
-            <a onclick="smoothScrollTo('experience')" data-i18n="nav.experience">Experience</a>
-            <a onclick="smoothScrollTo('education')" data-i18n="nav.education">Education</a>
-            <a onclick="smoothScrollTo('projects')" data-i18n="nav.projects">Projects</a>
-            <a onclick="smoothScrollTo('contact')" data-i18n="nav.contact">Contact/CV</a>
-        </div>
+
+        <!-- Contact/CV à droite -->
+        <a class="nav-contact-btn" onclick="smoothScrollTo('contact')" data-i18n="nav.contact">Contact / CV</a>
     </nav>
 
     <header class="hero" id="hero">
-        <canvas id="particles-canvas"></canvas>
-        <div class="hero-content">
-            <h1>Thomas <span>Lacombe</span></h1>
-            <p data-i18n="hero.subtitle">Machine Learning Engineer (AI & Software Systems)</p>
-            <a onclick="handleClickHero(event)" class="hero-btn" data-i18n="hero.btn">Discover my profile</a>
+        <canvas id="hero-bg-canvas"></canvas>
+        <div class="hero-split">
+            <div class="hero-left">
+                <h1>Thomas <span>Lacombe</span></h1>
+                <p data-i18n-html="hero.subtitle"><strong>Machine Learning Engineer</strong><br>(AI & Software Systems)</p>
+                <div class="hero-ctas">
+                    <a onclick="handleClickHero(event)" class="hero-btn-primary" data-i18n="hero.btn">Discover my profile</a>
+                </div>
+            </div>
+            <div class="hero-right">
+                <canvas id="neural-canvas"></canvas>
+            </div>
         </div>
 
         <div class="scroll-down">
@@ -715,93 +57,179 @@
 
     <section id="about">
         <h2 class="section-title reveal" data-i18n="about.title">About</h2>
-        <div class="about-content reveal">
-            <div class="profile-img-container">
-                <img src="PP.JPG" alt="Thomas Lacombe"
-                    onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\'color:#fff\'>TL</span>'">
+        <div class="about-card reveal">
+            <div class="about-left">
+                <div class="profile-ring-wrapper">
+                    <div class="profile-img-container">
+                        <img src="PP.JPG" alt="Thomas Lacombe"
+                            onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\'color:#fff\'>TL</span>'">
+                    </div>
+                </div>
             </div>
             <div class="about-text">
-                <p data-i18n="about.p1">As an engineering graduate specializing in Data Science and Artificial
-                    Intelligence, I am seeking my
-                    first professional opportunity starting in february 2026, following the completion of my final-year
-                    internship.</p>
-                <p data-i18n="about.p2">My hybrid background has enabled me to lead various concrete projects focused on
-                    Computer Vision,
-                    NLP, RAG (Retrieval-Augmented Generation) systems, and classification.</p>
-                <p data-i18n="about.p3">Curious and motivated, I am eager to leverage my Data Science skills to address
-                    diverse and
-                    real-world challenges.</p>
-                <p style="margin-top: 15px; font-weight: bold; color: var(--primary);"><i class="fas fa-map-marker-alt"
-                        style="margin-right: 15px;"></i><span data-i18n="about.location">Boulogne Billancourt
-                        (92100)</span></p>
+                <div class="about-para">
+                    <p data-i18n-html="about.p1"><strong class="about-highlight">Engineering graduate from Mines Saint-Étienne</strong>, specialized in Data Science &amp; AI, seeking my first opportunity in Data &amp; AI starting February 2026, after completing my final-year internship at <strong class="about-highlight">Dassault Aviation</strong>.</p>
+                </div>
+                <div class="about-para">
+                    <p data-i18n-html="about.p2">My <strong class="about-highlight">technical background</strong> has enabled me to lead concrete projects in Computer Vision, NLP, RAG, classification, LLM, Reinforcement Learning, software development and deployment (Docker, CI/CD).</p>
+                </div>
+                <div class="about-para">
+                    <p data-i18n-html="about.p3"><strong class="about-highlight">Curious and driven</strong>, I look to apply my Data Science skills to ambitious projects where technology meets real-world impact.</p>
+                </div>
+                <div class="about-para">
+                    <p data-i18n-html="about.p4">Available <strong class="about-highlight">immediately</strong>, I am open to opportunities in the Paris, Lyon or Geneva areas — on-site, remote or hybrid.</p>
+                </div>
+                <div class="about-meta">
+                    <div class="about-badge">
+                        <span class="badge-dot"></span>
+                        <span data-i18n="about.badge">Open to work</span>
+                    </div>
+                    <span class="about-meta-sep"></span>
+                    <div class="about-location">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span data-i18n="about.location">Boulogne Billancourt (92100)</span>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
 
     <section id="skills">
         <h2 class="section-title reveal" data-i18n="skills.title">Skills</h2>
-        <div class="skills-grid reveal">
-            <div class="skill-card">
-                <h3><i class="fas fa-brain"></i> <span data-i18n="skills.ai">AI & Data Science</span></h3>
+        <div class="skills-bento reveal">
+
+            <!-- AI & Data Science — hero card -->
+            <div class="sk-card c-cyan span-7">
+                <div class="sk-head">
+                    <div class="sk-ico"><i class="fas fa-brain"></i></div>
+                    <h3 data-i18n="skills.ai">AI &amp; Data Science</h3>
+                </div>
                 <div class="tags">
-                    <span class="tag">Machine Learning</span>
+                    <span class="tag tag-hero">Machine Learning</span>
+                    <span class="tag tag-hero">Deep Learning</span>
+                    <span class="tag tag-hero">LLM</span>
                     <span class="tag">NLP</span>
-                    <span class="tag">Deep Learning</span>
                     <span class="tag">RAG Systems</span>
                     <span class="tag">Computer Vision</span>
-                    <span class="tag">RL</span>
-                    <span class="tag">LLM</span>
+                    <span class="tag">Reinforcement Learning</span>
                     <span class="tag">Statistics</span>
                     <span class="tag">Prediction</span>
+                    <span class="tag">OCR</span>
+                    <span class="tag">XGBoost</span>
+                    <span class="tag">VLM</span>
+                    <span class="tag">Time Series</span>
                 </div>
             </div>
-            <div class="skill-card">
-                <h3><i class="fas fa-code"></i> <span data-i18n="skills.programming">Programming</span></h3>
+
+            <!-- Programming -->
+            <div class="sk-card c-indigo span-5">
+                <div class="sk-head">
+                    <div class="sk-ico"><i class="fas fa-code"></i></div>
+                    <h3 data-i18n="skills.programming">Programming</h3>
+                </div>
                 <div class="tags">
-                    <span class="tag">Python ♥</span>
+                    <span class="tag tag-hero">Python ♥</span>
                     <span class="tag">SQL</span>
+                    <span class="tag">TypeScript</span>
                     <span class="tag">C</span>
                     <span class="tag">Java</span>
                     <span class="tag">R</span>
                     <span class="tag">HTML</span>
                     <span class="tag">CSS</span>
-                    <span class="tag">TypeScript</span>
                 </div>
             </div>
-            <div class="skill-card">
-                <h3><i class="fas fa-layer-group"></i> Frameworks</h3>
+
+            <!-- Frameworks -->
+            <div class="sk-card c-violet span-4">
+                <div class="sk-head">
+                    <div class="sk-ico"><i class="fas fa-layer-group"></i></div>
+                    <h3>Frameworks &amp; Libs</h3>
+                </div>
                 <div class="tags">
                     <span class="tag">TensorFlow / PyTorch</span>
                     <span class="tag">Scikit-learn</span>
                     <span class="tag">Pandas</span>
                     <span class="tag">OpenCV</span>
-                    <span class="tag">Numpy</span>
+                    <span class="tag">NumPy</span>
                     <span class="tag">Streamlit</span>
                     <span class="tag">Matplotlib</span>
                     <span class="tag">Selenium</span>
+                    <span class="tag">Stable-Baselines3</span>
+                    <span class="tag">Gymnasium</span>
+                    <span class="tag">React</span>
+                    <span class="tag">LangChain</span>
+                    <span class="tag">FAISS</span>
+                    <span class="tag">Hugging Face</span>
                 </div>
             </div>
-            <div class="skill-card">
-                <h3><i class="fas fa-tools"></i> Tools</h3>
+
+            <!-- Tools -->
+            <div class="sk-card c-emerald span-4">
+                <div class="sk-head">
+                    <div class="sk-ico"><i class="fas fa-tools"></i></div>
+                    <h3>Tools &amp; DevOps</h3>
+                </div>
                 <div class="tags">
                     <span class="tag">Docker</span>
                     <span class="tag">Git</span>
+                    <span class="tag">CI/CD</span>
+                    <span class="tag">CUDA</span>
+                    <span class="tag">Linux</span>
+                    <span class="tag">Multithreading</span>
+                    <span class="tag">WandB</span>
+                    <span class="tag">GitHub Actions</span>
+                    <span class="tag">Jupyter</span>
+                    <span class="tag">n8n</span>
                     <span class="tag">Expo</span>
                     <span class="tag">Poetry</span>
                     <span class="tag">Conda</span>
                 </div>
             </div>
-            <div class="skill-card">
-                <h3><i class="fas fa-globe"></i> Languages</h3>
-                <div class="tags">
-                    <span class="tag" data-i18n="skills.french">French (Native)</span>
-                    <span class="tag" data-i18n="skills.english">English (C1)</span>
-                    <span class="tag" data-i18n="skills.spanish">Spanish (B2)</span>
-                    <span class="tag" data-i18n="skills.japanese">Japanese (A1)</span>
+
+            <!-- Languages — gauges -->
+            <div class="sk-card c-rose span-4">
+                <div class="sk-head">
+                    <div class="sk-ico"><i class="fas fa-globe"></i></div>
+                    <h3>Languages</h3>
+                </div>
+                <div class="lang-list">
+                    <div class="lang-item">
+                        <div class="lang-row">
+                            <span class="lang-name" data-i18n="skills.french.name">French</span>
+                            <span class="lang-level" data-i18n="skills.french.level">Native</span>
+                        </div>
+                        <div class="gauge-track"><div class="gauge-fill fill-native" data-w="100"></div></div>
+                    </div>
+                    <div class="lang-item">
+                        <div class="lang-row">
+                            <span class="lang-name" data-i18n="skills.english.name">English</span>
+                            <span class="lang-level">C1</span>
+                        </div>
+                        <div class="gauge-track"><div class="gauge-fill fill-c1" data-w="85"></div></div>
+                    </div>
+                    <div class="lang-item">
+                        <div class="lang-row">
+                            <span class="lang-name" data-i18n="skills.spanish.name">Spanish</span>
+                            <span class="lang-level">B2</span>
+                        </div>
+                        <div class="gauge-track"><div class="gauge-fill fill-b2" data-w="64"></div></div>
+                    </div>
+                    <div class="lang-item">
+                        <div class="lang-row">
+                            <span class="lang-name" data-i18n="skills.japanese.name">Japanese</span>
+                            <span class="lang-level">A1</span>
+                        </div>
+                        <div class="gauge-track"><div class="gauge-fill fill-a1" data-w="16"></div></div>
+                    </div>
                 </div>
             </div>
-            <div class="skill-card">
-                <h3><i class="fa-solid fa-gear"></i> <span data-i18n="skills.office">Office & Others</span></h3>
+
+            <!-- Office & Other — full width -->
+            <div class="sk-card c-amber span-12">
+                <div class="sk-head">
+                    <div class="sk-ico"><i class="fas fa-briefcase"></i></div>
+                    <h3 data-i18n="skills.office">Office &amp; Others</h3>
+                </div>
                 <div class="tags">
                     <span class="tag">Power BI</span>
                     <span class="tag">Microsoft Suite</span>
@@ -810,434 +238,443 @@
                     <span class="tag" data-i18n="skills.driving">Driving License (B) - Vehicle Owner</span>
                 </div>
             </div>
+
         </div>
     </section>
 
     <section id="experience">
         <h2 class="section-title reveal" data-i18n="exp.title">Experience</h2>
-        <div class="timeline reveal">
 
-            <div class="timeline-item">
-                <div class="timeline-marker">
-                    <svg class="hex-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-                        <polygon points="50 5, 95 27.5, 95 72.5, 50 95, 5 72.5, 5 27.5" />
-                    </svg>
-                </div>
-                <div class="timeline-content">
-                    <div class="card-header">
-                        <div class="company-group">
-                            <span class="company-name">Dassault Aviation | Saint-Cloud</span>
-                            <a href="https://www.linkedin.com/company/dassault-aviation/" target="_blank"
-                                class="linkedin-link" title="View on LinkedIn" onclick="event.stopPropagation()">
-                                <i class="fab fa-linkedin"></i>
-                            </a>
+        <div class="tl" id="tl-exp">
+            <!-- Spine -->
+            <div class="tl-glow"></div>
+            <div class="tl-line"></div>
+            <div class="tl-ticks"></div>
+            <div class="tl-particles" id="tl-exp-particles"></div>
+
+            <!-- ── 01 · DASSAULT · LEFT ── -->
+            <div class="tl-item left from-left" style="--ac:var(--c1);--ac-rgb:var(--c1-rgb)">
+                <div class="tl-card">
+                    <div class="tl-glass">
+                        <p class="tl-role" data-i18n-html="exp.dassault.role">Data Scientist Intern – Artificial Intelligence</p>
+                        <div class="tl-company-row">
+                            <h3 class="tl-company">Dassault Aviation</h3>
+                            <a href="https://www.linkedin.com/company/dassault-aviation/" target="_blank" class="tl-li" onclick="event.stopPropagation()"><i class="fab fa-linkedin"></i></a>
                         </div>
-                        <span class="date" data-i18n="exp.dassault.date">March 2025 - Sept 2025 (6 months)</span>
+                        <div class="tl-meta">
+                            <span class="tl-meta-item"><i class="fas fa-location-dot"></i> Saint-Cloud</span>
+                            <span class="tl-meta-item"><i class="fas fa-calendar-days"></i> <span data-i18n="exp.dassault.date">March 2025 — September 2025 · 6 months</span></span>
+                        </div>
+                        <div class="tl-div"></div>
+                        <span class="tl-hint" data-i18n-html="exp.hint"><i class="fas fa-chevron-down"></i> View details</span>
+                        <div class="tl-body"><div class="tl-body-inner">
+                            <ul class="tl-ul" data-i18n-html="exp.dassault.desc">
+                                <li>Development and deployment of AI solutions to improve Purchasing Department performance.</li>
+                                <li>Implementation of classification models (decision trees, gradient boosting, neural networks), data extraction via OCR, and development of programs to simplify processes.</li>
+                                <li>Work on LLM projects, specifically implementing RAG (and auto-RAG) systems to facilitate information access and optimize decision-making.</li>
+                                <li>Tool containerized and deployed via Docker, with a simple UI (Streamlit) accessible via web browser.</li>
+                                <li>Web scraping (using Selenium) to populate knowledge bases.</li>
+                                <li>Presentation of results in Power BI linked to Dassault data via SQL queries.</li>
+                            </ul>
+                            <div class="tl-tags">
+                                <span class="tl-tag">Python</span><span class="tl-tag">LLM</span><span class="tl-tag">RAG Systems</span>
+                                <span class="tl-tag">Docker</span><span class="tl-tag">Streamlit</span>
+                                <span class="tl-tag">OCR</span><span class="tl-tag">Power BI</span>
+                                <span class="tl-tag">SQL</span><span class="tl-tag">Selenium</span>
+                            </div>
+                        </div></div>
                     </div>
-                    <span class="role" data-i18n="exp.dassault.role">Data Scientist Intern – Artificial
-                        Intelligence</span>
-                    <ul class="description" data-i18n-html="exp.dassault.desc">
-                        <li>Development and deployment of AI solutions to improve Purchasing Department performance.
-                        </li>
-                        <li>Implementation of classification models (decision trees, gradient boosting, neural
-                            networks), data extraction via OCR, and development of programs to simplify processes.</li>
-                        <li>Work on LLM projects, specifically implementing RAG (and auto-RAG) systems to facilitate
-                            information access and optimize decision-making.</li>
-                        <li>Tool containerized and deployed via Docker, with a simple UI (Streamlit) accessible via web
-                            browser.</li>
-                        <li>Web scraping (using Selenium) to populate knowledge bases.</li>
-                        <li>Presentation of results in Power BI linked to Dassault data via SQL queries.</li>
-                    </ul>
+                    <div class="tl-pillar">
+                        <span class="tl-pillar-num">01</span>
+                        <i class="fas fa-brain tl-pillar-icon"></i>
+                        <span class="tl-pillar-label">Dassault</span>
+                    </div>
+                </div>
+                <div class="tl-marker">
+                    <span class="tl-year">2025</span>
+                    <div class="tl-dot"></div>
+                </div>
+                <div class="tl-spacer"></div>
+            </div>
+
+            <!-- ── 02 · MGF · RIGHT ── -->
+            <div class="tl-item right from-right" style="--ac:var(--c2);--ac-rgb:var(--c2-rgb)">
+                <div class="tl-spacer"></div>
+                <div class="tl-marker">
+                    <span class="tl-year">2024</span>
+                    <div class="tl-dot"></div>
+                </div>
+                <div class="tl-card">
+                    <div class="tl-pillar">
+                        <span class="tl-pillar-num">02</span>
+                        <i class="fas fa-drafting-compass tl-pillar-icon"></i>
+                        <span class="tl-pillar-label">MGF</span>
+                    </div>
+                    <div class="tl-glass">
+                        <p class="tl-role" data-i18n="exp.mgf.role">CAD Design Engineer Intern</p>
+                        <div class="tl-company-row">
+                            <h3 class="tl-company">MGF Grimaldi</h3>
+                            <a href="https://www.linkedin.com/company/mgf-grimaldi/" target="_blank" class="tl-li" onclick="event.stopPropagation()"><i class="fab fa-linkedin"></i></a>
+                        </div>
+                        <div class="tl-meta">
+                            <span class="tl-meta-item"><i class="fas fa-location-dot"></i> Grenoble</span>
+                            <span class="tl-meta-item"><i class="fas fa-calendar-days"></i> <span data-i18n="exp.mgf.date">May — August 2024 · 3 months</span></span>
+                        </div>
+                        <div class="tl-div"></div>
+                        <span class="tl-hint" data-i18n-html="exp.hint"><i class="fas fa-chevron-down"></i> View details</span>
+                        <div class="tl-body"><div class="tl-body-inner">
+                            <ul class="tl-ul" data-i18n-html="exp.mgf.desc">
+                                <li>3-month Assistant Engineer internship in the Methods Bureau at MGF Grimaldi:<br>
+                                    – Creation of fixtures adapted for high-precision machining (SolidWorks)<br>
+                                    – 3D part reproduction<br>
+                                    – 3D printing of parts/prototypes<br>
+                                    – Reading/Creation of blueprints
+                                </li>
+                            </ul>
+                            <div class="tl-tags">
+                                <span class="tl-tag">SolidWorks</span><span class="tl-tag">3D Printing</span>
+                                <span class="tl-tag">Technical Blueprints</span><span class="tl-tag">Precision Machining</span>
+                            </div>
+                        </div></div>
+                    </div>
                 </div>
             </div>
 
-            <div class="timeline-item">
-                <div class="timeline-marker">
-                    <svg class="hex-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-                        <polygon points="50 5, 95 27.5, 95 72.5, 50 95, 5 72.5, 5 27.5" />
-                    </svg>
-                </div>
-                <div class="timeline-content">
-                    <div class="card-header">
-                        <div class="company-group">
-                            <span class="company-name">MGF Grimaldi | Grenoble</span>
-                            <a href="https://www.linkedin.com/company/mgf-grimaldi/" target="_blank"
-                                class="linkedin-link" title="View on LinkedIn" onclick="event.stopPropagation()">
-                                <i class="fab fa-linkedin"></i>
-                            </a>
+            <!-- ── 03 · JE MINES · LEFT ── -->
+            <div class="tl-item left from-left" style="--ac:var(--c3);--ac-rgb:var(--c3-rgb)">
+                <div class="tl-card">
+                    <div class="tl-glass">
+                        <p class="tl-role" data-i18n="exp.je.role">Business Manager</p>
+                        <div class="tl-company-row">
+                            <h3 class="tl-company">Mines Études et Projets</h3>
+                            <a href="https://www.linkedin.com/company/mines-tudes-et-projets/" target="_blank" class="tl-li" onclick="event.stopPropagation()"><i class="fab fa-linkedin"></i></a>
                         </div>
-                        <span class="date" data-i18n="exp.mgf.date">May 2024 - August 2024 (3 months)</span>
+                        <div class="tl-meta">
+                            <span class="tl-meta-item"><i class="fas fa-location-dot"></i> Saint-Étienne</span>
+                            <span class="tl-meta-item"><i class="fas fa-calendar-days"></i> <span data-i18n="exp.je.date">December 2022 — May 2024 · 1.5 years</span></span>
+                        </div>
+                        <div class="tl-div"></div>
+                        <span class="tl-hint" data-i18n-html="exp.hint"><i class="fas fa-chevron-down"></i> View details</span>
+                        <div class="tl-body"><div class="tl-body-inner">
+                            <ul class="tl-ul" data-i18n-html="exp.je.desc">
+                                <li>Served as Business Manager and Project Manager within the school's Junior Enterprise.<br>
+                                    – Define and lead studies submitted by companies to our Junior-Enterprise.<br>
+                                    – Manage administrative phases: scoping, proposal, budgeting, signing...<br>
+                                    – Manage teams of consultants.<br>
+                                    – Manage stakeholders with different profiles and expectations.<br>
+                                    – Participated in the National Junior-Entrepreneur Congress.
+                                </li>
+                            </ul>
+                            <div class="tl-tags">
+                                <span class="tl-tag">Project Management</span><span class="tl-tag">Business Development</span>
+                                <span class="tl-tag">Consulting</span>
+                            </div>
+                        </div></div>
                     </div>
-                    <span class="role" data-i18n="exp.mgf.role">CAD Design Engineer Intern</span>
-                    <ul class="description" data-i18n-html="exp.mgf.desc">
-                        <li>3-month Assistant Engineer internship in the Methods Bureau at MGF Grimaldi:
-                            <br>- Creation of fixtures adapted for high-precision machining (SolidWorks)
-                            <br>- 3D part reproduction
-                            <br>- 3D printing of parts/prototypes
-                            <br>- Reading/Creation of blueprints
-                        </li>
-                    </ul>
+                    <div class="tl-pillar">
+                        <span class="tl-pillar-num">03</span>
+                        <i class="fas fa-briefcase tl-pillar-icon"></i>
+                        <span class="tl-pillar-label">JE Mines</span>
+                    </div>
+                </div>
+                <div class="tl-marker">
+                    <span class="tl-year">2022—2024</span>
+                    <div class="tl-dot"></div>
+                </div>
+                <div class="tl-spacer"></div>
+            </div>
+
+            <!-- ── 04 · TECUMSEH · RIGHT ── -->
+            <div class="tl-item right from-right" style="--ac:var(--c4);--ac-rgb:var(--c4-rgb)">
+                <div class="tl-spacer"></div>
+                <div class="tl-marker">
+                    <span class="tl-year">2023</span>
+                    <div class="tl-dot"></div>
+                </div>
+                <div class="tl-card">
+                    <div class="tl-pillar">
+                        <span class="tl-pillar-num">04</span>
+                        <i class="fas fa-industry tl-pillar-icon"></i>
+                        <span class="tl-pillar-label">Tecumseh</span>
+                    </div>
+                    <div class="tl-glass">
+                        <p class="tl-role" data-i18n="exp.tecumseh.role">Production Operator Intern</p>
+                        <div class="tl-company-row">
+                            <h3 class="tl-company">Tecumseh</h3>
+                            <a href="https://www.linkedin.com/company/tecumseh/" target="_blank" class="tl-li" onclick="event.stopPropagation()"><i class="fab fa-linkedin"></i></a>
+                        </div>
+                        <div class="tl-meta">
+                            <span class="tl-meta-item"><i class="fas fa-location-dot"></i> Cessieu</span>
+                            <span class="tl-meta-item"><i class="fas fa-calendar-days"></i> <span data-i18n="exp.tecumseh.date">January — February 2023 · 1 month</span></span>
+                        </div>
+                        <div class="tl-div"></div>
+                        <span class="tl-hint" data-i18n-html="exp.hint"><i class="fas fa-chevron-down"></i> View details</span>
+                        <div class="tl-body"><div class="tl-body-inner">
+                            <ul class="tl-ul" data-i18n-html="exp.tecumseh.desc">
+                                <li>Internship as a production operator:<br>
+                                    – Production on various machines in the machining workshop.<br>
+                                    – Quality control of parts.<br>
+                                    – Machine maintenance.
+                                </li>
+                            </ul>
+                            <div class="tl-tags">
+                                <span class="tl-tag">Manufacturing</span><span class="tl-tag">Quality Control</span>
+                                <span class="tl-tag">Machine Operation</span>
+                            </div>
+                        </div></div>
+                    </div>
                 </div>
             </div>
 
-            <div class="timeline-item">
-                <div class="timeline-marker">
-                    <svg class="hex-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-                        <polygon points="50 5, 95 27.5, 95 72.5, 50 95, 5 72.5, 5 27.5" />
-                    </svg>
-                </div>
-                <div class="timeline-content">
-                    <div class="card-header">
-                        <div class="company-group">
-                            <span class="company-name">JE - Mines Études et Projets | Saint-Étienne</span>
-                            <a href="https://www.linkedin.com/company/mines-tudes-et-projets/" target="_blank"
-                                class="linkedin-link" title="View on LinkedIn" onclick="event.stopPropagation()">
-                                <i class="fab fa-linkedin"></i>
-                            </a>
-                        </div>
-                        <span class="date" data-i18n="exp.je.date">December 2022 - May 2024 (1.5 years)</span>
-                    </div>
-                    <span class="role" data-i18n="exp.je.role">Business Manager</span>
-                    <ul class="description" data-i18n-html="exp.je.desc">
-                        <li>Served as Business Manager and Project Manager within the school's Junior Enterprise.
-                            <br>- Define and lead studies submitted by companies to our Junior-Enterprise.
-                            <br>- Manage administrative phases: scoping, proposal, budgeting, signing...
-                            <br>- Manage teams of consultants.
-                            <br>- Manage stakeholders with different profiles and expectations.
-                            <br>- Participated in the National Junior-Entrepreneur Congress.
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="timeline-item">
-                <div class="timeline-marker">
-                    <svg class="hex-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-                        <polygon points="50 5, 95 27.5, 95 72.5, 50 95, 5 72.5, 5 27.5" />
-                    </svg>
-                </div>
-                <div class="timeline-content">
-                    <div class="card-header">
-                        <div class="company-group">
-                            <span class="company-name">Tecumseh | Cessieu</span>
-                            <a href="https://www.linkedin.com/company/tecumseh/" target="_blank" class="linkedin-link"
-                                title="View on LinkedIn" onclick="event.stopPropagation()">
-                                <i class="fab fa-linkedin"></i>
-                            </a>
-                        </div>
-                        <span class="date" data-i18n="exp.tecumseh.date">January 2023 - February 2023 (1 month)</span>
-                    </div>
-                    <span class="role" data-i18n="exp.tecumseh.role">Production Operator Intern</span>
-                    <ul class="description" data-i18n-html="exp.tecumseh.desc">
-                        <li>Internship as a production operator:
-                            <br>- Production on various machines in the machining workshop.
-                            <br>- Quality control of parts.
-                            <br>- Machine maintenance.
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-        </div>
+        </div><!-- /.tl -->
     </section>
 
     <section id="education">
         <h2 class="section-title reveal" data-i18n="edu.title">Education</h2>
-        <div class="timeline reveal">
+        <div class="edu-list reveal" id="edu-list">
 
-            <div class="timeline-item">
-                <div class="timeline-marker">
-                    <svg class="hex-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-                        <polygon points="50 5, 95 27.5, 95 72.5, 50 95, 5 72.5, 5 27.5" />
-                    </svg>
-                </div>
-                <div class="timeline-content">
-                    <div class="card-header">
-                        <div class="company-group">
-                            <span class="company-name">École Nationale Supérieure des Mines de Saint-Étienne</span>
-                            <a href="https://www.linkedin.com/school/mines-st-etienne/" target="_blank"
-                                class="linkedin-link" title="View on LinkedIn" onclick="event.stopPropagation()">
-                                <i class="fab fa-linkedin"></i>
-                            </a>
+            <!-- ══ MINES · odd (left-lean) ══ -->
+            <div class="edu-item" style="--ac:var(--c1);--ac-rgb:var(--c1-rgb)">
+                <div class="edu-card">
+                    <div class="edu-glass">
+                        <div class="edu-year-mark">2022–2025</div>
+
+                        <p class="edu-role" data-i18n="edu.mines.role">Major in Data Science & AI - Mechanics Option (MSc in Engineering)</p>
+                        <div class="edu-company-row">
+                            <h3 class="edu-company">École Nationale Supérieure des Mines de Saint-Étienne</h3>
+                            <a href="https://www.linkedin.com/school/mines-st-etienne/" target="_blank" class="edu-li" onclick="event.stopPropagation()"><i class="fab fa-linkedin"></i></a>
                         </div>
-                        <span class="date" data-i18n="edu.mines.date">September 2022 - October 2025</span>
+                        <div class="edu-meta">
+                            <span class="edu-meta-item"><i class="fas fa-location-dot"></i> Saint-Étienne</span>
+                            <span class="edu-date"><i class="fas fa-calendar-days"></i> <span data-i18n="edu.mines.date">September 2022 - October 2025</span></span>
+                        </div>
+                        <div class="edu-div"></div>
+                        <span class="edu-hint" data-i18n-html="exp.hint"><i class="fas fa-chevron-down"></i> View details</span>
+                        <div class="edu-body"><div class="edu-body-inner">
+                            <div class="edu-desc" data-i18n-html="edu.mines.desc">
+                                <strong>3rd Year – Data Science Major:</strong><br>
+                                Courses: Probabilistic foundations, statistical learning, machine learning, metamodeling and
+                                optimization, artificial intelligence.<br>
+                                Projects: Pedestrian detection for Thales via ML, reconstruction of radiation-noised images
+                                using deep learning.<br><br>
+
+                                <strong>2nd Year:</strong><br>
+                                Courses: Semester at Seoul National University, transition management.<br>
+                                Electives: Entrepreneurship, economics, design thinking.<br>
+                                Project: CAD design of an autonomous production and breeding module.<br><br>
+
+                                <strong>1st Year – Core Curriculum:</strong><br>
+                                Courses: Physics (materials, thermodynamics, fluid mechanics, continuum mechanics), Computer
+                                Science (C, Java, Python, SQL, algorithms), Mathematics (statistics, OR, signal processing),
+                                marketing, economics, corporate law, sustainable development.<br>
+                                Projects: Solar power plant study (PRO II software), mechanical energy vehicle design, app
+                                creation for HPSE charity.
+                            </div>
+                            <div class="edu-tags">
+                                <span class="edu-tag">Machine Learning</span>
+                                <span class="edu-tag">Deep Learning</span>
+                                <span class="edu-tag">Python</span>
+                                <span class="edu-tag">Data Science</span>
+                                <span class="edu-tag">Statistics</span>
+                                <span class="edu-tag">SolidWorks</span>
+                            </div>
+                        </div></div>
                     </div>
-                    <span class="role" data-i18n="edu.mines.role">Major in Data Science & AI - Mechanics Option (MSc in
-                        Engineering)</span>
-                    <div class="description" style="color: var(--text-dim);" data-i18n-html="edu.mines.desc">
-                        <strong>3rd Year – Data Science Major:</strong><br>
-                        Courses: Probabilistic foundations, statistical learning, machine learning, metamodeling and
-                        optimization, artificial intelligence.<br>
-                        Projects: Pedestrian detection for Thales via ML, reconstruction of radiation-noised images
-                        using deep learning.<br><br>
-
-                        <strong>2nd Year:</strong><br>
-                        Courses: Semester at Seoul National University, transition management.<br>
-                        Electives: Entrepreneurship, economics, design thinking.<br>
-                        Project: CAD design of an autonomous production and breeding module.<br><br>
-
-                        <strong>1st Year – Core Curriculum:</strong><br>
-                        Courses: Physics (materials, thermodynamics, fluid mechanics, continuum mechanics), Computer
-                        Science (C, Java, Python, SQL, algorithms), Mathematics (statistics, OR, signal processing),
-                        marketing, economics, corporate law, sustainable development.<br>
-                        Projects: Solar power plant study (PRO II software), mechanical energy vehicle design, app
-                        creation for HPSE charity.
+                    <div class="edu-pillar">
+                        <i class="fas fa-graduation-cap edu-pillar-icon"></i>
+                        <span class="edu-pillar-label">Mines</span>
                     </div>
                 </div>
             </div>
 
-            <div class="timeline-item">
-                <div class="timeline-marker">
-                    <svg class="hex-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-                        <polygon points="50 5, 95 27.5, 95 72.5, 50 95, 5 72.5, 5 27.5" />
-                    </svg>
-                </div>
-                <div class="timeline-content">
-                    <div class="card-header">
-                        <div class="company-group">
-                            <span class="company-name">Seoul National University (South Korea)</span>
-                            <a href="https://www.linkedin.com/school/seoulnational-university/" target="_blank"
-                                class="linkedin-link" title="View on LinkedIn" onclick="event.stopPropagation()">
-                                <i class="fab fa-linkedin"></i>
-                            </a>
-                        </div>
-                        <span class="date" data-i18n="edu.snu.date">September 2023 - January 2024</span>
+            <!-- ══ SNU · even (right-lean) ══ -->
+            <div class="edu-item" style="--ac:var(--c2);--ac-rgb:var(--c2-rgb)">
+                <div class="edu-card">
+                    <div class="edu-pillar">
+                        <i class="fas fa-earth-asia edu-pillar-icon"></i>
+                        <span class="edu-pillar-label">SNU</span>
                     </div>
-                    <span class="role" data-i18n="edu.snu.role">International Exchange (6 months)</span>
-                    <div class="description" style="color: var(--text-dim);" data-i18n-html="edu.snu.desc">Academic
-                        exchange semester in the
-                        Mechanical Engineering department:<br>
-                        - Numerical analysis in mechanical engineering<br>
-                        - Robot mechanics<br>
-                        - Market finance</div>
+                    <div class="edu-glass">
+                        <div class="edu-year-mark">2023–2024</div>
+
+                        <p class="edu-role" data-i18n="edu.snu.role">International Exchange (6 months)</p>
+                        <div class="edu-company-row">
+                            <h3 class="edu-company">Seoul National University (South Korea)</h3>
+                            <a href="https://www.linkedin.com/school/seoulnational-university/" target="_blank" class="edu-li" onclick="event.stopPropagation()"><i class="fab fa-linkedin"></i></a>
+                        </div>
+                        <div class="edu-meta">
+                            <span class="edu-meta-item"><i class="fas fa-location-dot"></i> Seoul, South Korea</span>
+                            <span class="edu-date"><i class="fas fa-calendar-days"></i> <span data-i18n="edu.snu.date">September 2023 - January 2024</span></span>
+                        </div>
+                        <div class="edu-div"></div>
+                        <span class="edu-hint" data-i18n-html="exp.hint"><i class="fas fa-chevron-down"></i> View details</span>
+                        <div class="edu-body"><div class="edu-body-inner">
+                            <div class="edu-desc" data-i18n-html="edu.snu.desc">Academic
+                                exchange semester in the
+                                Mechanical Engineering department:<br>
+                                - Numerical analysis in mechanical engineering<br>
+                                - Robot mechanics<br>
+                                - Market finance</div>
+                            <div class="edu-tags">
+                                <span class="edu-tag">Numerical Analysis</span>
+                                <span class="edu-tag">Robotics</span>
+                                <span class="edu-tag">Finance</span>
+                                <span class="edu-tag">International</span>
+                            </div>
+                        </div></div>
+                    </div>
                 </div>
             </div>
 
-            <div class="timeline-item">
-                <div class="timeline-marker">
-                    <svg class="hex-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-                        <polygon points="50 5, 95 27.5, 95 72.5, 50 95, 5 72.5, 5 27.5" />
-                    </svg>
-                </div>
-                <div class="timeline-content">
-                    <div class="card-header">
-                        <div class="company-group">
-                            <span class="company-name" data-i18n="edu.vaucanson.name">Lycée Vaucanson Prep School
-                                (Grenoble)</span>
-                            <a href="https://www.linkedin.com/school/lycee-vaucanson/" target="_blank"
-                                class="linkedin-link" title="View on LinkedIn" onclick="event.stopPropagation()">
-                                <i class="fab fa-linkedin"></i>
-                            </a>
+            <!-- ══ VAUCANSON · odd (left-lean) ══ -->
+            <div class="edu-item" style="--ac:var(--c3);--ac-rgb:var(--c3-rgb)">
+                <div class="edu-card">
+                    <div class="edu-glass">
+                        <div class="edu-year-mark">2020–2022</div>
+                        <p class="edu-role" data-i18n="edu.vaucanson.role">CPGE Scientific Preparatory Classes PTSI-PT*</p>
+                        <div class="edu-company-row">
+                            <h3 class="edu-company" data-i18n="edu.vaucanson.name">Lycée Vaucanson Prep School (Grenoble)</h3>
+                            <a href="https://www.linkedin.com/school/lycee-vaucanson/" target="_blank" class="edu-li" onclick="event.stopPropagation()"><i class="fab fa-linkedin"></i></a>
                         </div>
-                        <span class="date" data-i18n="edu.vaucanson.date">September 2020 - July 2022</span>
+                        <div class="edu-meta">
+                            <span class="edu-meta-item"><i class="fas fa-location-dot"></i> Grenoble</span>
+                            <span class="edu-date"><i class="fas fa-calendar-days"></i> <span data-i18n="edu.vaucanson.date">September 2020 - July 2022</span></span>
+                        </div>
+                        <div class="edu-div"></div>
+                        <span class="edu-hint" data-i18n-html="exp.hint"><i class="fas fa-chevron-down"></i> View details</span>
+                        <div class="edu-body"><div class="edu-body-inner">
+                            <div class="edu-desc" data-i18n-html="edu.vaucanson.desc">
+                                Fundamentals in engineering fields
+                                (Mathematics, Physics, Engineering Sciences, Computer Science) to prepare for competitive
+                                entrance exams for French "Grandes Écoles".</div>
+                            <div class="edu-tags">
+                                <span class="edu-tag">Mathematics</span>
+                                <span class="edu-tag">Physics</span>
+                                <span class="edu-tag">Engineering Sciences</span>
+                                <span class="edu-tag">Computer Science</span>
+                                <span class="edu-tag">Algorithms</span>
+                            </div>
+                        </div></div>
                     </div>
-                    <span class="role" data-i18n="edu.vaucanson.role">CPGE Scientific Preparatory Classes
-                        PTSI-PT*</span>
-                    <div class="description" style="color: var(--text-dim);" data-i18n-html="edu.vaucanson.desc">
-                        Fundamentals in engineering fields
-                        (Mathematics, Physics, Engineering Sciences, Computer Science) to prepare for competitive
-                        entrance exams for French "Grandes Écoles".</div>
+                    <div class="edu-pillar">
+                        <i class="fas fa-book-open edu-pillar-icon"></i>
+                        <span class="edu-pillar-label">Prépa PT*</span>
+                    </div>
                 </div>
             </div>
 
         </div>
     </section>
 
-    <section id="projects">
-        <h2 class="section-title reveal" data-i18n="proj.title">Projects</h2>
-        <div class="timeline reveal">
-            <div class="timeline-item">
-                <div class="timeline-marker">
-                    <svg class="hex-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-                        <polygon points="50 5, 95 27.5, 95 72.5, 50 95, 5 72.5, 5 27.5" />
-                    </svg>
-                </div>
-                <div class="timeline-content">
-                    <div class="card-header">
-                        <div class="company-group">
-                            <span class="company-name">Personal Project | Paris</span>
-                            <a href="https://github.com/Thomas-lcb" target="_blank" class="linkedin-link"
-                                title="View on GitHub" onclick="event.stopPropagation()">
-                                <i class="fab fa-github"></i>
-                            </a>
-                        </div>
-                        <span class="date" data-i18n="proj.music.date">May 2025 - Present</span>
-                    </div>
-                    <span class="role" data-i18n="proj.music.role">Music Recommendation App (Dev & AI)</span>
-                    <ul class="description" data-i18n-html="proj.music.desc">
-                        <li>Development in React (with Expo), backend setup, and testing of recommendation algorithms
-                            (similarity, clustering).
-                            Reflection on UI/UX and implementation of the complete recommendation system.
-                            Management of app cache/data and data pipelines.</li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="timeline-item">
-                <div class="timeline-marker">
-                    <svg class="hex-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-                        <polygon points="50 5, 95 27.5, 95 72.5, 50 95, 5 72.5, 5 27.5" />
-                    </svg>
-                </div>
-                <div class="timeline-content">
-                    <div class="card-header">
-                        <div class="company-group">
-                            <span class="company-name">Personal Project | Paris</span>
-                            <a href="https://github.com/Thomas-lcb/Deep-Reinforcemen-tLearning-Trading-Agent"
-                                target="_blank" class="linkedin-link" title="View on GitHub"
-                                onclick="event.stopPropagation()">
-                                <i class="fab fa-github"></i>
-                            </a>
-                        </div>
-                        <span class="date" data-i18n="proj.trading.date">January 2026 - Present</span>
-                    </div>
-                    <span class="role" data-i18n="proj.trading.role">Autonomous Crypto Trading Agent (Deep Reinforcement
-                        Learning)</span>
-                    <ul class="description" data-i18n-html="proj.trading.desc">
-                        <li>Design and development of an autonomous trading agent using Deep Reinforcement Learning
-                            (PPO/SAC, PyTorch, Stable-Baselines3).</li>
-                        <li>Construction of a custom Gym environment with continuous action space, multi-asset support
-                            (10 crypto pairs), and domain randomization.</li>
-                        <li>Implementation of a multi-component reward function (log-return, drawdown penalty, trend
-                            alignment, unrealized PnL).</li>
-                        <li>Data pipeline with multi-timeframe feature engineering (1H/4H/1D/1W), rolling z-score
-                            normalization, and sentiment integration.</li>
-                        <li>Progressive training via curriculum learning with GPU-optimized batch processing (CUDA).
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="timeline-item">
-                <div class="timeline-marker">
-                    <svg class="hex-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-                        <polygon points="50 5, 95 27.5, 95 72.5, 50 95, 5 72.5, 5 27.5" />
-                    </svg>
-                </div>
-                <div class="timeline-content">
-                    <div class="card-header">
-                        <div class="company-group">
-                            <span class="company-name">EMSE | Saint-Étienne</span>
-                            <a href="https://www.linkedin.com/school/mines-st-etienne/" target="_blank"
-                                class="linkedin-link" title="View on LinkedIn" onclick="event.stopPropagation()">
-                                <i class="fab fa-linkedin"></i>
-                            </a>
-                        </div>
-                        <span class="date" data-i18n="proj.research.date">January 2025 - March 2025</span>
-                    </div>
-                    <span class="role" data-i18n="proj.research.role">Research Project (École des Mines)</span>
-                    <ul class="description" data-i18n-html="proj.research.desc">
-                        <li>Development and training of a deep learning model to denoise images damaged by ionizing
-                            radiation (nuclear reactor).
-                            Use of encoder-decoder networks and noise reproduction to generate training data.
-                            Drafting of a research paper and poster to present results.
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="timeline-item">
-                <div class="timeline-marker">
-                    <svg class="hex-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-                        <polygon points="50 5, 95 27.5, 95 72.5, 50 95, 5 72.5, 5 27.5" />
-                    </svg>
-                </div>
-                <div class="timeline-content">
-                    <div class="card-header">
-                        <div class="company-group">
-                            <span class="company-name">Thales | Saint-Étienne</span>
-                            <a href="https://www.linkedin.com/company/thales/" target="_blank" class="linkedin-link"
-                                title="View on LinkedIn" onclick="event.stopPropagation()">
-                                <i class="fab fa-linkedin"></i>
-                            </a>
-                        </div>
-                        <span class="date" data-i18n="proj.thales.date">Sept 2024 - Jan 2025</span>
-                    </div>
-                    <span class="role" data-i18n="proj.thales.role">Industrial Project (École des Mines)</span>
-                    <ul class="description" data-i18n-html="proj.thales.desc">
-                        <li>Training of a constrained image classification AI for infrared pedestrian detection.
-                            Benchmarking existing models and training CNN models using TensorFlow and PyTorch (MobileNet
-                            and YOLO). Testing and analysis of evaluation and training metrics.
-                            Model training on Linux cluster with GPU resource management.
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="timeline-item">
-                <div class="timeline-marker">
-                    <svg class="hex-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-                        <polygon points="50 5, 95 27.5, 95 72.5, 50 95, 5 72.5, 5 27.5" />
-                    </svg>
-                </div>
-                <div class="timeline-content">
-                    <div class="card-header">
-                        <div class="company-group">
-                            <span class="company-name">Fermavers | Saint-Étienne</span>
-                            <a href="https://www.linkedin.com/company/fermavers/" target="_blank" class="linkedin-link"
-                                title="View on LinkedIn" onclick="event.stopPropagation()">
-                                <i class="fab fa-linkedin"></i>
-                            </a>
-                        </div>
-                        <span class="date" data-i18n="proj.fermavers.date">February 2024 - June 2024</span>
-                    </div>
-                    <span class="role" data-i18n="proj.fermavers.role">PRICE Program (École des Mines)</span>
-                    <ul class="description" data-i18n-html="proj.fermavers.desc">
-                        <li>Development of a Black Soldier Fly larvae breeding tool for organic waste valorization into
-                            protein.
-                            Module design in CAD (Inventor), and resource flow management for larvae welfare.
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="timeline-item">
-                <div class="timeline-marker">
-                    <svg class="hex-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-                        <polygon points="50 5, 95 27.5, 95 72.5, 50 95, 5 72.5, 5 27.5" />
-                    </svg>
-                </div>
-                <div class="timeline-content">
-                    <div class="card-header">
-                        <div class="company-group">
-                            <span class="company-name">HEPSE | Saint-Étienne</span>
-                        </div>
-                        <span class="date" data-i18n="proj.hepse.date">September 2022 - May 2023</span>
-                    </div>
-                    <span class="role" data-i18n="proj.hepse.role">Civic Project (École des Mines)</span>
-                    <ul class="description" data-i18n-html="proj.hepse.desc">
-                        <li>Development of an application to promote Saint-Étienne's heritage via an interactive
-                            treasure hunt throughout the city.
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-
-            <div class="timeline-item">
-                <div class="timeline-marker">
-                    <svg class="hex-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-                        <polygon points="50 5, 95 27.5, 95 72.5, 50 95, 5 72.5, 5 27.5" />
-                    </svg>
-                </div>
-                <div class="timeline-content">
-                    <div class="card-header">
-                        <div class="company-group">
-                            <span class="company-name">TIPE (CPGE) | Grenoble</span>
-                        </div>
-                        <span class="date" data-i18n="proj.tipe.date">September 2020 - July 2022</span>
-                    </div>
-                    <span class="role" data-i18n="proj.tipe.role">Preparatory Class Project (TIPE)</span>
-                    <ul class="description" data-i18n-html="proj.tipe.desc">
-                        <li>Study, simulation, and modeling of an insulin pump and its effect on the human body
-                            (mechanically represented).
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-
+    <section id="projects" class="projects-section">
+        <div class="section-header">
+            <h2 class="section-title reveal" data-i18n="proj.title">Projects</h2>
         </div>
+
+        <div id="proj-expand-overlay"></div>
+        <div class="carousel-outer reveal" id="projCarouselOuter">
+            <div class="carousel-track" id="projCarouselTrack">
+
+                <div class="proj-card acc-c1" data-idx="0">
+                    <div class="proj-visual"><canvas class="card-canvas" data-type="trading"></canvas><div class="proj-visual-overlay"></div><span class="proj-type-badge">Deep RL</span><span class="proj-year">2026</span></div>
+                    <div class="proj-body">
+                        <div class="proj-title-row">
+                            <h3 class="proj-title" data-i18n="proj.trading.role">Autonomous Crypto Trading Agent</h3>
+                            <a class="proj-gh-link" href="https://github.com/Thomas-lcb/Deep-Reinforcemen-tLearning-Trading-Agent" target="_blank" onclick="event.stopPropagation()" title="GitHub"><i class="fab fa-github"></i></a>
+                        </div>
+                        <p class="proj-desc-short" data-i18n="proj.trading.short">Autonomous trading agent using Deep RL (PPO/SAC). Custom Gym environment, 10 crypto pairs, multi-component reward.</p>
+                        <div class="proj-tags-short"><span class="proj-tag">Reinforcement Learning</span><span class="proj-tag">TensorFlow / PyTorch</span><span class="proj-tag">CUDA</span><span class="proj-tag">Stable-Baselines3</span></div>
+                        <div class="proj-extra"></div>
+                        <div class="proj-expand-hint"><i class="fas fa-chevron-down arrow"></i><span class="hint-expand" data-i18n="proj.hint.expand">See project</span><span class="hint-collapse" data-i18n="proj.hint.collapse">Collapse</span></div>
+                    </div>
+                </div>
+
+                <div class="proj-card acc-c1c2" data-idx="1">
+                    <div class="proj-visual"><canvas class="card-canvas" data-type="music"></canvas><div class="proj-visual-overlay"></div><span class="proj-type-badge">Dev &amp; AI</span><span class="proj-year">2025</span></div>
+                    <div class="proj-body">
+                        <div class="proj-title-row">
+                            <h3 class="proj-title" data-i18n="proj.music.role">Music Recommendation App</h3>
+                            <a class="proj-gh-link" href="https://github.com/Thomas-lcb" target="_blank" onclick="event.stopPropagation()" title="GitHub"><i class="fab fa-github"></i></a>
+                        </div>
+                        <p class="proj-desc-short" data-i18n="proj.music.short">Mobile music recommendation app with similarity algorithms, clustering, and full data pipeline.</p>
+                        <div class="proj-tags-short"><span class="proj-tag">React</span><span class="proj-tag">Expo</span><span class="proj-tag">NLP</span><span class="proj-tag">Machine Learning</span></div>
+                        <div class="proj-extra"></div>
+                        <div class="proj-expand-hint"><i class="fas fa-chevron-down arrow"></i><span class="hint-expand" data-i18n="proj.hint.expand">See project</span><span class="hint-collapse" data-i18n="proj.hint.collapse">Collapse</span></div>
+                    </div>
+                </div>
+
+                <div class="proj-card acc-c2" data-idx="2">
+                    <div class="proj-visual"><canvas class="card-canvas" data-type="noise"></canvas><div class="proj-visual-overlay"></div><span class="proj-type-badge">Computer Vision</span><span class="proj-year">2025</span></div>
+                    <div class="proj-body">
+                        <div class="proj-title-row">
+                            <h3 class="proj-title" data-i18n="proj.research.role">Image Denoising — Nuclear Radiation</h3>
+                            <a class="proj-li-link" href="https://www.linkedin.com/school/mines-st-etienne/" target="_blank" onclick="event.stopPropagation()" title="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                        </div>
+                        <p class="proj-desc-short" data-i18n="proj.research.short">Encoder-decoder network to denoise images damaged by ionizing radiation (nuclear reactor).</p>
+                        <div class="proj-tags-short"><span class="proj-tag">Deep Learning</span><span class="proj-tag">TensorFlow / PyTorch</span><span class="proj-tag">Computer Vision</span></div>
+                        <div class="proj-extra"></div>
+                        <div class="proj-expand-hint"><i class="fas fa-chevron-down arrow"></i><span class="hint-expand" data-i18n="proj.hint.expand">See project</span><span class="hint-collapse" data-i18n="proj.hint.collapse">Collapse</span></div>
+                    </div>
+                </div>
+
+                <div class="proj-card acc-c2c3" data-idx="3">
+                    <div class="proj-visual"><canvas class="card-canvas" data-type="detection"></canvas><div class="proj-visual-overlay"></div><span class="proj-type-badge">Computer Vision</span><span class="proj-year">2024</span></div>
+                    <div class="proj-body">
+                        <div class="proj-title-row">
+                            <h3 class="proj-title" data-i18n="proj.thales.role">Pedestrian Detection — Thales</h3>
+                            <a class="proj-li-link" href="https://www.linkedin.com/company/thales/" target="_blank" onclick="event.stopPropagation()" title="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                        </div>
+                        <p class="proj-desc-short" data-i18n="proj.thales.short">Constrained infrared pedestrian classification AI. MobileNet/YOLO benchmark, Linux GPU cluster.</p>
+                        <div class="proj-tags-short"><span class="proj-tag">Computer Vision</span><span class="proj-tag">TensorFlow / PyTorch</span><span class="proj-tag">Linux</span></div>
+                        <div class="proj-extra"></div>
+                        <div class="proj-expand-hint"><i class="fas fa-chevron-down arrow"></i><span class="hint-expand" data-i18n="proj.hint.expand">See project</span><span class="hint-collapse" data-i18n="proj.hint.collapse">Collapse</span></div>
+                    </div>
+                </div>
+
+                <div class="proj-card acc-c3" data-idx="4">
+                    <div class="proj-visual"><canvas class="card-canvas" data-type="organic"></canvas><div class="proj-visual-overlay"></div><span class="proj-type-badge">CAO</span><span class="proj-year">2024</span></div>
+                    <div class="proj-body">
+                        <div class="proj-title-row">
+                            <h3 class="proj-title" data-i18n="proj.fermavers.role">BSF Larvae Breeding — Fermavers</h3>
+                            <a class="proj-li-link" href="https://www.linkedin.com/company/fermavers/" target="_blank" onclick="event.stopPropagation()" title="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                        </div>
+                        <p class="proj-desc-short" data-i18n="proj.fermavers.short">Organic waste valorization module via BSF larvae breeding. Inventor CAD design, flow management.</p>
+                        <div class="proj-tags-short"><span class="proj-tag">SolidWorks</span><span class="proj-tag">Systems Design</span><span class="proj-tag">Biotech</span></div>
+                        <div class="proj-extra"></div>
+                        <div class="proj-expand-hint"><i class="fas fa-chevron-down arrow"></i><span class="hint-expand" data-i18n="proj.hint.expand">See project</span><span class="hint-collapse" data-i18n="proj.hint.collapse">Collapse</span></div>
+                    </div>
+                </div>
+
+                <div class="proj-card acc-c3c4" data-idx="5">
+                    <div class="proj-visual"><canvas class="card-canvas" data-type="map"></canvas><div class="proj-visual-overlay"></div><span class="proj-type-badge">Mobile Dev</span><span class="proj-year">2023</span></div>
+                    <div class="proj-body">
+                        <div class="proj-title-row">
+                            <h3 class="proj-title" data-i18n="proj.hepse.role">Heritage App — HEPSE</h3>
+                        </div>
+                        <p class="proj-desc-short" data-i18n="proj.hepse.short">Mobile app for Saint-Étienne heritage via an interactive geolocated treasure hunt.</p>
+                        <div class="proj-tags-short"><span class="proj-tag">Mobile Dev</span><span class="proj-tag">UI/UX</span><span class="proj-tag">Geolocation</span></div>
+                        <div class="proj-extra"></div>
+                        <div class="proj-expand-hint"><i class="fas fa-chevron-down arrow"></i><span class="hint-expand" data-i18n="proj.hint.expand">See project</span><span class="hint-collapse" data-i18n="proj.hint.collapse">Collapse</span></div>
+                    </div>
+                </div>
+
+                <div class="proj-card acc-c4" data-idx="6">
+                    <div class="proj-visual"><canvas class="card-canvas" data-type="wave"></canvas><div class="proj-visual-overlay"></div><span class="proj-type-badge">Simulation</span><span class="proj-year">2022</span></div>
+                    <div class="proj-body">
+                        <div class="proj-title-row">
+                            <h3 class="proj-title" data-i18n="proj.tipe.role">Insulin Pump — TIPE (CPGE)</h3>
+                        </div>
+                        <p class="proj-desc-short" data-i18n="proj.tipe.short">Study, simulation, and modeling of an insulin pump and its effect on the mechanically represented human body.</p>
+                        <div class="proj-tags-short"><span class="proj-tag">Simulation</span><span class="proj-tag">MATLAB</span><span class="proj-tag">Biomedical</span></div>
+                        <div class="proj-extra"></div>
+                        <div class="proj-expand-hint"><i class="fas fa-chevron-down arrow"></i><span class="hint-expand" data-i18n="proj.hint.expand">See project</span><span class="hint-collapse" data-i18n="proj.hint.collapse">Collapse</span></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="carousel-dots" id="projDots"></div>
     </section>
 
     <section id="contact">
@@ -1259,7 +696,6 @@
                 <i class="fab fa-github"></i>
                 <span>GitHub</span>
             </a>
-
         </div>
         <div class="back-to-top" onclick="smoothScrollTo('hero')">
             <i class="fas fa-arrow-up"></i>
@@ -1271,354 +707,7 @@
         <p>&copy;2026 - Thomas Lacombe</p>
     </footer>
 
-    <script>
-        // --- ANIMATIONS GENERALES ---
-        const revealElements = document.querySelectorAll('.reveal');
-        const revealOnScroll = () => {
-            const windowHeight = window.innerHeight;
-            revealElements.forEach((reveal) => {
-                const elementTop = reveal.getBoundingClientRect().top;
-                if (elementTop < windowHeight - 100) reveal.classList.add('active');
-            });
-        };
-        window.addEventListener('scroll', revealOnScroll);
-        revealOnScroll();
-
-        function smoothScrollTo(targetId) {
-            const target = document.getElementById(targetId);
-            if (!target) return;
-            const targetPosition = target.getBoundingClientRect().top + window.scrollY;
-            const startPosition = window.scrollY;
-            const distance = targetPosition - startPosition;
-            const duration = 1500;
-            let startTime = null;
-            function animation(currentTime) {
-                if (startTime === null) startTime = currentTime;
-                const timeElapsed = currentTime - startTime;
-                const ease = (t) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-                const run = ease(Math.min(timeElapsed / duration, 1));
-                window.scrollTo(0, startPosition + (distance * run));
-                if (timeElapsed < duration) requestAnimationFrame(animation);
-            }
-            requestAnimationFrame(animation);
-        }
-
-        const timelineItems = document.querySelectorAll('.timeline-item');
-        timelineItems.forEach(item => {
-            item.addEventListener('click', () => {
-                item.classList.toggle('expanded');
-            });
-        });
-
-        // =========================================================
-        // 1. PARTICULES DE LA SECTION HERO (EXISTANT)
-        // =========================================================
-        const heroCanvas = document.getElementById('particles-canvas');
-        const heroCtx = heroCanvas.getContext('2d');
-        let heroParticlesArray;
-        let mouse = { x: null, y: null, radius: 150 };
-        let flashActive = false;
-
-        // Important: On redimensionne les 2 canvas au chargement et resize
-        function resizeCanvases() {
-            heroCanvas.width = window.innerWidth;
-            heroCanvas.height = window.innerHeight;
-            bgCanvas.width = window.innerWidth;
-            bgCanvas.height = window.innerHeight;
-            initHeroParticles();
-            initBgStars(); // Re-génère les étoiles de fond
-        }
-
-        window.addEventListener('mousemove', (event) => {
-            mouse.x = event.x;
-            mouse.y = event.y;
-        });
-
-        function handleClickHero(e) {
-            e.preventDefault();
-            flashActive = true;
-            setTimeout(() => { flashActive = false; }, 280);
-            setTimeout(() => { smoothScrollTo('about'); }, 1000);
-        }
-
-        class HeroParticle {
-            constructor(x, y, directionX, directionY, size) {
-                this.x = x; this.y = y;
-                this.directionX = directionX; this.directionY = directionY;
-                this.size = size; this.baseSize = size;
-                this.baseR = 56; this.baseG = 189; this.baseB = 248; // #38bdf8
-                this.currR = this.baseR; this.currG = this.baseG; this.currB = this.baseB;
-            }
-            draw() {
-                heroCtx.beginPath();
-                heroCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
-                heroCtx.fillStyle = `rgb(${Math.floor(this.currR)}, ${Math.floor(this.currG)}, ${Math.floor(this.currB)})`;
-                heroCtx.fill();
-            }
-            update() {
-                // Interaction souris
-                let dx = mouse.x - this.x;
-                let dy = mouse.y - this.y;
-                let distance = Math.sqrt(dx * dx + dy * dy);
-                if (distance < mouse.radius) {
-                    let forceDirectionX = dx / distance;
-                    let forceDirectionY = dy / distance;
-                    let force = (mouse.radius - distance) / mouse.radius;
-                    this.x -= forceDirectionX * force * 3;
-                    this.y -= forceDirectionY * force * 3;
-                }
-                // Mouvement
-                if (this.x > heroCanvas.width || this.x < 0) this.directionX = -this.directionX;
-                if (this.y > heroCanvas.height || this.y < 0) this.directionY = -this.directionY;
-                this.x += this.directionX;
-                this.y += this.directionY;
-                // Animation flash
-                const growthSpeed = 0.4;
-                const colorSpeed = 8;
-                const maxSizeScale = 5;
-                if (flashActive) {
-                    if (this.size < this.baseSize * maxSizeScale) this.size += growthSpeed;
-                    if (this.currR < 255) this.currR += colorSpeed;
-                    if (this.currG < 255) this.currG += colorSpeed;
-                    if (this.currB < 255) this.currB += colorSpeed;
-                } else {
-                    if (this.size > this.baseSize) this.size -= growthSpeed * 0.4;
-                    if (this.currR > this.baseR) this.currR -= colorSpeed * 0.4;
-                    if (this.currG > this.baseG) this.currG -= colorSpeed * 0.4;
-                    if (this.currB > this.baseB) this.currB -= colorSpeed * 0.4;
-                }
-                this.currR = Math.max(this.baseR, Math.min(255, this.currR));
-                this.currG = Math.max(this.baseG, Math.min(255, this.currG));
-                this.currB = Math.max(this.baseB, Math.min(255, this.currB));
-                this.draw();
-            }
-        }
-
-        function initHeroParticles() {
-            heroParticlesArray = [];
-            // Un peu moins de particules pour ne pas saturer
-            let numberOfParticles = (heroCanvas.height * heroCanvas.width) / 10000;
-            for (let i = 0; i < numberOfParticles; i++) {
-                let size = (Math.random() * 3) + 1;
-                let x = Math.random() * heroCanvas.width;
-                let y = Math.random() * heroCanvas.height;
-                let directionX = (Math.random() * 1.5) - 0.75;
-                let directionY = (Math.random() * 1.5) - 0.75;
-                heroParticlesArray.push(new HeroParticle(x, y, directionX, directionY, size));
-            }
-        }
-
-        // =========================================================
-        // 2. SCINTILLEMENT DE FOND (ARRIERE PLAN GLOBAL)
-        // =========================================================
-        const bgCanvas = document.getElementById('bg-stars');
-        const bgCtx = bgCanvas.getContext('2d');
-        let bgStarsArray = [];
-
-        class Star {
-            constructor() {
-                this.x = Math.random() * bgCanvas.width;
-                this.y = Math.random() * bgCanvas.height;
-                this.size = Math.random() * 1.5; // Petites étoiles
-                this.baseAlpha = Math.random(); // Transparence de départ
-                this.speedAlpha = Math.random() * 0.02 + 0.005; // Vitesse de scintillement
-                this.increasing = true;
-
-                // Couleur aléatoire entre Cyan et Violet pour "effet sympa"
-                // Cyan: 190, Violet: 250 (Hue)
-                this.hue = Math.floor(Math.random() * 60) + 190;
-            }
-
-            draw() {
-                bgCtx.fillStyle = `hsla(${this.hue}, 100%, 70%, ${this.baseAlpha})`;
-                bgCtx.beginPath();
-                bgCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                bgCtx.fill();
-            }
-
-            update() {
-                // Scintillement (Changement d'Alpha)
-                if (this.increasing) {
-                    this.baseAlpha += this.speedAlpha;
-                    if (this.baseAlpha >= 1) this.increasing = false;
-                } else {
-                    this.baseAlpha -= this.speedAlpha;
-                    if (this.baseAlpha <= 0.1) {
-                        this.increasing = true;
-                        // Déplacement léger quand l'étoile est presque éteinte
-                        this.x = Math.random() * bgCanvas.width;
-                        this.y = Math.random() * bgCanvas.height;
-                        this.hue = Math.floor(Math.random() * 60) + 190; // Change légèrement de couleur
-                    }
-                }
-                this.draw();
-            }
-        }
-
-        function initBgStars() {
-            bgStarsArray = [];
-            // Environ 80 étoiles pour un fond subtil
-            let numberOfStars = 80;
-            for (let i = 0; i < numberOfStars; i++) {
-                bgStarsArray.push(new Star());
-            }
-        }
-
-        // =========================================================
-        // BOUCLE D'ANIMATION PRINCIPALE
-        // =========================================================
-        function animate() {
-            // Animation Hero
-            heroCtx.clearRect(0, 0, heroCanvas.width, heroCanvas.height);
-            for (let i = 0; i < heroParticlesArray.length; i++) {
-                heroParticlesArray[i].update();
-            }
-
-            // Animation Fond Scintillant
-            bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
-            for (let i = 0; i < bgStarsArray.length; i++) {
-                bgStarsArray[i].update();
-            }
-
-            requestAnimationFrame(animate);
-        }
-
-        window.addEventListener('resize', resizeCanvases);
-
-        // Lancement
-        resizeCanvases(); // Initie tout
-        animate(); // Lance la boucle
-
-        // =========================================================
-        // INTERNATIONALISATION (i18n) EN / FR
-        // =========================================================
-        let currentLang = localStorage.getItem('lang') || 'en';
-
-        const translations = {
-            fr: {
-                // Nav
-                'nav.home': 'Accueil',
-                'nav.about': 'À propos',
-                'nav.skills': 'Compétences',
-                'nav.experience': 'Expérience',
-                'nav.education': 'Formation',
-                'nav.projects': 'Projets',
-                'nav.contact': 'Contact/CV',
-                // Hero
-                'hero.subtitle': 'Ingénieur Machine Learning (IA & Systèmes Logiciels)',
-                'hero.btn': 'Découvrir mon profil',
-                // About
-                'about.title': 'À propos',
-                'about.p1': 'Diplômé ingénieur spécialisé en Data Science et Intelligence Artificielle, je recherche ma première opportunité professionnelle à partir de février 2026, à la suite de mon stage de fin d\'études.',
-                'about.p2': 'Mon parcours hybride m\'a permis de mener divers projets concrets en Computer Vision, NLP, systèmes RAG (Retrieval-Augmented Generation) et classification.',
-                'about.p3': 'Curieux et motivé, je suis impatient de mettre mes compétences en Data Science au service de défis variés et concrets.',
-                'about.location': 'Boulogne Billancourt (92100)',
-                // Skills
-                'skills.title': 'Compétences',
-                'skills.ai': 'IA & Data Science',
-                'skills.programming': 'Programmation',
-                'skills.office': 'Bureautique & Autres',
-                'skills.french': 'Français (Natif)',
-                'skills.english': 'Anglais (C1)',
-                'skills.spanish': 'Espagnol (B2)',
-                'skills.japanese': 'Japonais (A1)',
-                'skills.driving': 'Permis B - Véhiculé',
-                // Experience
-                'exp.title': 'Expérience',
-                'exp.dassault.date': 'Mars 2025 - Sept 2025 (6 mois)',
-                'exp.dassault.role': 'Stagiaire Data Scientist – Intelligence Artificielle',
-                'exp.dassault.desc': '<li>Développement et déploiement de solutions IA pour améliorer la performance de la Direction des Achats.</li><li>Mise en place de modèles de classification (arbres de décision, gradient boosting, réseaux de neurones), extraction de données via OCR, et développement de programmes pour simplifier les processus.</li><li>Travail sur des projets LLM, notamment la mise en œuvre de systèmes RAG (et auto-RAG) pour faciliter l\'accès à l\'information et optimiser la prise de décision.</li><li>Outil conteneurisé et déployé via Docker, avec une interface simple (Streamlit) accessible via navigateur web.</li><li>Web scraping (avec Selenium) pour alimenter les bases de connaissances.</li><li>Présentation des résultats dans Power BI lié aux données Dassault via des requêtes SQL.</li>',
-                'exp.mgf.date': 'Mai 2024 - Août 2024 (3 mois)',
-                'exp.mgf.role': 'Stagiaire Ingénieur Conception CAO',
-                'exp.mgf.desc': '<li>Stage de 3 mois en tant qu\'ingénieur assistant au Bureau des Méthodes chez MGF Grimaldi :<br>- Création de montages adaptés à l\'usinage de haute précision (SolidWorks)<br>- Reproduction de pièces en 3D<br>- Impression 3D de pièces/prototypes<br>- Lecture/Création de plans</li>',
-                'exp.je.date': 'Décembre 2022 - Mai 2024 (1,5 ans)',
-                'exp.je.role': 'Chargé d\'Affaires',
-                'exp.je.desc': '<li>Chargé d\'affaires et chef de projet au sein de la Junior-Entreprise de l\'école.<br>- Définir et piloter les études soumises par les entreprises à notre Junior-Entreprise.<br>- Gérer les phases administratives : cadrage, proposition, budgétisation, signature...<br>- Manager des équipes de consultants.<br>- Gérer des parties prenantes aux profils et attentes variés.<br>- Participation au Congrès National des Junior-Entrepreneurs.</li>',
-                'exp.tecumseh.date': 'Janvier 2023 - Février 2023 (1 mois)',
-                'exp.tecumseh.role': 'Stagiaire Opérateur de Production',
-                'exp.tecumseh.desc': '<li>Stage en tant qu\'opérateur de production :<br>- Production sur différentes machines de l\'atelier d\'usinage.<br>- Contrôle qualité des pièces.<br>- Maintenance des machines.</li>',
-                // Education
-                'edu.title': 'Formation',
-                'edu.mines.date': 'Septembre 2022 - Octobre 2025',
-                'edu.mines.role': 'Majeure Data Science & IA - Option Mécanique (Diplôme d\'ingénieur)',
-                'edu.mines.desc': '<strong>3ème année – Majeure Data Science :</strong><br>Cours : Fondements probabilistes, apprentissage statistique, machine learning, métamodélisation et optimisation, intelligence artificielle.<br>Projets : Détection de piétons pour Thales via ML, reconstruction d\'images bruitées par radiation via deep learning.<br><br><strong>2ème année :</strong><br>Cours : Semestre à Seoul National University, management de la transition.<br>Électifs : Entrepreneuriat, économie, design thinking.<br>Projet : Conception CAO d\'un module autonome de production et d\'élevage.<br><br><strong>1ère année – Tronc commun :</strong><br>Cours : Physique (matériaux, thermodynamique, mécanique des fluides, mécanique des milieux continus), Informatique (C, Java, Python, SQL, algorithmique), Mathématiques (statistiques, RO, traitement du signal), marketing, économie, droit des sociétés, développement durable.<br>Projets : Étude d\'une centrale solaire (logiciel PRO II), conception d\'un véhicule à énergie mécanique, création d\'une app pour l\'association HPSE.',
-                'edu.snu.date': 'Septembre 2023 - Janvier 2024',
-                'edu.snu.role': 'Échange International (6 mois)',
-                'edu.snu.desc': 'Semestre d\'échange académique au département de Génie Mécanique :<br>- Analyse numérique en génie mécanique<br>- Mécanique des robots<br>- Finance de marché',
-                'edu.vaucanson.name': 'Lycée Vaucanson (Grenoble)',
-                'edu.vaucanson.date': 'Septembre 2020 - Juillet 2022',
-                'edu.vaucanson.role': 'Classes Préparatoires Scientifiques PTSI-PT*',
-                'edu.vaucanson.desc': 'Fondamentaux dans les domaines de l\'ingénierie (Mathématiques, Physique, Sciences de l\'Ingénieur, Informatique) pour préparer les concours d\'entrée aux Grandes Écoles.',
-                // Projects
-                'proj.title': 'Projets',
-                'proj.music.date': 'Mai 2025 - Présent',
-                'proj.music.role': 'Application de Recommandation Musicale (Dev & IA)',
-                'proj.music.desc': '<li>Développement en React (avec Expo), mise en place du backend, et test d\'algorithmes de recommandation (similarité, clustering). Réflexion UI/UX et implémentation du système complet de recommandation. Gestion du cache/données de l\'app et des pipelines de données.</li>',
-                'proj.trading.date': 'Janvier 2026 - Présent',
-                'proj.trading.role': 'Agent de Trading Crypto Autonome (Deep Reinforcement Learning)',
-                'proj.trading.desc': '<li>Conception et développement d\'un agent de trading autonome utilisant le Deep Reinforcement Learning (PPO/SAC, PyTorch, Stable-Baselines3).</li><li>Construction d\'un environnement Gym personnalisé avec espace d\'action continu, support multi-actifs (10 paires crypto) et randomisation de domaine.</li><li>Implémentation d\'une fonction de récompense multi-composantes (log-return, pénalité de drawdown, alignement de tendance, PnL latent).</li><li>Pipeline de données avec feature engineering multi-timeframe (1H/4H/1D/1W), normalisation z-score glissante et intégration de sentiment.</li><li>Entraînement progressif via curriculum learning avec traitement par batch optimisé GPU (CUDA).</li>',
-                'proj.research.date': 'Janvier 2025 - Mars 2025',
-                'proj.research.role': 'Projet de Recherche (École des Mines)',
-                'proj.research.desc': '<li>Développement et entraînement d\'un modèle de deep learning pour débruiter des images endommagées par des radiations ionisantes (réacteur nucléaire). Utilisation de réseaux encodeur-décodeur et reproduction de bruit pour générer des données d\'entraînement. Rédaction d\'un article de recherche et d\'un poster pour présenter les résultats.</li>',
-                'proj.thales.date': 'Sept 2024 - Jan 2025',
-                'proj.thales.role': 'Projet Industriel (École des Mines)',
-                'proj.thales.desc': '<li>Entraînement d\'une IA de classification d\'images contrainte pour la détection infrarouge de piétons. Benchmarking de modèles existants et entraînement de modèles CNN avec TensorFlow et PyTorch (MobileNet et YOLO). Tests et analyse des métriques d\'évaluation et d\'entraînement. Entraînement des modèles sur cluster Linux avec gestion des ressources GPU.</li>',
-                'proj.fermavers.date': 'Février 2024 - Juin 2024',
-                'proj.fermavers.role': 'Programme PRICE (École des Mines)',
-                'proj.fermavers.desc': '<li>Développement d\'un outil d\'élevage de larves de mouches soldat noires pour la valorisation des déchets organiques en protéines. Conception du module en CAO (Inventor) et gestion des flux de ressources pour le bien-être des larves.</li>',
-                'proj.hepse.date': 'Septembre 2022 - Mai 2023',
-                'proj.hepse.role': 'Projet Civique (École des Mines)',
-                'proj.hepse.desc': '<li>Développement d\'une application pour promouvoir le patrimoine de Saint-Étienne via une chasse au trésor interactive à travers la ville.</li>',
-                'proj.tipe.date': 'Septembre 2020 - Juillet 2022',
-                'proj.tipe.role': 'Projet de Classe Préparatoire (TIPE)',
-                'proj.tipe.desc': '<li>Étude, simulation et modélisation d\'une pompe à insuline et de son effet sur le corps humain (représenté mécaniquement).</li>',
-                // Contact
-                'contact.title': 'Me Contacter / CV',
-                'contact.resume': 'Mon CV',
-                'contact.backtotop': 'Retour en haut',
-            }
-        };
-
-        function applyLang(lang) {
-            currentLang = lang;
-            localStorage.setItem('lang', lang);
-            document.documentElement.lang = lang;
-
-            // Update button text to show the OTHER language
-            const btn = document.querySelector('.lang-toggle');
-            if (btn) btn.textContent = lang === 'en' ? 'EN' : 'FR';
-
-            // data-i18n: textContent swap
-            document.querySelectorAll('[data-i18n]').forEach(el => {
-                const key = el.getAttribute('data-i18n');
-                if (lang === 'fr' && translations.fr[key]) {
-                    if (!el.dataset.i18nOriginal) el.dataset.i18nOriginal = el.textContent;
-                    el.textContent = translations.fr[key];
-                } else if (lang === 'en' && el.dataset.i18nOriginal) {
-                    el.textContent = el.dataset.i18nOriginal;
-                }
-            });
-
-            // data-i18n-html: innerHTML swap
-            document.querySelectorAll('[data-i18n-html]').forEach(el => {
-                const key = el.getAttribute('data-i18n-html');
-                if (lang === 'fr' && translations.fr[key]) {
-                    if (!el.dataset.i18nOriginalHtml) el.dataset.i18nOriginalHtml = el.innerHTML;
-                    el.innerHTML = translations.fr[key];
-                } else if (lang === 'en' && el.dataset.i18nOriginalHtml) {
-                    el.innerHTML = el.dataset.i18nOriginalHtml;
-                }
-            });
-        }
-
-        function toggleLang() {
-            applyLang(currentLang === 'en' ? 'fr' : 'en');
-        }
-
-        // Apply saved language on load
-        if (currentLang !== 'en') applyLang(currentLang);
-
-    </script>
+    <script src="script.js"></script>
 </body>
 
 </html>
