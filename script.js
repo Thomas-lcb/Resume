@@ -1676,13 +1676,25 @@ eduItems.forEach(item => {
     }
     function animCode(ctx, w, h, cv, idx, clr) {
         const bg = ctx.createLinearGradient(0, 0, w, h); bg.addColorStop(0, `rgba(${clr},.12)`); bg.addColorStop(1, '#080e1a');
-        const WW = w * 0.60, WH = h * 0.72, WX = (w - WW) / 2, WY = (h - WH) / 2, NAV = WH * 0.18;
-        const rowFracs = [0.50, 0.78, 0.62, 0.88, 0.42];
+        const WW = w * 0.60, WH = h * 0.68, WX = (w - WW) / 2, WY = (h - WH) / 2 + 8, NAV = WH * 0.17;
+        // rows: [indent(0|1), widthFrac, hasTagsAfter]
+        const rows = [[0,.52,0],[0,.84,0],[1,.60,0],[1,.72,0],[0,.40,1],[0,.66,0]];
+        const CONTENT_TOP0 = WY + NAV + WH * 0.20, SPACING0 = (WY + WH - CONTENT_TOP0 - WH * 0.05) / (rows.length + 0.5);
+        const heroY0 = WY + NAV + WH * 0.04, heroH0 = WH * 0.13;
+        const waypoints = [
+            { x: WX + WW * 0.55, y: WY + NAV * 0.50 },
+            { x: WX + WW * 0.30, y: heroY0 + heroH0 * 0.50 },
+            { x: WX + WW * 0.40, y: CONTENT_TOP0 + SPACING0 * 1.7 },
+            { x: WX + WW * 0.20, y: CONTENT_TOP0 + SPACING0 * 3.7 },
+            { x: WX + WW * 0.18, y: CONTENT_TOP0 + SPACING0 * 5.5 },
+        ];
+        let curX = waypoints[0].x, curY = waypoints[0].y, wpIdx = 0, wpTimer = 0;
         let t = 0;
         (function d() {
             if (cv.__stopped) return;
             if (!cv.__visible) { cv.__paused = true; cv.__loop = d; return; } cv.__loop = d;
             ctx.clearRect(0, 0, w, h); ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
+            // Grid
             ctx.strokeStyle = `rgba(${clr},.05)`; ctx.lineWidth = 1;
             for (let x = 0; x < w; x += 30) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
             for (let y = 0; y < h; y += 30) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
@@ -1691,23 +1703,44 @@ eduItems.forEach(item => {
             ctx.shadowBlur = 12 + pulse * 8; ctx.shadowColor = `rgba(${clr},.8)`;
             ctx.strokeStyle = `rgba(${clr},${0.55 + pulse * 0.35})`; ctx.lineWidth = 1.5;
             ctx.beginPath(); ctx.roundRect(WX, WY, WW, WH, 6); ctx.stroke(); ctx.shadowBlur = 0;
-            // Nav bar
-            ctx.fillStyle = `rgba(${clr},.07)`; ctx.beginPath(); ctx.roundRect(WX, WY, WW, NAV, [6, 6, 0, 0]); ctx.fill();
-            ctx.strokeStyle = `rgba(${clr},.12)`; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(WX, WY + NAV); ctx.lineTo(WX + WW, WY + NAV); ctx.stroke();
+            // Nav bar background
+            ctx.fillStyle = `rgba(${clr},.07)`; ctx.beginPath(); ctx.roundRect(WX, WY, WW, NAV, [6,6,0,0]); ctx.fill();
+            ctx.strokeStyle = `rgba(${clr},.12)`; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(WX, WY + NAV); ctx.lineTo(WX + WW, WY + NAV); ctx.stroke();
             // 3 dots
             for (let i = 0; i < 3; i++) {
                 ctx.fillStyle = `rgba(${clr},${0.9 - i * 0.3})`; ctx.shadowBlur = i === 0 ? 5 : 0; ctx.shadowColor = `rgba(${clr},1)`;
                 ctx.beginPath(); ctx.arc(WX + 14 + i * 13, WY + NAV / 2, 3.5, 0, Math.PI * 2); ctx.fill();
             }
             ctx.shadowBlur = 0;
+            // URL bar
+            const urlX = WX + WW * 0.27, urlW = WW * 0.46, urlY = WY + NAV * 0.22, urlH = NAV * 0.56;
+            ctx.strokeStyle = `rgba(${clr},.22)`; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.roundRect(urlX, urlY, urlW, urlH, 3); ctx.stroke();
+            ctx.fillStyle = `rgba(${clr},.10)`; ctx.beginPath(); ctx.roundRect(urlX, urlY, urlW, urlH, 3); ctx.fill();
+            ctx.fillStyle = `rgba(${clr},.45)`; ctx.font = `${Math.round(urlH * 0.58)}px monospace`;
+            ctx.fillText('thomas-lcb.github.io', urlX + 6, urlY + urlH * 0.72);
+            // Hero block inside window
+            const heroY = WY + NAV + WH * 0.04, heroH = WH * 0.13;
+            ctx.fillStyle = `rgba(${clr},.05)`; ctx.beginPath(); ctx.roundRect(WX + WW * 0.08, heroY, WW * 0.84, heroH, 3); ctx.fill();
+            ctx.strokeStyle = `rgba(${clr},.15)`; ctx.lineWidth = 1; ctx.beginPath(); ctx.roundRect(WX + WW * 0.08, heroY, WW * 0.84, heroH, 3); ctx.stroke();
+            // Hero title bar
+            ctx.fillStyle = `rgba(${clr},.55)`; ctx.shadowBlur = 4; ctx.shadowColor = `rgba(${clr},1)`;
+            ctx.beginPath(); ctx.roundRect(WX + WW * 0.08 + 8, heroY + heroH * 0.25, WW * 0.40, 5, 2); ctx.fill();
+            ctx.fillStyle = `rgba(${clr},.28)`; ctx.shadowBlur = 0;
+            ctx.beginPath(); ctx.roundRect(WX + WW * 0.08 + 8, heroY + heroH * 0.62, WW * 0.28, 4, 2); ctx.fill();
             // Content rows
-            const SPACING = (WH - NAV) / (rowFracs.length + 1);
-            const activeRow = Math.floor(t / 80) % rowFracs.length;
-            const scanT = (t % 80) / 80;
-            rowFracs.forEach((frac, ri) => {
-                const rx = WX + WW * 0.08, ry = WY + NAV + SPACING * (ri + 1), rw = frac * WW * 0.84;
+            const CONTENT_TOP = WY + NAV + WH * 0.20;
+            const SPACING = (WY + WH - CONTENT_TOP - WH * 0.05) / (rows.length + 0.5);
+            const activeRow = Math.floor(t / 70) % rows.length;
+            const scanT = (t % 70) / 70;
+            rows.forEach(([indent, frac, hasTags], ri) => {
+                const rx = WX + WW * 0.08 + indent * 12, ry = CONTENT_TOP + SPACING * (ri + 0.7);
+                const rw = frac * (WW * 0.84 - indent * 12);
                 const isActive = ri === activeRow;
-                ctx.fillStyle = `rgba(${clr},${isActive ? 0.45 : 0.18})`; ctx.beginPath(); ctx.roundRect(rx, ry - 3, rw, 5, 2); ctx.fill();
+                // Row base
+                ctx.fillStyle = `rgba(${clr},${isActive ? 0.42 : 0.16})`; ctx.beginPath(); ctx.roundRect(rx, ry - 3, rw, 5, 2); ctx.fill();
+                // Scan highlight
                 if (isActive) {
                     const scanX = rx + scanT * rw;
                     const sg = ctx.createLinearGradient(scanX - 35, 0, scanX + 8, 0); sg.addColorStop(0, 'transparent'); sg.addColorStop(1, `rgba(${clr},.95)`);
@@ -1718,7 +1751,32 @@ eduItems.forEach(item => {
                         ctx.fillRect(Math.min(scanX + 2, rx + rw - 2), ry - 6, 2, 10); ctx.shadowBlur = 0;
                     }
                 }
+                // Mini tags after tagged row
+                if (hasTags) {
+                    [22, 40, 28].forEach((tw, ti) => {
+                        const tx = rx + ti * (tw + 5 + (ti > 0 ? [40,28][ti-1] : 0));
+                        ctx.strokeStyle = `rgba(${clr},.30)`; ctx.lineWidth = 1;
+                        ctx.beginPath(); ctx.roundRect(tx, ry + 6, tw, 7, 3); ctx.stroke();
+                        ctx.fillStyle = `rgba(${clr},.12)`; ctx.beginPath(); ctx.roundRect(tx, ry + 6, tw, 7, 3); ctx.fill();
+                    });
+                }
             });
+            // Mouse cursor
+            wpTimer++;
+            if (wpTimer > 90) { wpIdx = (wpIdx + 1) % waypoints.length; wpTimer = 0; }
+            curX += (waypoints[wpIdx].x - curX) * 0.055;
+            curY += (waypoints[wpIdx].y - curY) * 0.055;
+            ctx.shadowBlur = 5; ctx.shadowColor = `rgba(${clr},0.8)`;
+            ctx.fillStyle = 'rgba(255,255,255,0.88)';
+            ctx.beginPath();
+            ctx.moveTo(curX, curY);
+            ctx.lineTo(curX, curY + 9);
+            ctx.lineTo(curX + 2.5, curY + 6.5);
+            ctx.lineTo(curX + 5.5, curY + 11.5);
+            ctx.lineTo(curX + 7, curY + 10.8);
+            ctx.lineTo(curX + 4, curY + 5.8);
+            ctx.lineTo(curX + 7.5, curY + 5.8);
+            ctx.closePath(); ctx.fill(); ctx.shadowBlur = 0;
             t++; requestAnimationFrame(d);
         })();
     }
