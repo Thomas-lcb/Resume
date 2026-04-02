@@ -1150,6 +1150,9 @@ function applyLang(lang) {
     const btn = document.querySelector('.lang-toggle');
     if (btn) btn.textContent = lang === 'en' ? 'EN' : 'FR';
 
+    const cvLink = document.getElementById('cv-download-link');
+    if (cvLink) cvLink.href = `Thomas_Lacombe_CV_${lang}.pdf`;
+
     document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
         if (lang === 'fr' && translations.fr[key]) {

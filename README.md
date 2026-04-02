@@ -25,8 +25,8 @@ The site is bilingual (EN/FR), with a language toggle that persists across sessi
 - **About** — short bio and contact info
 - **Skills** — bento grid with skill categories and proficiency gauges
 - **Experience / Education** — interactive expandable timeline
-- **Projects** — horizontal carousel with per-card canvas animations (7 types)
-- **Contact** — links and downloadable CV
+- **Projects** — horizontal carousel with 8 project cards, each with a unique canvas animation
+- **Contact** — links and downloadable CV (EN or FR version served based on the active language)
 
 ## Versions
 
