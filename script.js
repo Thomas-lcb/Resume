@@ -914,8 +914,10 @@ function animate(timestamp) {
         bgStarsArray[i].update();
     }
 
-    animateHeroBg(timestamp);
-    animateNeural(timestamp);
+    if (heroVisible) {
+        animateHeroBg(timestamp);
+        animateNeural(timestamp);
+    }
 
     animRAF = requestAnimationFrame(animate);
 }
@@ -930,6 +932,12 @@ document.addEventListener('visibilitychange', () => {
     }
 });
 
+// Pause hero canvas animations when hero section is out of view
+let heroVisible = true;
+const heroVisibilityObserver = new IntersectionObserver((entries) => {
+    heroVisible = entries[0].isIntersecting;
+}, { threshold: 0 });
+heroVisibilityObserver.observe(document.querySelector('.hero'));
 
 window.addEventListener('resize', resizeCanvases);
 resizeCanvases();
@@ -1415,7 +1423,7 @@ eduItems.forEach(item => {
     const projCvObserver = new IntersectionObserver((entries) => {
         entries.forEach(e => {
             e.target.__visible = e.isIntersecting;
-            if (e.isIntersecting && e.target.__paused && e.target.__loop) {
+            if (e.isIntersecting && e.target.__paused && e.target.__loop && !e.target.__stopped_by_dim) {
                 e.target.__paused = false;
                 requestAnimationFrame(e.target.__loop);
             }
@@ -1699,7 +1707,29 @@ eduItems.forEach(item => {
         const idx = projGetActiveIdx();
         if (idx === projActiveIdx) return;
         projActiveIdx = idx;
-        projCards.forEach((c, i) => { if (projExpandedIdx < 0) c.classList.toggle('active', i === idx); });
+        projCards.forEach((c, i) => {
+            if (projExpandedIdx < 0) c.classList.toggle('active', i === idx);
+            const visual = c.querySelector('.proj-visual');
+            const cv = c.querySelector('.card-canvas');
+            if (!cv) return;
+            if (i !== idx) {
+                visual.classList.add('canvas-dim');
+                if (!cv.__stopped_by_dim) {
+                    cv.__stopped_by_dim = true;
+                    cv.__visible = false; // causes the RAF loop to self-pause on next frame
+                }
+            } else {
+                visual.classList.remove('canvas-dim');
+                if (cv.__stopped_by_dim) {
+                    cv.__stopped_by_dim = false;
+                    cv.__visible = true;
+                    if (cv.__paused && cv.__loop) {
+                        cv.__paused = false;
+                        requestAnimationFrame(cv.__loop);
+                    }
+                }
+            }
+        });
         projDotsEl.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === idx));
     }
 
@@ -1792,8 +1822,8 @@ eduItems.forEach(item => {
                 projEdgeInertia = 0; // Reset if user changes direction or is inside the carousel
             }
 
-            // Drive carousel — 0.23 ≈ 0.35/1.5 → ~1.5× slower than page scroll
-            projVelX -= e.deltaY * 0.23;
+            // Drive carousel — 0.12 ≈ moitié de la vitesse précédente
+            projVelX -= e.deltaY * 0.12;
         }
     }, { passive: false });
 
@@ -1871,6 +1901,14 @@ eduItems.forEach(item => {
 
     projCards[0].classList.add('active');
     projTrack.querySelectorAll('.card-canvas').forEach((c, idx) => startProjAnimation(c, c.dataset.type, idx));
+    // Freeze all cards except card 0 on init
+    projCards.forEach((c, i) => {
+        if (i === 0) return;
+        const visual = c.querySelector('.proj-visual');
+        const cv = c.querySelector('.card-canvas');
+        if (visual) visual.classList.add('canvas-dim');
+        if (cv) { cv.__stopped_by_dim = true; cv.__visible = false; }
+    });
     projSnapTo(0);
     projLoop();
 
