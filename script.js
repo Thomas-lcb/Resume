@@ -43,6 +43,8 @@ function smoothScrollTo(targetId) {
     const distance = targetPosition - startPosition;
     const duration = 1500;
     let startTime = null;
+
+    window._smoothScrollEndTime = Date.now() + duration + 50;
     function animation(currentTime) {
         if (startTime === null) startTime = currentTime;
         const timeElapsed = currentTime - startTime;
@@ -71,7 +73,7 @@ tlItems.forEach(item => {
 // (Legacy timeline click removed — projects now uses carousel)
 
 // Scroll reveal
-(function() {
+(function () {
     const tlItems = document.querySelectorAll('#tl-exp .tl-item');
     const obs = new IntersectionObserver(entries => {
         entries.forEach(e => {
@@ -83,8 +85,8 @@ tlItems.forEach(item => {
 })();
 
 // Particle system + dot energize + border light sweep
-(function() {
-    const tlEl  = document.getElementById('tl-exp');
+(function () {
+    const tlEl = document.getElementById('tl-exp');
     const pCont = document.getElementById('tl-exp-particles');
     if (!tlEl || !pCont) return;
 
@@ -112,18 +114,18 @@ tlItems.forEach(item => {
     function cachePositions() {
         cachedTlH = tlEl.offsetHeight;
         const tlAbs = tlEl.getBoundingClientRect().top + window.scrollY;
-        const tlH   = cachedTlH;
+        const tlH = cachedTlH;
         dotData = Array.from(document.querySelectorAll('#tl-exp .tl-marker')).map(marker => {
-            const dot   = marker.querySelector('.tl-dot');
+            const dot = marker.querySelector('.tl-dot');
             const dRect = dot.getBoundingClientRect();
-            const dAbs  = dRect.top + window.scrollY + dRect.height / 2;
+            const dAbs = dRect.top + window.scrollY + dRect.height / 2;
             return { marker, progress: (dAbs - tlAbs) / tlH };
         });
         itemData = Array.from(document.querySelectorAll('#tl-exp .tl-item')).map(item => {
             const rect = item.getBoundingClientRect();
             return {
                 item,
-                top:    rect.top + window.scrollY - tlAbs,
+                top: rect.top + window.scrollY - tlAbs,
                 bottom: rect.top + window.scrollY + rect.height - tlAbs,
                 sweeping: false
             };
@@ -141,8 +143,11 @@ tlItems.forEach(item => {
 
     const t0 = performance.now();
     let prevEnergized = new Set();
+    let tlLoopRAF = null;
 
     function loop(now) {
+        tlLoopRAF = null;
+        if (document.hidden) return; // restarted by visibilitychange
         const elapsed = now - t0;
         const tlH = cachedTlH || tlEl.offsetHeight;
 
@@ -153,7 +158,7 @@ tlItems.forEach(item => {
         if (t < 0.07) alpha = t / 0.07;
         if (t > 0.93) alpha = (1 - t) / 0.07;
         pEl.style.transform = `translateY(${y}px)`;
-        pEl.style.opacity   = alpha;
+        pEl.style.opacity = alpha;
 
         // Border light sweep
         itemData.forEach(d => {
@@ -185,16 +190,16 @@ tlItems.forEach(item => {
                 const hit = Math.abs(t - progress) < 0.046;
                 if (hit) nowEnergized.add(marker);
                 const wasOn = prevEnergized.has(marker);
-                if (hit && !wasOn)  marker.classList.add('energized');
-                if (!hit && wasOn)  marker.classList.remove('energized');
+                if (hit && !wasOn) marker.classList.add('energized');
+                if (!hit && wasOn) marker.classList.remove('energized');
             });
         }
         prevEnergized = nowEnergized;
-        requestAnimationFrame(loop);
+        tlLoopRAF = requestAnimationFrame(loop);
     }
-    requestAnimationFrame(loop);
+    tlLoopRAF = requestAnimationFrame(loop);
 
-    // Auto-collapse when user scrolls away
+    // Auto-collapse + pause loop when section leaves viewport
     const section = document.getElementById('experience');
     if (section) {
         new IntersectionObserver(entries => {
@@ -202,10 +207,18 @@ tlItems.forEach(item => {
                 if (!e.isIntersecting) {
                     document.querySelectorAll('#tl-exp .tl-item.open').forEach(i => i.classList.remove('open'));
                     setTimeout(cachePositions, 1000);
+                    cancelAnimationFrame(tlLoopRAF);
+                    tlLoopRAF = null;
+                } else {
+                    if (!tlLoopRAF) tlLoopRAF = requestAnimationFrame(loop);
                 }
             });
         }, { threshold: 0.05 }).observe(section);
     }
+
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden && !tlLoopRAF) tlLoopRAF = requestAnimationFrame(loop);
+    });
 })();
 
 // =========================================================
@@ -213,7 +226,7 @@ tlItems.forEach(item => {
 // =========================================================
 
 // Shockwave click system — smooth bell-curve boost
-let shockwaveT  = -1;   // -1 = inactive, 0→1 = active
+let shockwaveT = -1;   // -1 = inactive, 0→1 = active
 let shockwaveFrame = 0;
 const SHOCKWAVE_DUR = 150; // frames (~2.5s at 60fps)
 let heroClickBoost = 0;   // derived each frame from shockwaveT
@@ -230,9 +243,9 @@ function handleClickHero(e) {
     // Fixer les coords en coordonnées canvas au moment du clic (avant que le scroll ne bouge tout)
     if (heroRightRect && heroBgCanvas) {
         const heroBgRect = heroBgCanvas.getBoundingClientRect();
-        shockwaveCX    = heroRightRect.left + heroRightRect.width  / 2 - heroBgRect.left;
-        shockwaveCY    = heroRightRect.top  + heroRightRect.height / 2 - heroBgRect.top;
-        shockwaveMaxR  = Math.max(heroRightRect.width, heroRightRect.height) * 0.9;
+        shockwaveCX = heroRightRect.left + heroRightRect.width / 2 - heroBgRect.left;
+        shockwaveCY = heroRightRect.top + heroRightRect.height / 2 - heroBgRect.top;
+        shockwaveMaxR = Math.max(heroRightRect.width, heroRightRect.height) * 0.9;
     }
     setTimeout(() => smoothScrollTo('about'), 1200);
 }
@@ -291,11 +304,11 @@ function makeGlowTexture() {
     const c = document.createElement('canvas');
     c.width = c.height = size;
     const ctx = c.getContext('2d');
-    const grad = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
-    grad.addColorStop(0,    'rgba(255,255,255,1)');
+    const grad = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+    grad.addColorStop(0, 'rgba(255,255,255,1)');
     grad.addColorStop(0.25, 'rgba(255,255,255,0.6)');
-    grad.addColorStop(0.6,  'rgba(255,255,255,0.15)');
-    grad.addColorStop(1,    'rgba(255,255,255,0)');
+    grad.addColorStop(0.6, 'rgba(255,255,255,0.15)');
+    grad.addColorStop(1, 'rgba(255,255,255,0)');
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, size, size);
     return new THREE.CanvasTexture(c);
@@ -414,9 +427,11 @@ let neuralVelY = 0;    // vitesse angulaire Y (rad/frame)
 let neuralAngleY = 0;  // angle accumulé libre — rotation complète possible
 let neuralRotX = 0;    // tilt X (limité)
 let heroRightRect = null;
-let heroLeftRect  = null;
+let heroLeftRect = null;
 // Cursor halo position (in heroBgCanvas coords)
 let heroBgMouseX = -2000, heroBgMouseY = -2000;
+// Viewport cursor position — for neural hover detection
+let cursorTargetX = -500, cursorTargetY = -500;
 
 // Seuil de proximité pour l'activation des nœuds par les particules (3D units)
 const NODE_ACTIVATION_RADIUS = 0.55;
@@ -429,6 +444,8 @@ function updateHeroRightRect() {
 }
 
 window.addEventListener('mousemove', (e) => {
+    cursorTargetX = e.clientX;
+    cursorTargetY = e.clientY;
     neuralMouseNX = (e.clientX / window.innerWidth) * 2 - 1;
     neuralMouseNY = -((e.clientY / window.innerHeight) * 2 - 1);
     // Mouse relative to the neural panel center → equal range left/right
@@ -497,7 +514,7 @@ function animateNeural(timestamp) {
     // Boost global quand le curseur survole la zone du réseau neuronal
     const isHoveringNeural = heroRightRect &&
         cursorTargetX >= heroRightRect.left && cursorTargetX <= heroRightRect.right &&
-        cursorTargetY >= heroRightRect.top  && cursorTargetY <= heroRightRect.bottom;
+        cursorTargetY >= heroRightRect.top && cursorTargetY <= heroRightRect.bottom;
     const hoverAreaBoost = isHoveringNeural ? 2.2 : 1.0;
 
     // --- Reset cible d'activation des connexions ---
@@ -699,9 +716,9 @@ function animateHeroBg(t) {
         const cy = (blob.by + Math.cos(blobTime * blob.drift + i * 1.67) * 0.10) * H;
         const radius = blob.r * (1 + boost * 0.4);
         const grad = heroBgCtx.createRadialGradient(cx, cy, 0, cx, cy, radius);
-        grad.addColorStop(0,    `hsla(${blob.hue}, 90%, 62%, ${0.10 + boost * 0.06})`);
+        grad.addColorStop(0, `hsla(${blob.hue}, 90%, 62%, ${0.10 + boost * 0.06})`);
         grad.addColorStop(0.45, `hsla(${blob.hue}, 85%, 58%, ${0.04 + boost * 0.025})`);
-        grad.addColorStop(1,    `hsla(${blob.hue}, 80%, 55%, 0)`);
+        grad.addColorStop(1, `hsla(${blob.hue}, 80%, 55%, 0)`);
         heroBgCtx.fillStyle = grad;
         heroBgCtx.fillRect(0, 0, W, H);
     });
@@ -714,10 +731,10 @@ function animateHeroBg(t) {
             const pt = Math.max(0, (shockwaveT - delay) / (1 - delay));
             if (pt <= 0 || pt > 1) return;
             const eased = 1 - Math.pow(1 - pt, 2.8);
-            const r     = eased * maxR * scale;
+            const r = eased * maxR * scale;
 
             const alpha = Math.min(pt / 0.12, 1) * Math.pow(1 - pt, 1.8) * 0.6;
-            const lw    = (1 - pt) * 4.0 + 0.6;
+            const lw = (1 - pt) * 4.0 + 0.6;
             // Halo violet
             heroBgCtx.beginPath();
             heroBgCtx.arc(cx, cy, r, 0, Math.PI * 2);
@@ -738,15 +755,15 @@ function animateHeroBg(t) {
     let textCX = -1, textCY = -1, textRX = 0, textRY = 0;
     const bgRect = heroBgCanvas.getBoundingClientRect();
     if (heroRightRect) {
-        clipCX = heroRightRect.left + heroRightRect.width  / 2 - bgRect.left;
-        clipCY = heroRightRect.top  + heroRightRect.height / 2 - bgRect.top;
-        clipR  = Math.min(heroRightRect.width, heroRightRect.height) * 0.56;
+        clipCX = heroRightRect.left + heroRightRect.width / 2 - bgRect.left;
+        clipCY = heroRightRect.top + heroRightRect.height / 2 - bgRect.top;
+        clipR = Math.min(heroRightRect.width, heroRightRect.height) * 0.56;
     }
     // Zone de texte gauche — ellipse collée au texte, fade dans draw()
     if (heroLeftRect) {
-        textCX = (heroLeftRect.left + heroLeftRect.right)  / 2 - bgRect.left;
-        textCY = (heroLeftRect.top  + heroLeftRect.bottom) / 2 - bgRect.top;
-        textRX = heroLeftRect.width  / 2 + 24;
+        textCX = (heroLeftRect.left + heroLeftRect.right) / 2 - bgRect.left;
+        textCY = (heroLeftRect.top + heroLeftRect.bottom) / 2 - bgRect.top;
+        textRX = heroLeftRect.width / 2 + 24;
         textRY = heroLeftRect.height / 2 + 20;
     }
 
@@ -760,11 +777,11 @@ function animateHeroBg(t) {
                 let fadeI = 1, fadeJ = 1;
                 if (clipR > 0) {
                     const dxi = heroBgParticles[i].x - clipCX, dyi = heroBgParticles[i].y - clipCY;
-                    const di = Math.sqrt(dxi*dxi + dyi*dyi);
+                    const di = Math.sqrt(dxi * dxi + dyi * dyi);
                     const inner = clipR * 0.62;
                     fadeI = di < inner ? 0 : di < clipR ? (di - inner) / (clipR - inner) : 1;
                     const dxj = heroBgParticles[j].x - clipCX, dyj = heroBgParticles[j].y - clipCY;
-                    const dj = Math.sqrt(dxj*dxj + dyj*dyj);
+                    const dj = Math.sqrt(dxj * dxj + dyj * dyj);
                     fadeJ = dj < inner ? 0 : dj < clipR ? (dj - inner) / (clipR - inner) : 1;
                 }
                 // Fade zone texte pour les connexions
@@ -772,11 +789,11 @@ function animateHeroBg(t) {
                     const minFadeT = 0.18;
                     const niX = (heroBgParticles[i].x - textCX) / textRX;
                     const niY = (heroBgParticles[i].y - textCY) / textRY;
-                    const ndI = Math.sqrt(niX*niX + niY*niY);
+                    const ndI = Math.sqrt(niX * niX + niY * niY);
                     fadeI *= ndI < 0.70 ? minFadeT : ndI < 1.0 ? minFadeT + (1 - minFadeT) * (ndI - 0.70) / 0.30 : 1;
                     const njX = (heroBgParticles[j].x - textCX) / textRX;
                     const njY = (heroBgParticles[j].y - textCY) / textRY;
-                    const ndJ = Math.sqrt(njX*njX + njY*njY);
+                    const ndJ = Math.sqrt(njX * njX + njY * njY);
                     fadeJ *= ndJ < 0.70 ? minFadeT : ndJ < 1.0 ? minFadeT + (1 - minFadeT) * (ndJ - 0.70) / 0.30 : 1;
                 }
                 const fade = Math.min(fadeI, fadeJ);
@@ -899,92 +916,34 @@ function animate(timestamp) {
 
     animateHeroBg(timestamp);
     animateNeural(timestamp);
-    drawCursor(timestamp);
 
-    requestAnimationFrame(animate);
+    animRAF = requestAnimationFrame(animate);
 }
 
-// =========================================================
-// CURSEUR — DOT + RING GRADIENT FLOU
-// =========================================================
-
-const cursorCanvas = document.getElementById('cursor-canvas');
-const cursorCtx = cursorCanvas.getContext('2d');
-
-let cursorTargetX = -500, cursorTargetY = -500;
-let cursorX = -500, cursorY = -500;
-let cursorAlpha = 1;
-let cursorTargetAlpha = 1;
-
-window.addEventListener('mousemove', (e) => {
-    cursorTargetX = e.clientX;
-    cursorTargetY = e.clientY;
-
-    // Détecter si on survole un élément de contenu → estomper l'aura
-    const el = document.elementFromPoint(e.clientX, e.clientY);
-    if (el) {
-        const tag = el.tagName.toLowerCase();
-        cursorTargetAlpha = ['canvas', 'body', 'html'].includes(tag) ? 1.0 : 0.0;
+let animRAF = null;
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        cancelAnimationFrame(animRAF);
+        animRAF = null;
+    } else if (!animRAF) {
+        animRAF = requestAnimationFrame(animate);
     }
 });
 
-function resizeCursorCanvas() {
-    cursorCanvas.width  = window.innerWidth;
-    cursorCanvas.height = window.innerHeight;
-}
-
-function drawCursor(ts) {
-    cursorCtx.clearRect(0, 0, cursorCanvas.width, cursorCanvas.height);
-    return; // aura curseur désactivée
-
-    cursorX += (cursorTargetX - cursorX) * 0.15;
-    cursorY += (cursorTargetY - cursorY) * 0.15;
-    cursorAlpha += (cursorTargetAlpha - cursorAlpha) * 0.10;
-
-    if (cursorAlpha < 0.01) return;
-
-    cursorCtx.save();
-    cursorCtx.globalAlpha = cursorAlpha;
-
-    // Aura externe large et très douce
-    const outer = cursorCtx.createRadialGradient(cursorX, cursorY, 0, cursorX, cursorY, 55);
-    outer.addColorStop(0,    'rgba(56,189,248,0.12)');
-    outer.addColorStop(0.35, 'rgba(56,189,248,0.07)');
-    outer.addColorStop(0.65, 'rgba(129,140,248,0.04)');
-    outer.addColorStop(1,    'rgba(129,140,248,0)');
-    cursorCtx.fillStyle = outer;
-    cursorCtx.beginPath();
-    cursorCtx.arc(cursorX, cursorY, 55, 0, Math.PI * 2);
-    cursorCtx.fill();
-
-    // Halo intérieur plus concentré
-    const inner = cursorCtx.createRadialGradient(cursorX, cursorY, 0, cursorX, cursorY, 20);
-    inner.addColorStop(0,   'rgba(56,189,248,0.22)');
-    inner.addColorStop(0.5, 'rgba(56,189,248,0.08)');
-    inner.addColorStop(1,   'rgba(56,189,248,0)');
-    cursorCtx.fillStyle = inner;
-    cursorCtx.beginPath();
-    cursorCtx.arc(cursorX, cursorY, 20, 0, Math.PI * 2);
-    cursorCtx.fill();
-
-    cursorCtx.restore();
-}
 
 window.addEventListener('resize', resizeCanvases);
-window.addEventListener('resize', resizeCursorCanvas);
 resizeCanvases();
-resizeCursorCanvas();
-animate(0);
+animRAF = requestAnimationFrame(animate);
 
 // =========================================================
 // NAVIGATION — FLOATING ISLAND
 // =========================================================
 
 (function initNavIsland() {
-    const navEl     = document.getElementById('nav-wrapper');
-    const island    = document.getElementById('nav-island');
+    const navEl = document.getElementById('nav-wrapper');
+    const island = document.getElementById('nav-island');
     const indicator = document.getElementById('nav-indicator');
-    const links     = island ? island.querySelectorAll('a[data-section]') : [];
+    const links = island ? island.querySelectorAll('a[data-section]') : [];
 
     if (!island || !indicator || !links.length) return;
 
@@ -1041,8 +1000,8 @@ animate(0);
         } else {
             indO += (0 - indO) * 0.12;
         }
-        indicator.style.left    = (indX ?? 0) + 'px';
-        indicator.style.width   = (indW ?? 0) + 'px';
+        indicator.style.left = (indX ?? 0) + 'px';
+        indicator.style.width = (indW ?? 0) + 'px';
         indicator.style.opacity = indO;
         requestAnimationFrame(lerpLoop);
     })();
@@ -1055,9 +1014,9 @@ animate(0);
         ticking = true;
         requestAnimationFrame(() => {
             const heroBottom = heroSection ? heroSection.offsetTop + heroSection.offsetHeight * 0.3 : 300;
-            const isCompact  = window.scrollY > heroBottom;
+            const isCompact = window.scrollY > heroBottom;
             navEl.classList.toggle('nav-scrolled', window.scrollY > 50);
-            navEl.classList.toggle('nav-compact',  isCompact);
+            navEl.classList.toggle('nav-compact', isCompact);
 
             // Mettre à jour la section active seulement si pas de verrou manuel
             if (!manualLock) {
@@ -1072,7 +1031,6 @@ animate(0);
         });
     }, { passive: true });
 
-    window.addEventListener('resize', () => trackActive(500));
 })();
 
 // =========================================================
@@ -1151,10 +1109,8 @@ const translations = {
         'edu.vaucanson.desc': 'Fondamentaux dans les domaines de l\'ingénierie (Mathématiques, Physique, Sciences de l\'Ingénieur, Informatique) pour préparer les concours d\'entrée aux Grandes Écoles.',
         // Projects
         'proj.title': 'Projets',
-        'proj.subtitle': 'Des architectures conçues pour la performance et l\'échelle.',
         'proj.hint.expand': 'Voir le projet',
         'proj.hint.collapse': 'Réduire',
-        'proj.scroll.hint': 'Scroll ou glisser · Cliquer pour développer',
         'proj.trading.role': 'Agent de Trading Crypto Autonome',
         'proj.trading.short': 'Agent de trading autonome par Deep RL (PPO/SAC). Environnement Gym custom, 10 crypto-paires, reward multi-composants.',
         'proj.music.role': 'Application de Recommandation Musicale',
@@ -1203,6 +1159,10 @@ function applyLang(lang) {
             el.innerHTML = el.dataset.i18nOriginalHtml;
         }
     });
+
+    if (typeof window._projRebuildExtra === 'function') {
+        window._projRebuildExtra();
+    }
 }
 
 function toggleLang() {
@@ -1284,7 +1244,7 @@ if (currentLang !== 'en') applyLang(currentLang);
 
 // Inject card-bg + border-spin into every card
 document.querySelectorAll('#edu-list .edu-card').forEach(card => {
-    const bg   = document.createElement('div'); bg.className   = 'edu-card-bg';     card.prepend(bg);
+    const bg = document.createElement('div'); bg.className = 'edu-card-bg'; card.prepend(bg);
     const spin = document.createElement('div'); spin.className = 'edu-border-spin'; card.appendChild(spin);
 });
 
@@ -1299,7 +1259,7 @@ eduItems.forEach(item => {
 });
 
 // Staggered scroll reveal
-(function() {
+(function () {
     const items = document.querySelectorAll('#edu-list .edu-item');
     items.forEach((el, i) => { el.style.transitionDelay = `${i * 0.13}s`; });
     const obs = new IntersectionObserver(entries => {
@@ -1314,7 +1274,7 @@ eduItems.forEach(item => {
 // =========================================================
 // PROJECTS CAROUSEL
 // =========================================================
-(function() {
+(function () {
     const projOuter = document.getElementById('projCarouselOuter');
     const projTrack = document.getElementById('projCarouselTrack');
     const projDotsEl = document.getElementById('projDots');
@@ -1326,125 +1286,132 @@ eduItems.forEach(item => {
 
     // ── PROJECT DATA ──
     const PROJECTS = [
-        { type:'trading', rgb:'56,189,248', accent:'#38bdf8',
-          period:'January 2026 — Present', context:'Personal Project · Paris',
-          periodFr:'Janvier 2026 — Présent', contextFr:'Projet Personnel · Paris',
-          desc:`<ul>
+        {
+            type: 'trading', rgb: '56,189,248', accent: '#38bdf8',
+            period: 'January 2026 — Present', context: 'Personal Project · Paris',
+            periodFr: 'Janvier 2026 — Présent', contextFr: 'Projet Personnel · Paris',
+            desc: `<ul>
             <li>Design and development of an autonomous trading agent using Deep RL (PPO/SAC, PyTorch, Stable-Baselines3).</li>
             <li>Custom Gym environment: continuous action space, 10 crypto pairs, domain randomization.</li>
             <li>Multi-component reward: log-return, drawdown penalty, trend alignment, unrealized PnL.</li>
             <li>Multi-timeframe pipeline (1H/4H/1D/1W), z-score normalization, sentiment integration.</li>
             <li>Curriculum learning with GPU-optimized batch (CUDA).</li>
           </ul>`,
-          descFr:`<ul>
+            descFr: `<ul>
             <li>Conception d'un agent de trading autonome par Deep RL (PPO/SAC, PyTorch, Stable-Baselines3).</li>
             <li>Environnement Gym custom : espace d'action continu, 10 paires crypto, domain randomization.</li>
             <li>Reward multi-composants : log-return, drawdown penalty, trend alignment, unrealized PnL.</li>
             <li>Pipeline multi-timeframes (1H/4H/1D/1W), normalisation z-score, intégration de sentiment.</li>
             <li>Curriculum learning avec batch GPU-optimisé (CUDA).</li>
           </ul>`,
-          tags:['PPO/SAC','PyTorch','CUDA','Stable-Baselines3','Gym Env','Curriculum Learning','Multi-Timeframe','Feature Engineering'],
+            tags: ['Reinforcement Learning', 'TensorFlow / PyTorch', 'CUDA', 'Stable-Baselines3', 'Gymnasium', 'Time Series'],
         },
-        { type:'music', rgb:'167,139,250', accent:'#a78bfa',
-          period:'May 2025 — Present', context:'Personal Project · Paris',
-          periodFr:'Mai 2025 — Présent', contextFr:'Projet Personnel · Paris',
-          desc:`<ul>
+        {
+            type: 'music', rgb: '167,139,250', accent: '#a78bfa',
+            period: 'May 2025 — Present', context: 'Personal Project · Paris',
+            periodFr: 'Mai 2025 — Présent', contextFr: 'Projet Personnel · Paris',
+            desc: `<ul>
             <li>Complete mobile music recommendation app in React Native (Expo).</li>
             <li>Recommendation algorithms: cosine similarity, K-Means, DBSCAN.</li>
             <li>Backend architecture, app cache management and data pipelines.</li>
             <li>UI/UX design and end-to-end recommendation system implementation.</li>
           </ul>`,
-          descFr:`<ul>
+            descFr: `<ul>
             <li>Application mobile de recommandation musicale complète en React Native (Expo).</li>
             <li>Algorithmes de recommandation : similarité cosinus, K-Means, DBSCAN.</li>
             <li>Architecture backend, gestion du cache applicatif et pipelines de données.</li>
             <li>Réflexion UI/UX et implémentation du système de recommandation end-to-end.</li>
           </ul>`,
-          tags:['React Native','Expo','K-Means','DBSCAN','Cosine Similarity','Data Pipeline','Cache','UI/UX'],
+            tags: ['React', 'Expo', 'Machine Learning', 'NLP', 'Data Pipeline'],
         },
-        { type:'noise', rgb:'96,165,250', accent:'#60a5fa',
-          period:'January — March 2025', context:'EMSE · Saint-Étienne',
-          periodFr:'Janvier — Mars 2025', contextFr:'EMSE · Saint-Étienne',
-          desc:`<ul>
+        {
+            type: 'noise', rgb: '96,165,250', accent: '#60a5fa',
+            period: 'January — March 2025', context: 'EMSE · Saint-Étienne',
+            periodFr: 'Janvier — Mars 2025', contextFr: 'EMSE · Saint-Étienne',
+            desc: `<ul>
             <li>Deep learning model to denoise images damaged by ionizing radiation.</li>
             <li>U-Net encoder-decoder architecture with skip connections for image reconstruction.</li>
             <li>Synthetic data generation by reproducing radiation noise.</li>
             <li>Drafting of a research paper and scientific poster.</li>
           </ul>`,
-          descFr:`<ul>
+            descFr: `<ul>
             <li>Modèle deep learning pour débruiter des images endommagées par rayonnement ionisant.</li>
             <li>Architecture U-Net encodeur-décodeur avec skip connections pour reconstruction d'images.</li>
             <li>Génération de données synthétiques par reproduction du bruit de radiation.</li>
             <li>Rédaction d'un article de recherche et d'un poster scientifique.</li>
           </ul>`,
-          tags:['U-Net','Encoder-Decoder','Skip Connections','PyTorch','Synthetic Data','Research Paper'],
+            tags: ['Deep Learning', 'Computer Vision', 'TensorFlow / PyTorch', 'Synthetic Data'],
         },
-        { type:'detection', rgb:'129,140,248', accent:'#818cf8',
-          period:'September 2024 — January 2025', context:'EMSE Project · Saint-Étienne',
-          periodFr:'Septembre 2024 — Janvier 2025', contextFr:'Projet EMSE · Saint-Étienne',
-          desc:`<ul>
+        {
+            type: 'detection', rgb: '129,140,248', accent: '#818cf8',
+            period: 'September 2024 — January 2025', context: 'EMSE Project · Saint-Étienne',
+            periodFr: 'Septembre 2024 — Janvier 2025', contextFr: 'Projet EMSE · Saint-Étienne',
+            desc: `<ul>
             <li>Constrained image classification AI for infrared pedestrian detection.</li>
             <li>CNN benchmarking and training: MobileNet and YOLO (TensorFlow / PyTorch).</li>
             <li>Metrics analysis: mAP, F1, precision/recall.</li>
             <li>Training on Linux cluster with GPU resource management.</li>
           </ul>`,
-          descFr:`<ul>
+            descFr: `<ul>
             <li>IA de classification d'images infrarouge pour la détection de piétons sous contraintes embarquées.</li>
             <li>Benchmark et entraînement CNN : MobileNet et YOLO (TensorFlow / PyTorch).</li>
             <li>Analyse des métriques : mAP, F1, précision/rappel.</li>
             <li>Entraînement sur cluster Linux avec gestion des ressources GPU.</li>
           </ul>`,
-          tags:['YOLO','MobileNet','TensorFlow','PyTorch','Infrared','GPU Cluster','mAP'],
+            tags: ['Computer Vision', 'TensorFlow / PyTorch', 'Linux', 'Machine Learning'],
         },
-        { type:'organic', rgb:'52,211,153', accent:'#34d399',
-          period:'February — June 2024', context:'PRICE Program · EMSE',
-          periodFr:'Février — Juin 2024', contextFr:'Programme PRICE · EMSE',
-          desc:`<ul>
+        {
+            type: 'organic', rgb: '52,211,153', accent: '#34d399',
+            period: 'February — June 2024', context: 'PRICE Program · EMSE',
+            periodFr: 'Février — Juin 2024', contextFr: 'Programme PRICE · EMSE',
+            desc: `<ul>
             <li>BSF larvae breeding module for organic waste valorization into protein.</li>
             <li>Modular CAD design (Autodesk Inventor) of an autonomous production module.</li>
             <li>Resource flow modeling for larval welfare (feeding, humidity, temperature).</li>
           </ul>`,
-          descFr:`<ul>
+            descFr: `<ul>
             <li>Module d'élevage de larves BSF pour la valorisation de déchets organiques en protéines.</li>
             <li>Conception modulaire en CAO (Autodesk Inventor) d'un module de production autonome.</li>
             <li>Modélisation des flux de ressources pour le bien-être larvaire (alimentation, humidité, T°).</li>
           </ul>`,
-          tags:['CAD/Inventor','Systems Design','Biotech','Circular Economy','Resource Modeling'],
+            tags: ['SolidWorks', 'Systems Design', 'Biotech', 'Circular Economy'],
         },
-        { type:'map', rgb:'251,191,36', accent:'#fbbf24',
-          period:'September 2022 — May 2023', context:'Civic Project · EMSE',
-          periodFr:'Septembre 2022 — Mai 2023', contextFr:'Projet Civique · EMSE',
-          desc:`<ul>
+        {
+            type: 'map', rgb: '251,191,36', accent: '#fbbf24',
+            period: 'September 2022 — May 2023', context: 'Civic Project · EMSE',
+            periodFr: 'Septembre 2022 — Mai 2023', contextFr: 'Projet Civique · EMSE',
+            desc: `<ul>
             <li>Mobile app for Saint-Étienne heritage: interactive treasure hunt.</li>
             <li>App architecture and full user experience design.</li>
             <li>Geolocation, heritage content and gamified progression system.</li>
           </ul>`,
-          descFr:`<ul>
+            descFr: `<ul>
             <li>Application mobile pour le patrimoine de Saint-Étienne : chasse au trésor interactive.</li>
             <li>Conception de l'architecture applicative et de l'expérience utilisateur complète.</li>
             <li>Géolocalisation, contenus patrimoniaux et système de progression gamifiée.</li>
           </ul>`,
-          tags:['Mobile Dev','Geolocation','UI/UX Design','Gamification','Cultural Heritage'],
+            tags: ['Mobile Dev', 'Geolocation', 'UI/UX Design', 'Gamification', 'Cultural Heritage'],
         },
-        { type:'wave', rgb:'251,113,133', accent:'#fb7185',
-          period:'September 2020 — July 2022', context:'TIPE · Lycée Vaucanson, Grenoble',
-          periodFr:'Septembre 2020 — Juillet 2022', contextFr:'TIPE · Lycée Vaucanson, Grenoble',
-          desc:`<ul>
+        {
+            type: 'wave', rgb: '251,113,133', accent: '#fb7185',
+            period: 'September 2020 — July 2022', context: 'TIPE · Lycée Vaucanson, Grenoble',
+            periodFr: 'Septembre 2020 — Juillet 2022', contextFr: 'TIPE · Lycée Vaucanson, Grenoble',
+            desc: `<ul>
             <li>Study, simulation and modeling of an insulin pump and its effect on the human body.</li>
             <li>Modeling of insulin and glycemic dynamics via differential equations.</li>
             <li>Numerical implementation and validation under MATLAB/Simulink.</li>
           </ul>`,
-          descFr:`<ul>
+            descFr: `<ul>
             <li>Étude, simulation et modélisation d'une pompe à insuline et de son effet sur le corps humain.</li>
             <li>Modélisation des dynamiques insuliniques et glycémiques par équations différentielles.</li>
             <li>Implémentation et validation numérique sous MATLAB/Simulink.</li>
           </ul>`,
-          tags:['Simulation','Modeling','MATLAB','Differential Equations','Biomedical'],
+            tags: ['Simulation', 'Modeling', 'MATLAB', 'Differential Equations', 'Biomedical'],
         },
     ];
 
     // ── CANVAS ANIMATIONS ──
-    const CANVAS_W=540, CANVAS_H=240;
+    const CANVAS_W = 540, CANVAS_H = 240;
     const projCvObserver = new IntersectionObserver((entries) => {
         entries.forEach(e => {
             e.target.__visible = e.isIntersecting;
@@ -1455,232 +1422,246 @@ eduItems.forEach(item => {
         });
     }, { threshold: 0.01 });
 
-    function startProjAnimation(canvas, type, idx){
-        canvas.__stopped=false;
-        canvas.width=CANVAS_W; canvas.height=CANVAS_H;
-        canvas.__visible=true; projCvObserver.observe(canvas);
-        const ctx=canvas.getContext('2d');
-        const card=canvas.closest('.proj-card');
-        const clr=getComputedStyle(card).getPropertyValue('--card-rgb').trim();
-        ({trading:animT,music:animM,noise:animN,detection:animD,organic:animO,map:animA,wave:animW})[type]?.(ctx,CANVAS_W,CANVAS_H,canvas,idx,clr);
+    function startProjAnimation(canvas, type, idx) {
+        canvas.__stopped = false;
+        canvas.width = CANVAS_W; canvas.height = CANVAS_H;
+        canvas.__visible = true; projCvObserver.observe(canvas);
+        const ctx = canvas.getContext('2d');
+        const card = canvas.closest('.proj-card');
+        const clr = getComputedStyle(card).getPropertyValue('--card-rgb').trim();
+        ({ trading: animT, music: animM, noise: animN, detection: animD, organic: animO, map: animA, wave: animW })[type]?.(ctx, CANVAS_W, CANVAS_H, canvas, idx, clr);
     }
 
-    function animT(ctx,w,h,cv,idx,clr){
-        const bg=ctx.createLinearGradient(0,0,0,h);bg.addColorStop(0,`rgba(${clr},.12)`);bg.addColorStop(1,'#080e1a');
-        const cols=15,cw=(w/cols)*.75;let t=0, candles=[];let curY=h*0.5;
-        for(let i=0;i<cols+2;i++){let op=curY,cl=curY+(Math.random()-.5)*70;if(cl<50)cl=50+Math.random()*20;if(cl>h-50)cl=h-50-Math.random()*20;let hi=Math.max(op,cl)+5+Math.random()*30,lo=Math.min(op,cl)-5-Math.random()*30;if(lo<10)lo=10;if(hi>h-10)hi=h-10;candles.push({op,cl,hi,lo});curY=cl;}
-        (function d(){
-            if(cv.__stopped)return;
-            if(!cv.__visible){cv.__paused=true;cv.__loop=d;return;}cv.__loop=d;
-            ctx.clearRect(0,0,w,h);ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);
-            ctx.strokeStyle=`rgba(${clr},.06)`;ctx.lineWidth=1;
-            for(let y=20;y<h;y+=h/4){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();}
-            for(let x=0;x<w;x+=w/cols){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();}
-            let last=candles[candles.length-1];last.cl+=(Math.random()-.5)*9;if(last.cl<50)last.cl=50;if(last.cl>h-50)last.cl=h-50;last.hi=Math.max(last.hi,Math.max(last.op,last.cl)+2);last.lo=Math.min(last.lo,Math.min(last.op,last.cl)-2);if(last.lo<10)last.lo=10;if(last.hi>h-10)last.hi=h-10;
-            if(t%40===0){let nextOp=last.cl,dY=(Math.random()-.5)*70,nextCl=nextOp+dY;if(nextCl<40)nextCl=40+Math.abs(dY)*.5;if(nextCl>h-40)nextCl=h-40-Math.abs(dY)*.5;let nhi=Math.max(nextOp,nextCl)+5+Math.random()*35,nlo=Math.min(nextOp,nextCl)-5-Math.random()*35;if(nlo<10)nlo=10;if(nhi>h-10)nhi=h-10;candles.push({op:nextOp,cl:nextCl,hi:nhi,lo:nlo});if(candles.length>cols+3)candles.shift();}
-            let offsetX=-(t%40)/40*(w/cols);
-            ctx.beginPath();let ma=[];
-            candles.forEach((c,i)=>{
-                const x=i*(w/cols)+offsetX;if(x<-cw||x>w+cw)return;
-                const isUp=c.cl<=c.op, col=isUp?'rgba(52,211,153,1)':'rgba(251,113,133,1)';
-                const bgCol=isUp?'rgba(52,211,153,.25)':'rgba(251,113,133,.25)';
-                const bodyH=Math.max(5,Math.abs(c.cl-c.op)), bodyY=Math.min(c.cl,c.op);
-                ctx.shadowBlur=12;ctx.shadowColor=col;ctx.fillStyle=bgCol;ctx.strokeStyle=col;ctx.lineWidth=2.5;
-                ctx.beginPath();ctx.moveTo(x,c.hi);ctx.lineTo(x,c.lo);ctx.stroke();
-                ctx.fillRect(x-cw/2,bodyY,cw,bodyH);ctx.strokeRect(x-cw/2,bodyY,cw,bodyH);ctx.shadowBlur=0;
-                let sum=0,cnt=0;for(let j=Math.max(0,i-3);j<=i;j++){sum+=candles[j].cl;cnt++;}ma.push({x:x,y:sum/cnt});
+    function animT(ctx, w, h, cv, idx, clr) {
+        const bg = ctx.createLinearGradient(0, 0, 0, h); bg.addColorStop(0, `rgba(${clr},.12)`); bg.addColorStop(1, '#080e1a');
+        const cols = 15, cw = (w / cols) * .75; let t = 0, candles = []; let curY = h * 0.5;
+        for (let i = 0; i < cols + 2; i++) { let op = curY, cl = curY + (Math.random() - .5) * 70; if (cl < 50) cl = 50 + Math.random() * 20; if (cl > h - 50) cl = h - 50 - Math.random() * 20; let hi = Math.max(op, cl) + 5 + Math.random() * 30, lo = Math.min(op, cl) - 5 - Math.random() * 30; if (lo < 10) lo = 10; if (hi > h - 10) hi = h - 10; candles.push({ op, cl, hi, lo }); curY = cl; }
+        (function d() {
+            if (cv.__stopped) return;
+            if (!cv.__visible) { cv.__paused = true; cv.__loop = d; return; } cv.__loop = d;
+            ctx.clearRect(0, 0, w, h); ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
+            ctx.strokeStyle = `rgba(${clr},.06)`; ctx.lineWidth = 1;
+            for (let y = 20; y < h; y += h / 4) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
+            for (let x = 0; x < w; x += w / cols) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
+            let last = candles[candles.length - 1]; last.cl += (Math.random() - .5) * 9; if (last.cl < 50) last.cl = 50; if (last.cl > h - 50) last.cl = h - 50; last.hi = Math.max(last.hi, Math.max(last.op, last.cl) + 2); last.lo = Math.min(last.lo, Math.min(last.op, last.cl) - 2); if (last.lo < 10) last.lo = 10; if (last.hi > h - 10) last.hi = h - 10;
+            if (t % 40 === 0) { let nextOp = last.cl, dY = (Math.random() - .5) * 70, nextCl = nextOp + dY; if (nextCl < 40) nextCl = 40 + Math.abs(dY) * .5; if (nextCl > h - 40) nextCl = h - 40 - Math.abs(dY) * .5; let nhi = Math.max(nextOp, nextCl) + 5 + Math.random() * 35, nlo = Math.min(nextOp, nextCl) - 5 - Math.random() * 35; if (nlo < 10) nlo = 10; if (nhi > h - 10) nhi = h - 10; candles.push({ op: nextOp, cl: nextCl, hi: nhi, lo: nlo }); if (candles.length > cols + 3) candles.shift(); }
+            let offsetX = -(t % 40) / 40 * (w / cols);
+            ctx.beginPath(); let ma = [];
+            candles.forEach((c, i) => {
+                const x = i * (w / cols) + offsetX; if (x < -cw || x > w + cw) return;
+                const isUp = c.cl <= c.op, col = isUp ? 'rgba(52,211,153,1)' : 'rgba(251,113,133,1)';
+                const bgCol = isUp ? 'rgba(52,211,153,.25)' : 'rgba(251,113,133,.25)';
+                const bodyH = Math.max(5, Math.abs(c.cl - c.op)), bodyY = Math.min(c.cl, c.op);
+                ctx.shadowBlur = 6; ctx.shadowColor = col; ctx.fillStyle = bgCol; ctx.strokeStyle = col; ctx.lineWidth = 2.5;
+                ctx.beginPath(); ctx.moveTo(x, c.hi); ctx.lineTo(x, c.lo); ctx.stroke();
+                ctx.fillRect(x - cw / 2, bodyY, cw, bodyH); ctx.strokeRect(x - cw / 2, bodyY, cw, bodyH); ctx.shadowBlur = 0;
+                let sum = 0, cnt = 0; for (let j = Math.max(0, i - 3); j <= i; j++) { sum += candles[j].cl; cnt++; } ma.push({ x: x, y: sum / cnt });
             });
-            if(ma.length>0){ctx.beginPath();ma.forEach((pt,i)=>i===0?ctx.moveTo(pt.x,pt.y):ctx.lineTo(pt.x,pt.y));ctx.strokeStyle=`rgba(${clr},0.9)`;ctx.lineWidth=3.5;ctx.shadowBlur=15;ctx.shadowColor=`rgba(${clr},1)`;ctx.stroke();ctx.shadowBlur=0;}
-            const fade=ctx.createLinearGradient(0,h-40,0,h);fade.addColorStop(0,'transparent');fade.addColorStop(1,'#080e1a');
-            ctx.fillStyle=fade;ctx.fillRect(0,h-40,w,40);
-            t++;requestAnimationFrame(d);
+            if (ma.length > 0) { ctx.beginPath(); ma.forEach((pt, i) => i === 0 ? ctx.moveTo(pt.x, pt.y) : ctx.lineTo(pt.x, pt.y)); ctx.strokeStyle = `rgba(${clr},0.9)`; ctx.lineWidth = 3.5; ctx.shadowBlur = 8; ctx.shadowColor = `rgba(${clr},1)`; ctx.stroke(); ctx.shadowBlur = 0; }
+            const fade = ctx.createLinearGradient(0, h - 40, 0, h); fade.addColorStop(0, 'transparent'); fade.addColorStop(1, '#080e1a');
+            ctx.fillStyle = fade; ctx.fillRect(0, h - 40, w, 40);
+            t++; requestAnimationFrame(d);
         })();
     }
-    function animM(ctx,w,h,cv,idx,clr){
-        const bg=ctx.createLinearGradient(0,0,0,h);bg.addColorStop(0,`rgba(${clr},.14)`);bg.addColorStop(1,'#080818');
-        const num=40,bw=w/num;
-        const bars=Array.from({length:num},(_,i)=>({x:i*bw+bw*.1,w:bw*.8,ph:i*.15,fr:.05+Math.random()*.03}));
-        let t=0;(function d(){
-            if(cv.__stopped)return;
-            if(!cv.__visible){cv.__paused=true;cv.__loop=d;return;}cv.__loop=d;
-            ctx.clearRect(0,0,w,h);ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);
-            bars.forEach(b=>{
-                let env=Math.sin(b.x/w*Math.PI), amp=Math.max(0.1,Math.abs(Math.sin(t*b.fr+b.ph))*Math.abs(Math.cos(t*.02+b.ph*2)))*env, bh=amp*h*0.45;
-                const g=ctx.createLinearGradient(0,h*.55-bh,0,h*.55+bh);g.addColorStop(0,`rgba(${clr},1)`);g.addColorStop(0.5,`rgba(${clr},0.2)`);g.addColorStop(1,`rgba(${clr},0.7)`);
-                ctx.fillStyle=g;ctx.shadowBlur=amp*15;ctx.shadowColor=`rgba(${clr},1)`;
-                ctx.beginPath();ctx.roundRect(b.x,h*.55-bh,b.w,bh*2,[2]);ctx.fill();
+    function animM(ctx, w, h, cv, idx, clr) {
+        const bg = ctx.createLinearGradient(0, 0, 0, h); bg.addColorStop(0, `rgba(${clr},.14)`); bg.addColorStop(1, '#080818');
+        const num = 40, bw = w / num;
+        const bars = Array.from({ length: num }, (_, i) => ({ x: i * bw + bw * .1, w: bw * .8, ph: i * .15, fr: .05 + Math.random() * .03 }));
+        let t = 0; (function d() {
+            if (cv.__stopped) return;
+            if (!cv.__visible) { cv.__paused = true; cv.__loop = d; return; } cv.__loop = d;
+            ctx.clearRect(0, 0, w, h); ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
+            bars.forEach(b => {
+                let env = Math.sin(b.x / w * Math.PI), amp = Math.max(0.1, Math.abs(Math.sin(t * b.fr + b.ph)) * Math.abs(Math.cos(t * .02 + b.ph * 2))) * env, bh = amp * h * 0.45;
+                const g = ctx.createLinearGradient(0, h * .55 - bh, 0, h * .55 + bh); g.addColorStop(0, `rgba(${clr},1)`); g.addColorStop(0.5, `rgba(${clr},0.2)`); g.addColorStop(1, `rgba(${clr},0.7)`);
+                ctx.fillStyle = g; ctx.shadowBlur = amp * 8; ctx.shadowColor = `rgba(${clr},1)`;
+                ctx.beginPath(); ctx.roundRect(b.x, h * .55 - bh, b.w, bh * 2, [2]); ctx.fill();
             });
-            ctx.shadowBlur=0;ctx.beginPath();
-            for(let x=0;x<w;x++){let y=h*.55+Math.sin(x*.02+t*.04)*25*Math.sin(x*Math.PI/w);x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}
-            ctx.strokeStyle='rgba(255,255,255,0.4)';ctx.lineWidth=1.5;ctx.stroke();
-            t++;requestAnimationFrame(d);
+            ctx.shadowBlur = 0; ctx.beginPath();
+            for (let x = 0; x < w; x += 2) { let y = h * .55 + Math.sin(x * .02 + t * .04) * 25 * Math.sin(x * Math.PI / w); x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); }
+            ctx.strokeStyle = 'rgba(255,255,255,0.4)'; ctx.lineWidth = 1.5; ctx.stroke();
+            t++; requestAnimationFrame(d);
         })();
     }
-    function animN(ctx,w,h,cv,idx,clr){
-        const bg=ctx.createLinearGradient(0,0,w,h);bg.addColorStop(0,`rgba(${clr},.11)`);bg.addColorStop(1,'#0a0e1a');
-        let t=0;
-        const cn=[];for(let r=0;r<6;r++){let rd=20+r*20,c=12+r*8;for(let i=0;i<c;i++)cn.push({x:w/2+Math.cos(i*(Math.PI*2/c)+r*.2)*rd,y:h/2+Math.sin(i*(Math.PI*2/c)+r*.2)*rd*0.6,r:1.5});}
-        (function d(){
-            if(cv.__stopped)return;
-            if(!cv.__visible){cv.__paused=true;cv.__loop=d;return;}cv.__loop=d;
-            ctx.clearRect(0,0,w,h);ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);
-            let sX=(t*1.5)%(w*1.5)-w*.2;
-            ctx.strokeStyle=`rgba(${clr},.2)`;ctx.lineWidth=1;
-            cn.forEach(n=>{if(n.x>sX)return;
-                ctx.shadowBlur=8;ctx.shadowColor=`rgba(${clr},1)`;ctx.fillStyle=`rgba(${clr},.9)`;
-                ctx.beginPath();ctx.arc(n.x,n.y,n.r,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
-                if(Math.random()<.03){ctx.beginPath();ctx.moveTo(w/2,h/2);ctx.lineTo(n.x,n.y);ctx.stroke();}
+    function animN(ctx, w, h, cv, idx, clr) {
+        const bg = ctx.createLinearGradient(0, 0, w, h); bg.addColorStop(0, `rgba(${clr},.11)`); bg.addColorStop(1, '#0a0e1a');
+        let t = 0, lastT = 0;
+        const cn = []; for (let r = 0; r < 6; r++) { let rd = 20 + r * 20, c = 12 + r * 8; for (let i = 0; i < c; i++)cn.push({ x: w / 2 + Math.cos(i * (Math.PI * 2 / c) + r * .2) * rd, y: h / 2 + Math.sin(i * (Math.PI * 2 / c) + r * .2) * rd * 0.6, r: 1.5 }); }
+        (function d(now) {
+            if (cv.__stopped) return;
+            if (!cv.__visible) { cv.__paused = true; cv.__loop = d; return; } cv.__loop = d;
+            if (now && (now - lastT < 32)) { requestAnimationFrame(d); return; } lastT = now || 0;
+            ctx.clearRect(0, 0, w, h); ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
+            let sX = (t * 1.5) % (w * 1.5) - w * .2;
+            ctx.strokeStyle = `rgba(${clr},.2)`; ctx.lineWidth = 1;
+            cn.forEach(n => {
+                if (n.x > sX) return;
+                ctx.shadowBlur = 5; ctx.shadowColor = `rgba(${clr},1)`; ctx.fillStyle = `rgba(${clr},.9)`;
+                ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
+                if (Math.random() < .03) { ctx.beginPath(); ctx.moveTo(w / 2, h / 2); ctx.lineTo(n.x, n.y); ctx.stroke(); }
             });
-            if(w/2<=sX){
-                ctx.shadowBlur=20;ctx.shadowColor=`rgba(${clr},1)`;
-                const gr=ctx.createRadialGradient(w/2,h/2,0,w/2,h/2,15);
-                gr.addColorStop(0,'rgba(255,255,255,.9)');gr.addColorStop(1,'transparent');
-                ctx.fillStyle=gr;ctx.beginPath();ctx.arc(w/2,h/2,15,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
+            if (w / 2 <= sX) {
+                ctx.shadowBlur = 12; ctx.shadowColor = `rgba(${clr},1)`;
+                const gr = ctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, 15);
+                gr.addColorStop(0, 'rgba(255,255,255,.9)'); gr.addColorStop(1, 'transparent');
+                ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(w / 2, h / 2, 15, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
             }
-            for(let i=0;i<400;i++){
-                let nx=Math.random()*w,ny=Math.random()*h;if(nx<=sX)continue;
-                let intense=Math.hypot(nx-w/2,ny-h/2)<130?Math.random()*.5:0;
-                ctx.fillStyle=`rgba(200,220,255,${.15+intense})`;
-                ctx.fillRect(nx,ny,1+Math.random()*3,1+Math.random()*2);
+            for (let i = 0; i < 150; i++) {
+                let nx = Math.random() * w, ny = Math.random() * h; if (nx <= sX) continue;
+                let intense = Math.hypot(nx - w / 2, ny - h / 2) < 130 ? Math.random() * .5 : 0;
+                ctx.fillStyle = `rgba(200,220,255,${.15 + intense})`;
+                ctx.fillRect(nx, ny, 1 + Math.random() * 3, 1 + Math.random() * 2);
             }
-            const g=ctx.createLinearGradient(sX-40,0,sX,0);g.addColorStop(0,'transparent');g.addColorStop(1,`rgba(${clr},0.8)`);
-            ctx.fillStyle=g;ctx.fillRect(sX-40,0,40,h);
-            ctx.fillStyle='#fff';ctx.shadowBlur=12;ctx.shadowColor=`rgba(${clr},1)`;ctx.fillRect(sX,0,2,h);ctx.shadowBlur=0;
-            t++;requestAnimationFrame(d);
+            const g = ctx.createLinearGradient(sX - 40, 0, sX, 0); g.addColorStop(0, 'transparent'); g.addColorStop(1, `rgba(${clr},0.8)`);
+            ctx.fillStyle = g; ctx.fillRect(sX - 40, 0, 40, h);
+            ctx.fillStyle = '#fff'; ctx.shadowBlur = 6; ctx.shadowColor = `rgba(${clr},1)`; ctx.fillRect(sX, 0, 2, h); ctx.shadowBlur = 0;
+            t++; requestAnimationFrame(d);
         })();
     }
-    function animD(ctx,w,h,cv,idx,clr){
-        const bg=ctx.createLinearGradient(0,0,w,h);bg.addColorStop(0,`rgba(${clr},.10)`);bg.addColorStop(1,'#0a0e1a');
-        const boxes=[{x:w*.15,y:h*.3,w:w*.15,h:h*.4,ph:0},{x:w*.45,y:h*.2,w:w*.2,h:h*.6,ph:2},{x:w*.78,y:h*.4,w:w*.12,h:h*.35,ph:4}];
-        let t=0;(function d(){
-            if(cv.__stopped)return;
-            if(!cv.__visible){cv.__paused=true;cv.__loop=d;return;}cv.__loop=d;
-            ctx.clearRect(0,0,w,h);ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);
-            ctx.strokeStyle=`rgba(${clr},.05)`;ctx.lineWidth=1;
-            for(let x=0;x<w;x+=30){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();}
-            for(let y=0;y<h;y+=30){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();}
-            boxes.forEach(b=>{
-                let act=Math.sin(t*.03+b.ph)>0, a=act?.8:.2, col=`rgba(${clr},${a})`;
-                if(act){const grd=ctx.createRadialGradient(b.x+b.w*.5,b.y+b.h*.5,0,b.x+b.w*.5,b.y+b.h*.5,b.h*.6);grd.addColorStop(0,`rgba(${clr},.25)`);grd.addColorStop(1,'transparent');ctx.fillStyle=grd;ctx.fillRect(b.x,b.y,b.w,b.h);}
-                ctx.strokeStyle=col;ctx.lineWidth=1.5;ctx.shadowBlur=act?8:0;ctx.shadowColor=`rgba(${clr},1)`;
-                const cs=10;[[b.x,b.y,1,1],[b.x+b.w,b.y,-1,1],[b.x,b.y+b.h,1,-1],[b.x+b.w,b.y+b.h,-1,-1]].forEach(([x,y,dx,dy])=>{ctx.beginPath();ctx.moveTo(x+dx*cs,y);ctx.lineTo(x,y);ctx.lineTo(x,y+dy*cs);ctx.stroke();});
-                ctx.shadowBlur=0;
-                if(act){
-                    ctx.fillStyle=col;ctx.font='600 9px sans-serif';ctx.fillText('PERSON: '+(85+Math.round(Math.random()*14))+'%',b.x,b.y-6);
-                    ctx.beginPath();ctx.arc(b.x+b.w*.5+Math.sin(t*.1)*5,b.y+b.h*.5+Math.cos(t*.1)*5,3,0,Math.PI*2);ctx.fill();
+    function animD(ctx, w, h, cv, idx, clr) {
+        const bg = ctx.createLinearGradient(0, 0, w, h); bg.addColorStop(0, `rgba(${clr},.10)`); bg.addColorStop(1, '#0a0e1a');
+        const boxes = [{ x: w * .15, y: h * .3, w: w * .15, h: h * .4, ph: 0 }, { x: w * .45, y: h * .2, w: w * .2, h: h * .6, ph: 2 }, { x: w * .78, y: h * .4, w: w * .12, h: h * .35, ph: 4 }];
+        let t = 0; (function d() {
+            if (cv.__stopped) return;
+            if (!cv.__visible) { cv.__paused = true; cv.__loop = d; return; } cv.__loop = d;
+            ctx.clearRect(0, 0, w, h); ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
+            ctx.strokeStyle = `rgba(${clr},.05)`; ctx.lineWidth = 1;
+            for (let x = 0; x < w; x += 45) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
+            for (let y = 0; y < h; y += 45) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
+            boxes.forEach(b => {
+                let act = Math.sin(t * .03 + b.ph) > 0, a = act ? .8 : .2, col = `rgba(${clr},${a})`;
+                if (act) { const grd = ctx.createRadialGradient(b.x + b.w * .5, b.y + b.h * .5, 0, b.x + b.w * .5, b.y + b.h * .5, b.h * .6); grd.addColorStop(0, `rgba(${clr},.25)`); grd.addColorStop(1, 'transparent'); ctx.fillStyle = grd; ctx.fillRect(b.x, b.y, b.w, b.h); }
+                ctx.strokeStyle = col; ctx.lineWidth = 1.5; ctx.shadowBlur = act ? 8 : 0; ctx.shadowColor = `rgba(${clr},1)`;
+                const cs = 10;[[b.x, b.y, 1, 1], [b.x + b.w, b.y, -1, 1], [b.x, b.y + b.h, 1, -1], [b.x + b.w, b.y + b.h, -1, -1]].forEach(([x, y, dx, dy]) => { ctx.beginPath(); ctx.moveTo(x + dx * cs, y); ctx.lineTo(x, y); ctx.lineTo(x, y + dy * cs); ctx.stroke(); });
+                ctx.shadowBlur = 0;
+                if (act) {
+                    ctx.fillStyle = col; ctx.font = '600 9px sans-serif'; ctx.fillText('PERSON: ' + (85 + Math.round(Math.random() * 14)) + '%', b.x, b.y - 6);
+                    ctx.beginPath(); ctx.arc(b.x + b.w * .5 + Math.sin(t * .1) * 5, b.y + b.h * .5 + Math.cos(t * .1) * 5, 3, 0, Math.PI * 2); ctx.fill();
                 }
             });
-            let sY=(t*2)%h;ctx.fillStyle=`rgba(${clr},.5)`;ctx.fillRect(0,sY,w,1);
-            const sg=ctx.createLinearGradient(0,sY-40,0,sY);sg.addColorStop(0,'transparent');sg.addColorStop(1,`rgba(${clr},.15)`);
-            ctx.fillStyle=sg;ctx.fillRect(0,sY-40,w,40);
-            t++;requestAnimationFrame(d);
+            let sY = (t * 2) % h; ctx.fillStyle = `rgba(${clr},.5)`; ctx.fillRect(0, sY, w, 1);
+            const sg = ctx.createLinearGradient(0, sY - 40, 0, sY); sg.addColorStop(0, 'transparent'); sg.addColorStop(1, `rgba(${clr},.15)`);
+            ctx.fillStyle = sg; ctx.fillRect(0, sY - 40, w, 40);
+            t++; requestAnimationFrame(d);
         })();
     }
-    function animO(ctx,w,h,cv,idx,clr){
-        const bg=ctx.createLinearGradient(0,0,w,h);bg.addColorStop(0,`rgba(${clr},.12)`);bg.addColorStop(1,'#080e14');
-        let t=0;
-        (function d(){
-            if(cv.__stopped)return;
-            if(!cv.__visible){cv.__paused=true;cv.__loop=d;return;}cv.__loop=d;
-            ctx.clearRect(0,0,w,h);ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);
-            ctx.strokeStyle=`rgba(${clr},.08)`; ctx.lineWidth=1;
-            for(let x=0;x<w;x+=15){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();}
-            for(let y=0;y<h;y+=15){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();}
-            const cx=w/2, cy=h/2;
-            let ang=t*0.01, radius=60+Math.sin(t*0.05)*5;
-            ctx.shadowBlur=12; ctx.shadowColor=`rgba(${clr},1)`;
-            ctx.strokeStyle=`rgba(${clr},.8)`; ctx.lineWidth=1.5;
-            let pts=[];
-            for(let i=0; i<6; i++) {
-                let a = ang + i*Math.PI/3;
-                pts.push({x: cx + Math.cos(a)*radius, y: cy + Math.sin(a)*radius*0.6});
+    function animO(ctx, w, h, cv, idx, clr) {
+        const bg = ctx.createLinearGradient(0, 0, w, h); bg.addColorStop(0, `rgba(${clr},.12)`); bg.addColorStop(1, '#080e14');
+        let t = 0;
+        (function d() {
+            if (cv.__stopped) return;
+            if (!cv.__visible) { cv.__paused = true; cv.__loop = d; return; } cv.__loop = d;
+            ctx.clearRect(0, 0, w, h); ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
+            ctx.strokeStyle = `rgba(${clr},.08)`; ctx.lineWidth = 1;
+            for (let x = 0; x < w; x += 25) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
+            for (let y = 0; y < h; y += 25) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
+            const cx = w / 2, cy = h / 2;
+            let ang = t * 0.01, radius = 60 + Math.sin(t * 0.05) * 5;
+            ctx.shadowBlur = 12; ctx.shadowColor = `rgba(${clr},1)`;
+            ctx.strokeStyle = `rgba(${clr},.8)`; ctx.lineWidth = 1.5;
+            let pts = [];
+            for (let i = 0; i < 6; i++) {
+                let a = ang + i * Math.PI / 3;
+                pts.push({ x: cx + Math.cos(a) * radius, y: cy + Math.sin(a) * radius * 0.6 });
             }
             ctx.beginPath();
-            for(let i=0; i<6; i++) {
-                if(i===0) ctx.moveTo(pts[i].x, pts[i].y);
+            for (let i = 0; i < 6; i++) {
+                if (i === 0) ctx.moveTo(pts[i].x, pts[i].y);
                 else ctx.lineTo(pts[i].x, pts[i].y);
             }
             ctx.closePath(); ctx.stroke();
             ctx.beginPath();
-            for(let i=0;i<6;i+=2) { ctx.moveTo(cx, cy); ctx.lineTo(pts[i].x, pts[i].y); }
-            ctx.stroke(); ctx.shadowBlur=0;
-            ctx.fillStyle=`rgba(${clr},.5)`; ctx.font='9px monospace';
-            ctx.fillText(`R: ${Math.round(radius)} mm`, cx+70, cy-30);
-            ctx.fillText(`0: ${Math.round((ang*180/Math.PI)%360)} deg`, cx-100, cy+40);
-            ctx.strokeStyle=`rgba(${clr},.3)`;
-            ctx.beginPath(); ctx.moveTo(cx-100, cy); ctx.lineTo(cx+100, cy); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(cx, cy-80); ctx.lineTo(cx, cy+80); ctx.stroke();
-            let edgePhase = (t*0.02) % 6, eIdx = Math.floor(edgePhase), eT = edgePhase - eIdx, nextIdx = (eIdx+1)%6;
-            let px = pts[eIdx].x + (pts[nextIdx].x - pts[eIdx].x)*eT, py = pts[eIdx].y + (pts[nextIdx].y - pts[eIdx].y)*eT;
-            ctx.fillStyle=`rgba(${clr},1)`; ctx.shadowBlur=10; ctx.shadowColor=`rgba(${clr},1)`;
-            ctx.beginPath(); ctx.arc(px,py, 3, 0, Math.PI*2); ctx.fill(); ctx.shadowBlur=0;
-            t++;requestAnimationFrame(d);
+            for (let i = 0; i < 6; i += 2) { ctx.moveTo(cx, cy); ctx.lineTo(pts[i].x, pts[i].y); }
+            ctx.stroke(); ctx.shadowBlur = 0;
+            ctx.fillStyle = `rgba(${clr},.5)`; ctx.font = '9px monospace';
+            ctx.fillText(`R: ${Math.round(radius)} mm`, cx + 70, cy - 30);
+            ctx.fillText(`0: ${Math.round((ang * 180 / Math.PI) % 360)} deg`, cx - 100, cy + 40);
+            ctx.strokeStyle = `rgba(${clr},.3)`;
+            ctx.beginPath(); ctx.moveTo(cx - 100, cy); ctx.lineTo(cx + 100, cy); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(cx, cy - 80); ctx.lineTo(cx, cy + 80); ctx.stroke();
+            let edgePhase = (t * 0.02) % 6, eIdx = Math.floor(edgePhase), eT = edgePhase - eIdx, nextIdx = (eIdx + 1) % 6;
+            let px = pts[eIdx].x + (pts[nextIdx].x - pts[eIdx].x) * eT, py = pts[eIdx].y + (pts[nextIdx].y - pts[eIdx].y) * eT;
+            ctx.fillStyle = `rgba(${clr},1)`; ctx.shadowBlur = 10; ctx.shadowColor = `rgba(${clr},1)`;
+            ctx.beginPath(); ctx.arc(px, py, 3, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
+            t++; requestAnimationFrame(d);
         })();
     }
-    function animA(ctx,w,h,cv,idx,clr){
-        const bg=ctx.createLinearGradient(0,0,w,h);bg.addColorStop(0,`rgba(${clr},.11)`);bg.addColorStop(1,'#0a0c14');
-        let t=0;const nodes=[{x:w*.2,y:h*.4},{x:w*.35,y:h*.7},{x:w*.5,y:h*.3},{x:w*.7,y:h*.6},{x:w*.85,y:h*.35}];
-        const routes=[[0,1],[1,2],[2,3],[3,4],[0,2],[1,3]];
-        (function d(){
-            if(cv.__stopped)return;
-            if(!cv.__visible){cv.__paused=true;cv.__loop=d;return;}cv.__loop=d;
-            ctx.clearRect(0,0,w,h);ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);
-            ctx.strokeStyle=`rgba(${clr},.03)`;ctx.lineWidth=1;
-            for(let i=10;i<w;i+=40){ctx.beginPath();for(let y=0;y<h;y+=20){let dx=Math.sin(y*.02+i)*15;if(y===0)ctx.moveTo(i+dx,y);else ctx.lineTo(i+dx,y);}ctx.stroke();}
-            routes.forEach(([i,j])=>{
-                const n1=nodes[i],n2=nodes[j],cx=(n1.x+n2.x)/2,cy=(n1.y+n2.y)/2-30;
-                ctx.strokeStyle=`rgba(${clr},.15)`;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(n1.x,n1.y);ctx.quadraticCurveTo(cx,cy,n2.x,n2.y);ctx.stroke();
-                let p=(t*.005+i*.1+j*.2)%1,px=(1-p)*(1-p)*n1.x+2*(1-p)*p*cx+p*p*n2.x,py=(1-p)*(1-p)*n1.y+2*(1-p)*p*cy+p*p*n2.y;
-                ctx.fillStyle=`rgba(${clr},.8)`;ctx.shadowBlur=10;ctx.shadowColor=`rgba(${clr},1)`;ctx.beginPath();ctx.arc(px,py,2,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
+    function animA(ctx, w, h, cv, idx, clr) {
+        const bg = ctx.createLinearGradient(0, 0, w, h); bg.addColorStop(0, `rgba(${clr},.11)`); bg.addColorStop(1, '#0a0c14');
+        let t = 0; const nodes = [{ x: w * .2, y: h * .4 }, { x: w * .35, y: h * .7 }, { x: w * .5, y: h * .3 }, { x: w * .7, y: h * .6 }, { x: w * .85, y: h * .35 }];
+        const routes = [[0, 1], [1, 2], [2, 3], [3, 4], [0, 2], [1, 3]];
+        (function d() {
+            if (cv.__stopped) return;
+            if (!cv.__visible) { cv.__paused = true; cv.__loop = d; return; } cv.__loop = d;
+            ctx.clearRect(0, 0, w, h); ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
+            ctx.strokeStyle = `rgba(${clr},.03)`; ctx.lineWidth = 1;
+            for (let i = 10; i < w; i += 40) { ctx.beginPath(); for (let y = 0; y < h; y += 30) { let dx = Math.sin(y * .02 + i) * 15; if (y === 0) ctx.moveTo(i + dx, y); else ctx.lineTo(i + dx, y); } ctx.stroke(); }
+            routes.forEach(([i, j]) => {
+                const n1 = nodes[i], n2 = nodes[j], cx = (n1.x + n2.x) / 2, cy = (n1.y + n2.y) / 2 - 30;
+                ctx.strokeStyle = `rgba(${clr},.15)`; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(n1.x, n1.y); ctx.quadraticCurveTo(cx, cy, n2.x, n2.y); ctx.stroke();
+                let p = (t * .005 + i * .1 + j * .2) % 1, px = (1 - p) * (1 - p) * n1.x + 2 * (1 - p) * p * cx + p * p * n2.x, py = (1 - p) * (1 - p) * n1.y + 2 * (1 - p) * p * cy + p * p * n2.y;
+                ctx.fillStyle = `rgba(${clr},.8)`; ctx.shadowBlur = 10; ctx.shadowColor = `rgba(${clr},1)`; ctx.beginPath(); ctx.arc(px, py, 2, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
             });
-            nodes.forEach((n,i)=>{
-                let pulse=1+.2*Math.sin(t*.05+i);
-                ctx.fillStyle=`rgba(${clr},.9)`;ctx.beginPath();ctx.arc(n.x,n.y,4,0,Math.PI*2);ctx.fill();
-                ctx.fillStyle=`rgba(${clr},${.3-.3*Math.sin(t*.05+i)})`;ctx.beginPath();ctx.arc(n.x,n.y,12*pulse,0,Math.PI*2);ctx.fill();
-                ctx.fillStyle='rgba(255,255,255,0.8)';ctx.font='10px Arial';ctx.fillText('▼',n.x-4,n.y-6);
+            nodes.forEach((n, i) => {
+                let pulse = 1 + .2 * Math.sin(t * .05 + i);
+                ctx.fillStyle = `rgba(${clr},.9)`; ctx.beginPath(); ctx.arc(n.x, n.y, 4, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = `rgba(${clr},${.3 - .3 * Math.sin(t * .05 + i)})`; ctx.beginPath(); ctx.arc(n.x, n.y, 12 * pulse, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = 'rgba(255,255,255,0.8)'; ctx.font = '10px Arial'; ctx.fillText('▼', n.x - 4, n.y - 6);
             });
-            t++;requestAnimationFrame(d);
+            t++; requestAnimationFrame(d);
         })();
     }
-    function animW(ctx,w,h,cv,idx,clr){
-        const bg=ctx.createLinearGradient(0,0,w,h);bg.addColorStop(0,`rgba(${clr},.13)`);bg.addColorStop(1,'#0c0a14');
-        let t=0;const pts=[];
-        (function d(){
-            if(cv.__stopped)return;
-            if(!cv.__visible){cv.__paused=true;cv.__loop=d;return;}cv.__loop=d;
-            ctx.clearRect(0,0,w,h);ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);
-            ctx.strokeStyle=`rgba(${clr},.05)`;ctx.lineWidth=1;
-            for(let y=0;y<h;y+=20){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();}
-            for(let x=0;x<w;x+=20){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();}
-            const bY=h*.55;let sX=(t*2.5)%w, y=bY;
-            if(sX%160<20)y=bY-15*Math.sin((sX%160)/20*Math.PI);else if(sX%160<40)y=bY+25*Math.sin((sX%160-20)/20*Math.PI);else if(sX%160<60)y=bY-45*Math.sin((sX%160-40)/20*Math.PI);else if(sX%160<80)y=bY+15*Math.sin((sX%160-60)/20*Math.PI);
-            pts.push({x:sX,y:y});if(pts.length>150)pts.shift();
-            if(pts.length>1){for(let i=1;i<pts.length;i++){if(pts[i].x<pts[i-1].x)continue;
-                ctx.beginPath();ctx.moveTo(pts[i-1].x,pts[i-1].y);ctx.lineTo(pts[i].x,pts[i].y);
-                let a=i/pts.length;ctx.strokeStyle=`rgba(${clr},${a})`;ctx.lineWidth=2+a/2;
-                ctx.shadowBlur=10*a;ctx.shadowColor=`rgba(${clr},1)`;ctx.stroke();ctx.shadowBlur=0;
-            }}
-            ctx.fillStyle='#fff';ctx.shadowBlur=12;ctx.shadowColor=`rgba(${clr},1)`;ctx.beginPath();ctx.arc(sX,y,3,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
-            ctx.strokeStyle=`rgba(${clr},0.3)`;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(sX,0);ctx.lineTo(sX,h);ctx.stroke();
-            t++;requestAnimationFrame(d);
+    function animW(ctx, w, h, cv, idx, clr) {
+        const bg = ctx.createLinearGradient(0, 0, w, h); bg.addColorStop(0, `rgba(${clr},.13)`); bg.addColorStop(1, '#0c0a14');
+        let t = 0; const pts = [];
+        (function d() {
+            if (cv.__stopped) return;
+            if (!cv.__visible) { cv.__paused = true; cv.__loop = d; return; } cv.__loop = d;
+            ctx.clearRect(0, 0, w, h); ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
+            ctx.strokeStyle = `rgba(${clr},.05)`; ctx.lineWidth = 1;
+            for (let y = 0; y < h; y += 20) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
+            for (let x = 0; x < w; x += 20) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
+            const bY = h * .55; let sX = (t * 2.5) % w, y = bY;
+            if (sX % 160 < 20) y = bY - 15 * Math.sin((sX % 160) / 20 * Math.PI); else if (sX % 160 < 40) y = bY + 25 * Math.sin((sX % 160 - 20) / 20 * Math.PI); else if (sX % 160 < 60) y = bY - 45 * Math.sin((sX % 160 - 40) / 20 * Math.PI); else if (sX % 160 < 80) y = bY + 15 * Math.sin((sX % 160 - 60) / 20 * Math.PI);
+            pts.push({ x: sX, y: y }); if (pts.length > 150) pts.shift();
+            if (pts.length > 1) {
+                // Draw all segments in one pass without per-segment shadowBlur
+                for (let i = 1; i < pts.length; i++) {
+                    if (pts[i].x < pts[i - 1].x) continue;
+                    let a = i / pts.length;
+                    ctx.beginPath(); ctx.moveTo(pts[i - 1].x, pts[i - 1].y); ctx.lineTo(pts[i].x, pts[i].y);
+                    ctx.strokeStyle = `rgba(${clr},${a})`; ctx.lineWidth = 2 + a / 2; ctx.stroke();
+                }
+                // Single glow only on the last few segments (leading edge)
+                ctx.shadowBlur = 8; ctx.shadowColor = `rgba(${clr},1)`;
+                for (let i = Math.max(1, pts.length - 6); i < pts.length; i++) {
+                    if (pts[i].x < pts[i - 1].x) continue;
+                    ctx.beginPath(); ctx.moveTo(pts[i - 1].x, pts[i - 1].y); ctx.lineTo(pts[i].x, pts[i].y);
+                    ctx.strokeStyle = `rgba(${clr},1)`; ctx.lineWidth = 2.5; ctx.stroke();
+                }
+                ctx.shadowBlur = 0;
+            }
+            ctx.fillStyle = '#fff'; ctx.shadowBlur = 10; ctx.shadowColor = `rgba(${clr},1)`; ctx.beginPath(); ctx.arc(sX, y, 3, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
+            ctx.strokeStyle = `rgba(${clr},0.3)`; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(sX, 0); ctx.lineTo(sX, h); ctx.stroke();
+            t++; requestAnimationFrame(d);
         })();
     }
 
     // ── CAROUSEL MECHANICS ──
-    const PROJ_CARD_W=370, PROJ_CARD_GAP=24, PROJ_STEP=PROJ_CARD_W+PROJ_CARD_GAP;
-    const PROJ_NORMAL_H=610, PROJ_EXPANDED_H=730;
-    let projSidePad=0;
+    const PROJ_CARD_W = 370, PROJ_CARD_GAP = 24, PROJ_STEP = PROJ_CARD_W + PROJ_CARD_GAP;
+    const PROJ_NORMAL_H = 610, PROJ_EXPANDED_H = 730;
+    let projSidePad = 0;
 
-    function updateProjSidePad(){
-        projSidePad=Math.max(40,Math.floor((window.innerWidth-PROJ_CARD_W)/2));
-        projTrack.style.paddingLeft  = projSidePad+'px';
-        projTrack.style.paddingRight = projSidePad+'px';
+    function updateProjSidePad() {
+        projSidePad = Math.max(40, Math.floor((window.innerWidth - PROJ_CARD_W) / 2));
+        projTrack.style.paddingLeft = projSidePad + 'px';
+        projTrack.style.paddingRight = projSidePad + 'px';
     }
     updateProjSidePad();
     window.addEventListener('resize', updateProjSidePad);
 
     // Inject smooth grid wrappers
-    projCards.forEach((card)=>{
+    projCards.forEach((card) => {
         const pDesc = card.querySelector('.proj-desc-short');
         const pTags = card.querySelector('.proj-tags-short');
         const pExtra = card.querySelector('.proj-extra');
@@ -1700,29 +1681,29 @@ eduItems.forEach(item => {
     });
 
     // Dots
-    projCards.forEach((_,i)=>{
-        const d=document.createElement('div');
-        d.className='dot'+(i===0?' active':'');
-        d.addEventListener('click',()=>projSnapTo(i));
+    projCards.forEach((_, i) => {
+        const d = document.createElement('div');
+        d.className = 'dot' + (i === 0 ? ' active' : '');
+        d.addEventListener('click', () => projSnapTo(i));
         projDotsEl.appendChild(d);
     });
 
-    let projPos=0, projTargetX=0, projVelX=0;
-    let projIsDrag=false, projDragStartX=0, projDragStartPos=0, projLastDragX=0, projLastDragT=0, projDragMoved=false;
-    let projActiveIdx=0, projExpandedIdx=-1;
+    let projPos = 0, projTargetX = 0, projVelX = 0;
+    let projIsDrag = false, projDragStartX = 0, projDragStartPos = 0, projLastDragX = 0, projLastDragT = 0, projDragMoved = false;
+    let projActiveIdx = 0, projExpandedIdx = -1;
 
-    function projClampPos(p){ return Math.max(-(projCards.length-1)*PROJ_STEP,Math.min(0,p)); }
-    function projGetActiveIdx(){ return Math.max(0,Math.min(projCards.length-1,Math.round(-projPos/PROJ_STEP))); }
+    function projClampPos(p) { return Math.max(-(projCards.length - 1) * PROJ_STEP, Math.min(0, p)); }
+    function projGetActiveIdx() { return Math.max(0, Math.min(projCards.length - 1, Math.round(-projPos / PROJ_STEP))); }
 
-    function projUpdateActiveCard(){
-        const idx=projGetActiveIdx();
-        if(idx===projActiveIdx) return;
-        projActiveIdx=idx;
-        projCards.forEach((c,i)=>{ if(projExpandedIdx<0) c.classList.toggle('active',i===idx); });
-        projDotsEl.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
+    function projUpdateActiveCard() {
+        const idx = projGetActiveIdx();
+        if (idx === projActiveIdx) return;
+        projActiveIdx = idx;
+        projCards.forEach((c, i) => { if (projExpandedIdx < 0) c.classList.toggle('active', i === idx); });
+        projDotsEl.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === idx));
     }
 
-    function projSnapTo(idx){ projTargetX=projClampPos(-(idx*PROJ_STEP)); projVelX=0; }
+    function projSnapTo(idx) { projTargetX = projClampPos(-(idx * PROJ_STEP)); projVelX = 0; }
 
     // ── SCROLL-LOCK SYSTEM ──
     // When the projects section occupies a significant portion of the viewport,
@@ -1733,6 +1714,7 @@ eduItems.forEach(item => {
     let projAtStart = true;   // carousel at card 0
     let projAtEnd = false;    // carousel at last card
     let projLockCooldown = 0; // prevent immediate re-lock after release
+    let projIsRepositioning = false; // true during projScrollToSection() smooth scroll
 
     function projIsInView() {
         const r = projSection.getBoundingClientRect();
@@ -1744,8 +1726,14 @@ eduItems.forEach(item => {
     function projScrollToSection() {
         const r = projSection.getBoundingClientRect();
         const vh = window.innerHeight;
-        const targetScroll = window.scrollY + r.top - (vh - r.height) / 2;
+        // Target: section top sits just above viewport top (at most by half the overflow)
+        // cap at 0 so section never starts below viewport top
+        const targetTop = Math.min(0, (vh - r.height) / 2);
+        if (Math.abs(r.top - targetTop) < 25) return; // already well positioned
+        projIsRepositioning = true;
+        const targetScroll = window.scrollY + r.top - targetTop;
         window.scrollTo({ top: Math.max(0, targetScroll), behavior: 'smooth' });
+        setTimeout(() => { projIsRepositioning = false; }, 700);
     }
 
     function projCheckEdges() {
@@ -1755,7 +1743,10 @@ eduItems.forEach(item => {
     }
 
     // Global wheel handler for scroll-lock
-    window.addEventListener('wheel', function(e) {
+    let projEdgeInertia = 0;
+
+    window.addEventListener('wheel', function (e) {
+        if (window._smoothScrollEndTime && Date.now() < window._smoothScrollEndTime) return; // avoid navbar transit bug
         if (projExpandedIdx >= 0) return; // expanded card has its own overlay
         if (Date.now() < projLockCooldown) return; // cooldown after release
 
@@ -1763,12 +1754,14 @@ eduItems.forEach(item => {
         const scrollingUp = e.deltaY < 0;
 
         if (!projScrollLocked) {
-            // Check if we should lock
+            // Lock whenever section is in view (edge handled inside, not as pre-check)
             if (projIsInView()) {
-                // Don't lock if user is scrolling in the direction where carousel is already at edge
-                if (scrollingDown && projAtEnd) return;
-                if (scrollingUp && projAtStart) return;
+                projCheckEdges();
+                if ((scrollingDown && projAtEnd) || (scrollingUp && projAtStart)) {
+                    return; // Allow scrolling past section without re-locking
+                }
                 projScrollLocked = true;
+                projEdgeInertia = 0; // reset on new lock
                 projScrollToSection();
             }
         }
@@ -1778,99 +1771,144 @@ eduItems.forEach(item => {
             projCheckEdges();
 
             // Release if at edge and user continues scrolling that direction
+            // Dead-zone added to absorb trackpad inertia and avoid accidental exits
             if (scrollingDown && projAtEnd) {
-                projScrollLocked = false;
-                projLockCooldown = Date.now() + 600;
-                return;
-            }
-            if (scrollingUp && projAtStart) {
-                projScrollLocked = false;
-                projLockCooldown = Date.now() + 600;
-                return;
+                projEdgeInertia += e.deltaY;
+                if (projEdgeInertia > 250) {
+                    projScrollLocked = false;
+                    projLockCooldown = Date.now() + 600;
+                    projEdgeInertia = 0;
+                    return;
+                }
+            } else if (scrollingUp && projAtStart) {
+                projEdgeInertia -= e.deltaY; // e.deltaY is negative, subtract to accumulate positive inertia
+                if (projEdgeInertia > 250) {
+                    projScrollLocked = false;
+                    projLockCooldown = Date.now() + 600;
+                    projEdgeInertia = 0;
+                    return;
+                }
+            } else {
+                projEdgeInertia = 0; // Reset if user changes direction or is inside the carousel
             }
 
-            // Drive the carousel
-            projVelX -= e.deltaY * 0.35;
+            // Drive carousel — 0.23 ≈ 0.35/1.5 → ~1.5× slower than page scroll
+            projVelX -= e.deltaY * 0.23;
         }
     }, { passive: false });
 
     // Release lock if section scrolls out of view (e.g. via keyboard scroll)
-    window.addEventListener('scroll', function() {
-        if (projScrollLocked && !projIsInView()) {
-            projScrollLocked = false;
+    // Debounced: avoids premature release during projScrollToSection() smooth scroll
+    let projScrollReleaseTimer = null;
+    window.addEventListener('scroll', function () {
+        if (!projScrollLocked || projIsRepositioning) return;
+        if (!projIsInView()) {
+            if (!projScrollReleaseTimer) {
+                projScrollReleaseTimer = setTimeout(() => {
+                    if (projScrollLocked && !projIsInView()) projScrollLocked = false;
+                    projScrollReleaseTimer = null;
+                }, 200);
+            }
+        } else {
+            clearTimeout(projScrollReleaseTimer);
+            projScrollReleaseTimer = null;
         }
     }, { passive: true });
 
     // Mouse drag
-    projOuter.addEventListener('mousedown',e=>{
-        if(projExpandedIdx>=0) return;
-        projIsDrag=true; projDragMoved=false;
-        projDragStartX=e.clientX; projDragStartPos=projTargetX; projLastDragX=e.clientX; projLastDragT=performance.now(); projVelX=0;
+    projOuter.addEventListener('mousedown', e => {
+        if (projExpandedIdx >= 0) return;
+        projIsDrag = true; projDragMoved = false;
+        projDragStartX = e.clientX; projDragStartPos = projTargetX; projLastDragX = e.clientX; projLastDragT = performance.now(); projVelX = 0;
         projOuter.classList.add('dragging');
     });
-    window.addEventListener('mousemove',e=>{
-        if(!projIsDrag) return;
-        if(Math.abs(e.clientX-projDragStartX)>4) projDragMoved=true;
-        projTargetX=projClampPos(projDragStartPos+(e.clientX-projDragStartX));
-        const now=performance.now(); projVelX=(e.clientX-projLastDragX)/Math.max(1,now-projLastDragT)*10;
-        projLastDragX=e.clientX; projLastDragT=now;
+    window.addEventListener('mousemove', e => {
+        if (!projIsDrag) return;
+        if (Math.abs(e.clientX - projDragStartX) > 4) projDragMoved = true;
+        projTargetX = projClampPos(projDragStartPos + (e.clientX - projDragStartX));
+        const now = performance.now(); projVelX = (e.clientX - projLastDragX) / Math.max(1, now - projLastDragT) * 10;
+        projLastDragX = e.clientX; projLastDragT = now;
     });
-    window.addEventListener('mouseup',()=>{
-        if(!projIsDrag) return; projIsDrag=false; projOuter.classList.remove('dragging');
-        if(!projDragMoved) return;
-        projSnapTo(Math.max(0,Math.min(projCards.length-1,Math.round(-projTargetX/PROJ_STEP)-Math.sign(projVelX))));
+    window.addEventListener('mouseup', () => {
+        if (!projIsDrag) return; projIsDrag = false; projOuter.classList.remove('dragging');
+        if (!projDragMoved) return;
+        projSnapTo(Math.max(0, Math.min(projCards.length - 1, Math.round(-projTargetX / PROJ_STEP) - Math.sign(projVelX))));
     });
 
     // Touch
-    projOuter.addEventListener('touchstart',e=>{
-        if(projExpandedIdx>=0) return;
-        projDragStartX=e.touches[0].clientX; projDragStartPos=projTargetX; projLastDragX=projDragStartX; projLastDragT=performance.now(); projVelX=0; projIsDrag=true; projDragMoved=false;
-    },{passive:true});
-    projOuter.addEventListener('touchmove',e=>{
-        if(!projIsDrag) return;
-        const dx=e.touches[0].clientX-projDragStartX; if(Math.abs(dx)>4) projDragMoved=true;
-        projTargetX=projClampPos(projDragStartPos+dx); const now=performance.now();
-        projVelX=(e.touches[0].clientX-projLastDragX)/Math.max(1,now-projLastDragT)*10; projLastDragX=e.touches[0].clientX; projLastDragT=now;
-    },{passive:true});
-    projOuter.addEventListener('touchend',()=>{
-        projIsDrag=false; if(!projDragMoved) return;
-        projSnapTo(Math.max(0,Math.min(projCards.length-1,Math.round(-projTargetX/PROJ_STEP)-Math.sign(projVelX))));
+    projOuter.addEventListener('touchstart', e => {
+        if (projExpandedIdx >= 0) return;
+        projDragStartX = e.touches[0].clientX; projDragStartPos = projTargetX; projLastDragX = projDragStartX; projLastDragT = performance.now(); projVelX = 0; projIsDrag = true; projDragMoved = false;
+    }, { passive: true });
+    projOuter.addEventListener('touchmove', e => {
+        if (!projIsDrag) return;
+        const dx = e.touches[0].clientX - projDragStartX; if (Math.abs(dx) > 4) projDragMoved = true;
+        projTargetX = projClampPos(projDragStartPos + dx); const now = performance.now();
+        projVelX = (e.touches[0].clientX - projLastDragX) / Math.max(1, now - projLastDragT) * 10; projLastDragX = e.touches[0].clientX; projLastDragT = now;
+    }, { passive: true });
+    projOuter.addEventListener('touchend', () => {
+        projIsDrag = false; if (!projDragMoved) return;
+        projSnapTo(Math.max(0, Math.min(projCards.length - 1, Math.round(-projTargetX / PROJ_STEP) - Math.sign(projVelX))));
     });
 
     // Main loop
-    const PROJ_LERP=0.1, PROJ_FRICTION=0.75;
-    function projLoop(){
-        if(!projIsDrag && projExpandedIdx<0){
-            projTargetX=projClampPos(projTargetX+projVelX); projVelX*=PROJ_FRICTION;
-            if(Math.abs(projVelX)<.3){
-                projVelX=0;
-                const sn=projClampPos(-(Math.max(0,Math.min(projCards.length-1,Math.round(-projTargetX/PROJ_STEP)))*PROJ_STEP));
-                projTargetX+=(sn-projTargetX)*.06;
+    const PROJ_LERP = 0.1, PROJ_FRICTION = 0.75;
+    function projLoop() {
+        if (!projIsDrag && projExpandedIdx < 0) {
+            projTargetX = projClampPos(projTargetX + projVelX); projVelX *= PROJ_FRICTION;
+            if (Math.abs(projVelX) < .3) {
+                projVelX = 0;
+                const sn = projClampPos(-(Math.max(0, Math.min(projCards.length - 1, Math.round(-projTargetX / PROJ_STEP))) * PROJ_STEP));
+                projTargetX += (sn - projTargetX) * .06;
             }
         }
-        projPos+=(projTargetX-projPos)*PROJ_LERP;
-        projTrack.style.transform=`translateX(${projPos}px)`;
+        projPos += (projTargetX - projPos) * PROJ_LERP;
+        projTrack.style.transform = `translateX(${projPos}px)`;
         projUpdateActiveCard();
+        projCheckEdges();
         requestAnimationFrame(projLoop);
     }
 
     projCards[0].classList.add('active');
-    projTrack.querySelectorAll('.card-canvas').forEach((c, idx)=>startProjAnimation(c,c.dataset.type, idx));
+    projTrack.querySelectorAll('.card-canvas').forEach((c, idx) => startProjAnimation(c, c.dataset.type, idx));
     projSnapTo(0);
     projLoop();
+
+    // Pause canvas animations when tab is hidden, resume on return
+    document.addEventListener('visibilitychange', () => {
+        const cvs = projTrack.querySelectorAll('.card-canvas');
+        if (document.hidden) {
+            cvs.forEach(cv => { cv.__savedVisible = cv.__visible; cv.__visible = false; });
+        } else {
+            cvs.forEach(cv => {
+                if (cv.__savedVisible !== undefined) { cv.__visible = cv.__savedVisible; delete cv.__savedVisible; }
+                if (cv.__paused && cv.__loop && cv.__visible) { cv.__paused = false; requestAnimationFrame(cv.__loop); }
+            });
+        }
+    });
 
     // ── EXPAND / COLLAPSE ──
     projOverlay.addEventListener('click', projCollapseCard);
 
-    function projPopulateExtra(card, idx){
-        const extra=card.querySelector('.proj-extra');
-        if(extra.dataset.loaded) return;
-        const p=PROJECTS[idx];
+    window._projRebuildExtra = function () {
+        projCards.forEach((c, idx) => {
+            const extra = c.querySelector('.proj-extra');
+            if (extra && extra.dataset.loaded) {
+                extra.dataset.loaded = '';
+                projPopulateExtra(c, idx);
+            }
+        });
+    };
+
+    function projPopulateExtra(card, idx) {
+        const extra = card.querySelector('.proj-extra');
+        if (extra.dataset.loaded) return;
+        const p = PROJECTS[idx];
         const isFr = (typeof currentLang !== 'undefined' && currentLang === 'fr');
         const desc = isFr && p.descFr ? p.descFr : p.desc;
         const period = isFr && p.periodFr ? p.periodFr : p.period;
         const context = isFr && p.contextFr ? p.contextFr : p.context;
-        extra.innerHTML=`
+        extra.innerHTML = `
             <div class="proj-divider-exp"></div>
             <div class="proj-meta-exp">
                 <span class="proj-meta-item"><i class="fas fa-calendar-alt"></i>${period}</span>
@@ -1878,15 +1916,15 @@ eduItems.forEach(item => {
             </div>
             <div class="proj-desc-full">${desc}</div>
             <p class="proj-tags-title-exp">Technologies</p>
-            <div class="proj-tags-exp">${p.tags.map(t=>`<span class="proj-tag">${t}</span>`).join('')}</div>
+            <div class="proj-tags-exp">${p.tags.map(t => `<span class="proj-tag">${t}</span>`).join('')}</div>
         `;
-        extra.dataset.loaded='1';
+        extra.dataset.loaded = '1';
     }
 
-    function projExpandCard(idx){
-        const card=projCards[idx];
-        projPopulateExtra(card,idx);
-        projExpandedIdx=idx;
+    function projExpandCard(idx) {
+        const card = projCards[idx];
+        projPopulateExtra(card, idx);
+        projExpandedIdx = idx;
         window._projExpandedIdx = idx;
 
         // Center expanded card vertically in viewport before locking scroll
@@ -1899,49 +1937,49 @@ eduItems.forEach(item => {
         // Lock body scroll
         document.body.style.overflow = 'hidden';
 
-        projPos=projClampPos(-(idx*PROJ_STEP));
-        projTargetX=projPos;
-        projTrack.style.transform=`translateX(${projPos}px)`;
+        projPos = projClampPos(-(idx * PROJ_STEP));
+        projTargetX = projPos;
+        projTrack.style.transform = `translateX(${projPos}px)`;
 
-        projCards.forEach((c,i)=>{
-            c.classList.toggle('active', i===idx);
-            if(i < idx) { c.classList.add('shift-left'); }
-            else if(i > idx) { c.classList.add('shift-right'); }
-            if(i!==idx){ c.style.opacity='.28'; c.style.filter='blur(2.5px) brightness(0.6)'; }
+        projCards.forEach((c, i) => {
+            c.classList.toggle('active', i === idx);
+            if (i < idx) { c.classList.add('shift-left'); }
+            else if (i > idx) { c.classList.add('shift-right'); }
+            if (i !== idx) { c.style.opacity = '.28'; c.style.filter = 'blur(2.5px) brightness(0.6)'; }
         });
 
         projOverlay.classList.add('active');
         card.classList.add('expanded');
-        projOuter.style.height=PROJ_EXPANDED_H+'px';
+        projOuter.style.height = PROJ_EXPANDED_H + 'px';
     }
 
-    function projCollapseCard(){
-        if(projExpandedIdx<0) return;
-        const prevIdx=projExpandedIdx;
-        const card=projCards[prevIdx];
+    function projCollapseCard() {
+        if (projExpandedIdx < 0) return;
+        const prevIdx = projExpandedIdx;
+        const card = projCards[prevIdx];
         card.classList.remove('expanded');
-        projOuter.style.height=PROJ_NORMAL_H+'px';
+        projOuter.style.height = PROJ_NORMAL_H + 'px';
 
         // Unlock body scroll
         document.body.style.overflow = '';
 
-        projPos=projClampPos(-(prevIdx*PROJ_STEP));
-        projTargetX=projPos;
-        projTrack.style.transform=`translateX(${projPos}px)`;
+        projPos = projClampPos(-(prevIdx * PROJ_STEP));
+        projTargetX = projPos;
+        projTrack.style.transform = `translateX(${projPos}px)`;
 
-        projCards.forEach(c=>{ 
-            c.style.opacity=''; c.style.filter=''; 
-            c.classList.remove('shift-left', 'shift-right'); 
+        projCards.forEach(c => {
+            c.style.opacity = ''; c.style.filter = '';
+            c.classList.remove('shift-left', 'shift-right');
         });
         projOverlay.classList.remove('active');
-        projExpandedIdx=-1;
+        projExpandedIdx = -1;
         window._projExpandedIdx = -1;
 
-        setTimeout(()=>{
-            const idx=projGetActiveIdx();
-            projCards.forEach((c,i)=>c.classList.toggle('active',i===idx));
-            projDotsEl.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
-        },100);
+        setTimeout(() => {
+            const idx = projGetActiveIdx();
+            projCards.forEach((c, i) => c.classList.toggle('active', i === idx));
+            projDotsEl.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === idx));
+        }, 100);
     }
 
     // Expose globally for smoothScrollTo nav integration
@@ -1950,31 +1988,31 @@ eduItems.forEach(item => {
     window._projSnapTo = projSnapTo;
     window._projLastIdx = projCards.length - 1;
 
-    projCards.forEach((card,idx)=>{
+    projCards.forEach((card, idx) => {
         // Inject spin element
         const spin = document.createElement('div');
         spin.className = 'proj-border-spin';
         card.appendChild(spin);
 
-        card.addEventListener('click',()=>{
-            if(projDragMoved) return;
-            if(projExpandedIdx===idx){ projCollapseCard(); return; }
-            if(projExpandedIdx>=0){ projCollapseCard(); return; }
+        card.addEventListener('click', () => {
+            if (projDragMoved) return;
+            if (projExpandedIdx === idx) { projCollapseCard(); return; }
+            if (projExpandedIdx >= 0) { projCollapseCard(); return; }
             projDoExpand(idx);
         });
     });
 
-    function projDoExpand(idx){
-        const alreadyCentered = Math.abs(projPos - projClampPos(-(idx*PROJ_STEP))) < 2;
-        if(alreadyCentered){
+    function projDoExpand(idx) {
+        const alreadyCentered = Math.abs(projPos - projClampPos(-(idx * PROJ_STEP))) < 2;
+        if (alreadyCentered) {
             projExpandCard(idx);
         } else {
             projSnapTo(idx);
-            setTimeout(()=>projExpandCard(idx), 520);
+            setTimeout(() => projExpandCard(idx), 520);
         }
     }
 
     // ESC to collapse
-    document.addEventListener('keydown',e=>{ if(e.key==='Escape' && projExpandedIdx>=0) projCollapseCard(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && projExpandedIdx >= 0) projCollapseCard(); });
 })();
 
