@@ -1078,6 +1078,7 @@ const translations = {
         'skills.ai': 'IA & Data Science',
         'skills.programming': 'Programmation',
         'skills.office': 'Bureautique & Autres',
+        'skills.certs': 'Certifications',
         'skills.french': 'Français (Natif)',
         'skills.french.name': 'Français',
         'skills.french.level': 'Natif',

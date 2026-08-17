@@ -2079,9 +2079,18 @@ footer {
     --sk-rgb: 251, 191, 36;
 }
 
+.c-teal {
+    --sk-accent: #2dd4bf;
+    --sk-rgb: 45, 212, 191;
+}
+
 /* Bento column spans */
 .span-7 {
     grid-column: span 7;
+}
+
+.span-6 {
+    grid-column: span 6;
 }
 
 .span-5 {
