@@ -68,26 +68,34 @@
             </div>
             <div class="about-text">
                 <div class="about-para">
-                    <p data-i18n-html="about.p1"><strong class="about-highlight">Engineering graduate from Mines Saint-Étienne</strong>, specialized in Data Science &amp; AI, seeking my first opportunity in Data &amp; AI starting February 2026, after completing my final-year internship at <strong class="about-highlight">Dassault Aviation</strong>.</p>
+                    <p data-i18n-html="about.p1">Engineering graduate from <strong class="about-highlight">Mines Saint-Étienne</strong>, specialized in Data Science &amp; AI, I now work as an <strong class="about-highlight">AI Engineer</strong> on a permanent contract at <strong class="about-highlight">SIA</strong>, following my final-year internship at <strong class="about-highlight">Dassault Aviation</strong>.</p>
                 </div>
                 <div class="about-para">
-                    <p data-i18n-html="about.p2">My <strong class="about-highlight">technical background</strong> has enabled me to lead concrete projects in Computer Vision, NLP, RAG, classification, LLM, Reinforcement Learning, software development and deployment (Docker, CI/CD).</p>
+                    <p data-i18n-html="about.p2">My <strong class="about-highlight">technical background</strong> has enabled me to lead concrete projects in Computer Vision, NLP, RAG (text &amp; multimodal), classification, LLM agents, Reinforcement Learning, OCR and Time Series, as well as full-stack software development and production deployment (FastAPI, Docker, CI/CD, MLOps).</p>
                 </div>
                 <div class="about-para">
                     <p data-i18n-html="about.p3"><strong class="about-highlight">Curious and driven</strong>, I look to apply my Data Science skills to ambitious projects where technology meets real-world impact.</p>
                 </div>
                 <div class="about-para">
-                    <p data-i18n-html="about.p4">Available <strong class="about-highlight">immediately</strong>, I am open to opportunities in the Paris, Lyon or Geneva areas — on-site, remote or hybrid.</p>
+                    <p data-i18n-html="about.p4">Based in the <strong class="about-highlight">Paris area</strong>, I enjoy tackling new technical challenges and collaborating with cross-functional teams to bring AI solutions from prototype to production.</p>
                 </div>
+                <!--
+                    2026-08: switched from job-search framing (badge "Open to work" / p4 availability & location openness)
+                    to employed framing after starting the SIA Partners CDI. To revert to job-search mode:
+                      - about.badge (index.html line ~85 + script.js 'about.badge'): "Open to work" / FR "Disponible"
+                      - about.p4    (index.html line ~80 + script.js 'about.p4'):
+                          EN: "Available immediately, I am open to opportunities in the Paris, Lyon or Geneva areas — on-site, remote or hybrid."
+                          FR: "Disponible immédiatement, je suis ouvert aux opportunités en région parisienne, lyonnaise ou à Genève — en présentiel, remote ou hybride."
+                -->
                 <div class="about-meta">
                     <div class="about-badge">
                         <span class="badge-dot"></span>
-                        <span data-i18n="about.badge">Open to work</span>
+                        <span data-i18n="about.badge">Employed</span>
                     </div>
                     <span class="about-meta-sep"></span>
                     <div class="about-location">
                         <i class="fas fa-map-marker-alt"></i>
-                        <span data-i18n="about.location">Boulogne Billancourt (92100)</span>
+                        <span data-i18n="about.location">Montrouge (92120)</span>
                     </div>
                 </div>
             </div>
@@ -118,6 +126,7 @@
                     <span class="tag">XGBoost</span>
                     <span class="tag">VLM</span>
                     <span class="tag">Time Series</span>
+                    <span class="tag">Multimodal AI</span>
                 </div>
             </div>
 
@@ -146,6 +155,8 @@
                     <h3>Frameworks &amp; Libs</h3>
                 </div>
                 <div class="tags">
+                    <span class="tag">FastAPI</span>
+                    <span class="tag">Pydantic</span>
                     <span class="tag">TensorFlow / PyTorch</span>
                     <span class="tag">Scikit-learn</span>
                     <span class="tag">Pandas</span>
@@ -170,6 +181,7 @@
                     <h3>Tools &amp; DevOps</h3>
                 </div>
                 <div class="tags">
+                    <span class="tag">Traefik</span>
                     <span class="tag">Docker</span>
                     <span class="tag">Git</span>
                     <span class="tag">CI/CD</span>
@@ -224,8 +236,8 @@
                 </div>
             </div>
 
-            <!-- Office & Other — full width -->
-            <div class="sk-card c-amber span-12">
+            <!-- Office & Other -->
+            <div class="sk-card c-amber span-7">
                 <div class="sk-head">
                     <div class="sk-ico"><i class="fas fa-briefcase"></i></div>
                     <h3 data-i18n="skills.office">Office &amp; Others</h3>
@@ -236,6 +248,22 @@
                     <span class="tag">SolidWorks</span>
                     <span class="tag">Photoshop</span>
                     <span class="tag" data-i18n="skills.driving">Driving License (B) - Vehicle Owner</span>
+                </div>
+            </div>
+
+            <!-- Certifications -->
+            <div class="sk-card c-coral span-5">
+                <div class="sk-head">
+                    <div class="sk-ico"><i class="fas fa-certificate"></i></div>
+                    <h3 data-i18n="skills.certs">Certifications</h3>
+                </div>
+                <div class="tags">
+                    <a href="https://www.credly.com/badges/7ea468fa-8e9d-4aed-8a14-52edb9a71930/linked_in_profile" target="_blank" class="tag tag-cert" style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <span class="tag-issuer">Anthropic</span>
+                        <span class="tag-sep"></span>
+                        <span class="tag-cert-name">Claude Certified Architect - Foundations</span>
+                        <i class="fas fa-external-link-alt" style="font-size: 0.85em; opacity: 0.7;"></i>
+                    </a>
                 </div>
             </div>
 
@@ -252,9 +280,61 @@
             <div class="tl-ticks"></div>
             <div class="tl-particles" id="tl-exp-particles"></div>
 
-            <!-- ── 01 · DASSAULT · LEFT ── -->
+            <!-- ── 01 · SIA · LEFT ── -->
             <div class="tl-item left from-left" style="--ac:var(--c1);--ac-rgb:var(--c1-rgb)">
                 <div class="tl-card">
+                    <div class="tl-glass">
+                        <p class="tl-role" data-i18n-html="exp.sia.role">AI Engineer – Full-time</p>
+                        <div class="tl-company-row">
+                            <h3 class="tl-company">SIA Partners</h3>
+                            <a href="https://www.linkedin.com/company/sia-partners/" target="_blank" class="tl-li" onclick="event.stopPropagation()"><i class="fab fa-linkedin"></i></a>
+                        </div>
+                        <div class="tl-meta">
+                            <span class="tl-meta-item"><i class="fas fa-location-dot"></i> Paris</span>
+                            <span class="tl-meta-item"><i class="fas fa-calendar-days"></i> <span data-i18n="exp.sia.date">June 2026 — Present</span></span>
+                        </div>
+                        <div class="tl-div"></div>
+                        <span class="tl-hint" data-i18n-html="exp.hint"><i class="fas fa-chevron-down"></i> View details</span>
+                        <div class="tl-body"><div class="tl-body-inner">
+                            <ul class="tl-ul" data-i18n-html="exp.sia.desc">
+                                <li>Design of text and multimodal RAG architectures, including comprehensive benchmarking at different scales to optimize ingestion (chunking) and retrieval strategies.</li>
+                                <li>Integration of memory-optimized vector search algorithms (like DiskANN) to handle indexing and semantic search across very high volumes of data.</li>
+                                <li>Development of robust and asynchronous RESTful APIs using FastAPI, with strict data modeling via Pydantic.</li>
+                                <li>Secure backend deployment via Traefik (dynamic routing, SSL certificate generation), and containerization of AI pipelines for future scalable cloud deployments.</li>
+                            </ul>
+                            <div class="tl-tags">
+                                <span class="tl-tag">Python</span><span class="tl-tag">RAG Systems</span><span class="tl-tag">LLM</span>
+                                <span class="tl-tag">FastAPI</span><span class="tl-tag">Pydantic</span><span class="tl-tag">Traefik</span>
+                                <span class="tl-tag">Multimodal AI</span>
+                            </div>
+                        </div></div>
+                    </div>
+                    <div class="tl-pillar">
+                        <span class="tl-pillar-num">01</span>
+                        <i class="fas fa-robot tl-pillar-icon"></i>
+                        <span class="tl-pillar-label">SIA</span>
+                    </div>
+                </div>
+                <div class="tl-marker">
+                    <span class="tl-year">2026</span>
+                    <div class="tl-dot"></div>
+                </div>
+                <div class="tl-spacer"></div>
+            </div>
+
+            <!-- ── 02 · DASSAULT · RIGHT ── -->
+            <div class="tl-item right from-right" style="--ac:var(--c2);--ac-rgb:var(--c2-rgb)">
+                <div class="tl-spacer"></div>
+                <div class="tl-marker">
+                    <span class="tl-year">2025</span>
+                    <div class="tl-dot"></div>
+                </div>
+                <div class="tl-card">
+                    <div class="tl-pillar">
+                        <span class="tl-pillar-num">02</span>
+                        <i class="fas fa-plane tl-pillar-icon"></i>
+                        <span class="tl-pillar-label">Dassault</span>
+                    </div>
                     <div class="tl-glass">
                         <p class="tl-role" data-i18n-html="exp.dassault.role">Data Scientist Intern – Artificial Intelligence</p>
                         <div class="tl-company-row">
@@ -284,34 +364,14 @@
                             </div>
                         </div></div>
                     </div>
-                    <div class="tl-pillar">
-                        <span class="tl-pillar-num">01</span>
-                        <i class="fas fa-brain tl-pillar-icon"></i>
-                        <span class="tl-pillar-label">Dassault</span>
-                    </div>
                 </div>
-                <div class="tl-marker">
-                    <span class="tl-year">2025</span>
-                    <div class="tl-dot"></div>
-                </div>
-                <div class="tl-spacer"></div>
             </div>
 
-            <!-- ── 02 · MGF · RIGHT ── -->
-            <div class="tl-item right from-right" style="--ac:var(--c2);--ac-rgb:var(--c2-rgb)">
-                <div class="tl-spacer"></div>
-                <div class="tl-marker">
-                    <span class="tl-year">2024</span>
-                    <div class="tl-dot"></div>
-                </div>
+            <!-- ── 03 · MGF · LEFT ── -->
+            <div class="tl-item left from-left" style="--ac:var(--c3);--ac-rgb:var(--c3-rgb)">
                 <div class="tl-card">
-                    <div class="tl-pillar">
-                        <span class="tl-pillar-num">02</span>
-                        <i class="fas fa-drafting-compass tl-pillar-icon"></i>
-                        <span class="tl-pillar-label">MGF</span>
-                    </div>
                     <div class="tl-glass">
-                        <p class="tl-role" data-i18n="exp.mgf.role">CAD Design Engineer Intern</p>
+                        <p class="tl-role" data-i18n-html="exp.mgf.role">CAD Design Engineer Intern</p>
                         <div class="tl-company-row">
                             <h3 class="tl-company">MGF Grimaldi</h3>
                             <a href="https://www.linkedin.com/company/mgf-grimaldi/" target="_blank" class="tl-li" onclick="event.stopPropagation()"><i class="fab fa-linkedin"></i></a>
@@ -337,12 +397,32 @@
                             </div>
                         </div></div>
                     </div>
+                    <div class="tl-pillar">
+                        <span class="tl-pillar-num">03</span>
+                        <i class="fas fa-drafting-compass tl-pillar-icon"></i>
+                        <span class="tl-pillar-label">MGF</span>
+                    </div>
                 </div>
+                <div class="tl-marker">
+                    <span class="tl-year">2024</span>
+                    <div class="tl-dot"></div>
+                </div>
+                <div class="tl-spacer"></div>
             </div>
 
-            <!-- ── 03 · JE MINES · LEFT ── -->
-            <div class="tl-item left from-left" style="--ac:var(--c3);--ac-rgb:var(--c3-rgb)">
+            <!-- ── 04 · JE MINES · RIGHT ── -->
+            <div class="tl-item right from-right" style="--ac:var(--c4);--ac-rgb:var(--c4-rgb)">
+                <div class="tl-spacer"></div>
+                <div class="tl-marker">
+                    <span class="tl-year">2022—2024</span>
+                    <div class="tl-dot"></div>
+                </div>
                 <div class="tl-card">
+                    <div class="tl-pillar">
+                        <span class="tl-pillar-num">04</span>
+                        <i class="fas fa-briefcase tl-pillar-icon"></i>
+                        <span class="tl-pillar-label">JE Mines</span>
+                    </div>
                     <div class="tl-glass">
                         <p class="tl-role" data-i18n="exp.je.role">Business Manager</p>
                         <div class="tl-company-row">
@@ -371,32 +451,12 @@
                             </div>
                         </div></div>
                     </div>
-                    <div class="tl-pillar">
-                        <span class="tl-pillar-num">03</span>
-                        <i class="fas fa-briefcase tl-pillar-icon"></i>
-                        <span class="tl-pillar-label">JE Mines</span>
-                    </div>
                 </div>
-                <div class="tl-marker">
-                    <span class="tl-year">2022—2024</span>
-                    <div class="tl-dot"></div>
-                </div>
-                <div class="tl-spacer"></div>
             </div>
 
-            <!-- ── 04 · TECUMSEH · RIGHT ── -->
-            <div class="tl-item right from-right" style="--ac:var(--c4);--ac-rgb:var(--c4-rgb)">
-                <div class="tl-spacer"></div>
-                <div class="tl-marker">
-                    <span class="tl-year">2023</span>
-                    <div class="tl-dot"></div>
-                </div>
+            <!-- ── 05 · TECUMSEH · LEFT ── -->
+            <div class="tl-item left from-left" style="--ac:var(--c5);--ac-rgb:var(--c5-rgb)">
                 <div class="tl-card">
-                    <div class="tl-pillar">
-                        <span class="tl-pillar-num">04</span>
-                        <i class="fas fa-industry tl-pillar-icon"></i>
-                        <span class="tl-pillar-label">Tecumseh</span>
-                    </div>
                     <div class="tl-glass">
                         <p class="tl-role" data-i18n="exp.tecumseh.role">Production Operator Intern</p>
                         <div class="tl-company-row">
@@ -423,7 +483,17 @@
                             </div>
                         </div></div>
                     </div>
+                    <div class="tl-pillar">
+                        <span class="tl-pillar-num">05</span>
+                        <i class="fas fa-industry tl-pillar-icon"></i>
+                        <span class="tl-pillar-label">Tecumseh</span>
+                    </div>
                 </div>
+                <div class="tl-marker">
+                    <span class="tl-year">2023</span>
+                    <div class="tl-dot"></div>
+                </div>
+                <div class="tl-spacer"></div>
             </div>
 
         </div><!-- /.tl -->

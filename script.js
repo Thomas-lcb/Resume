@@ -1062,12 +1062,15 @@ const translations = {
         'hero.btn': 'Découvrir mon profil',
         // About
         'about.title': 'À propos',
-        'about.p1': 'Diplômé ingénieur des <strong class="about-highlight">Mines de Saint-Étienne</strong>, spécialisé en Data Science & IA, je recherche ma première opportunité dans ce domaine à partir de février 2026, à la suite de mon stage de fin d\'études chez <strong class="about-highlight">Dassault Aviation</strong>.',
-        'about.p2': 'Mon <strong class="about-highlight">parcours technique</strong> m\'a permis de mener des projets concrets en Computer Vision, NLP, RAG, classification, LLM, Reinforcement Learning, développement logiciel et déploiement (Docker, CI/CD).',
+        'about.p1': 'Diplômé ingénieur des <strong class="about-highlight">Mines de Saint-Étienne</strong>, spécialisé en Data Science & IA, je travaille aujourd\'hui en tant qu\'<strong class="about-highlight">AI Engineer en CDI</strong> chez <strong class="about-highlight">SIA</strong>, à la suite de mon stage de fin d\'études chez <strong class="about-highlight">Dassault Aviation</strong>.',
+        'about.p2': 'Mon <strong class="about-highlight">parcours technique</strong> m\'a permis de mener des projets concrets en Computer Vision, NLP, RAG (texte & multimodal), classification, agents LLM, Reinforcement Learning, OCR et séries temporelles, ainsi qu\'en développement logiciel full-stack et déploiement en production (FastAPI, Docker, CI/CD, MLOps).',
         'about.p3': '<strong class="about-highlight">Curieux et motivé</strong>, je cherche à mettre mes compétences en Data Science au service de projets ambitieux où la technique rencontre un impact concret.',
-        'about.p4': 'Disponible <strong class="about-highlight">immédiatement</strong>, je suis ouvert aux opportunités en région parisienne, lyonnaise ou à Genève — en présentiel, remote ou hybride.',
-        'about.location': 'Boulogne Billancourt (92100)',
-        'about.badge': 'Disponible',
+        'about.p4': 'Basé en <strong class="about-highlight">région parisienne</strong>, j\'aime relever de nouveaux défis techniques et collaborer avec des équipes pluridisciplinaires pour faire passer des solutions IA du prototype à la production.',
+        // 2026-08: cadrage "recherche d'emploi" -> "en poste" (CDI SIA Partners). Pour revenir en arrière :
+        //   about.badge -> 'Disponible'
+        //   about.p4    -> 'Disponible <strong class="about-highlight">immédiatement</strong>, je suis ouvert aux opportunités en région parisienne, lyonnaise ou à Genève — en présentiel, remote ou hybride.'
+        'about.location': 'Montrouge (92120)',
+        'about.badge': 'En poste',
         'about.stat1': 'ans de form.',
         'about.stat2': 'projets',
         'about.stat3': 'domaines',
@@ -1078,6 +1081,7 @@ const translations = {
         'skills.ai': 'IA & Data Science',
         'skills.programming': 'Programmation',
         'skills.office': 'Bureautique & Autres',
+        'skills.certs': 'Certifications',
         'skills.french': 'Français (Natif)',
         'skills.french.name': 'Français',
         'skills.french.level': 'Natif',
@@ -1091,6 +1095,9 @@ const translations = {
         // Experience
         'exp.hint': '<i class="fas fa-chevron-down"></i> Voir les détails',
         'exp.title': 'Expérience',
+        'exp.sia.date': 'Juin 2026 — Présent',
+        'exp.sia.role': 'AI Engineer – CDI',
+        'exp.sia.desc': '<li>Conception d\'architectures RAG (texte, image, tableaux), incluant la réalisation de benchmarks complets à différentes échelles pour optimiser les stratégies d\'ingestion (chunking) et de recherche (retrieval).</li><li>Intégration d\'algorithmes de recherche optimisés pour la mémoire disque (comme DiskANN) afin de gérer l\'indexation et la recherche sémantique sur de très hauts volumes de données.</li><li>Création d\'API RESTful robustes et asynchrones avec FastAPI et modélisation stricte des données via Pydantic.</li><li>Déploiement backend sécurisé via Traefik (routage dynamique, génération de certificats SSL) et conteneurisation des pipelines IA pour de futurs déploiements scalables sur le Cloud.</li>',
         'exp.dassault.date': 'Mars 2025 - Sept 2025 (6 mois)',
         'exp.dassault.role': 'Stagiaire Data Scientist – Intelligence Artificielle',
         'exp.dassault.desc': '<li>Développement et déploiement de solutions IA pour améliorer la performance de la Direction des Achats.</li><li>Mise en place de modèles de classification (arbres de décision, gradient boosting, réseaux de neurones), extraction de données via OCR, et développement de programmes pour simplifier les processus.</li><li>Travail sur des projets LLM, notamment la mise en œuvre de systèmes RAG (et auto-RAG) pour faciliter l\'accès à l\'information et optimiser la prise de décision.</li><li>Outil conteneurisé et déployé via Docker, avec une interface simple (Streamlit) accessible via navigateur web.</li><li>Web scraping (avec Selenium) pour alimenter les bases de connaissances.</li><li>Présentation des résultats dans Power BI lié aux données Dassault via des requêtes SQL.</li>',

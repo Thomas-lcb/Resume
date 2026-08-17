@@ -15,6 +15,8 @@
     --c3-rgb: 123, 90, 255;
     --c4: #a82ee6;
     --c4-rgb: 168, 46, 230;
+    --c5: #d419c8;
+    --c5-rgb: 212, 25, 200;
 }
 
 html {
@@ -777,9 +779,10 @@ section {
     width: 18px;
     transform: translateX(-50%);
     background: linear-gradient(to bottom,
-            transparent 0%, rgba(var(--c1-rgb), .45) 6%,
-            rgba(var(--c2-rgb), .22) 28%, rgba(var(--c3-rgb), .28) 58%,
-            rgba(var(--c4-rgb), .14) 88%, transparent 100%);
+            transparent 0%, rgba(var(--c1-rgb), .45) 5%,
+            rgba(var(--c2-rgb), .25) 24%, rgba(var(--c3-rgb), .28) 46%,
+            rgba(var(--c4-rgb), .22) 70%, rgba(var(--c5-rgb), .14) 92%,
+            transparent 100%);
     filter: blur(12px);
     pointer-events: none;
     z-index: 0;
@@ -794,8 +797,9 @@ section {
     transform: translateX(-50%);
     background: linear-gradient(to bottom,
             transparent 0%, rgba(var(--c1-rgb), .95) 4%,
-            rgba(var(--c2-rgb), .55) 28%, rgba(var(--c3-rgb), .65) 58%,
-            rgba(var(--c4-rgb), .35) 90%, transparent 100%);
+            rgba(var(--c2-rgb), .60) 24%, rgba(var(--c3-rgb), .65) 46%,
+            rgba(var(--c4-rgb), .50) 70%, rgba(var(--c5-rgb), .35) 92%,
+            transparent 100%);
     z-index: 1;
     pointer-events: none;
 }
@@ -2075,9 +2079,18 @@ footer {
     --sk-rgb: 251, 191, 36;
 }
 
+.c-coral {
+    --sk-accent: #f97316;
+    --sk-rgb: 249, 115, 22;
+}
+
 /* Bento column spans */
 .span-7 {
     grid-column: span 7;
+}
+
+.span-6 {
+    grid-column: span 6;
 }
 
 .span-5 {
@@ -2152,6 +2165,24 @@ footer {
     font-size: 0.93rem;
     font-weight: 600;
     padding: 6px 15px;
+}
+
+/* Certification tag — issuer distinguished from certification name by weight + hairline divider, no nested boxes */
+.tag-issuer {
+    font-weight: 700;
+    letter-spacing: 0.01em;
+}
+
+.tag-sep {
+    width: 1px;
+    height: 12px;
+    background: rgba(var(--sk-rgb), 0.4);
+    flex-shrink: 0;
+}
+
+.tag-cert-name {
+    font-weight: 500;
+    opacity: 0.88;
 }
 
 /* Language gauges */
