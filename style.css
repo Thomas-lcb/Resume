@@ -2079,9 +2079,9 @@ footer {
     --sk-rgb: 251, 191, 36;
 }
 
-.c-teal {
-    --sk-accent: #2dd4bf;
-    --sk-rgb: 45, 212, 191;
+.c-coral {
+    --sk-accent: #f97316;
+    --sk-rgb: 249, 115, 22;
 }
 
 /* Bento column spans */
@@ -2165,6 +2165,24 @@ footer {
     font-size: 0.93rem;
     font-weight: 600;
     padding: 6px 15px;
+}
+
+/* Certification tag — issuer distinguished from certification name by weight + hairline divider, no nested boxes */
+.tag-issuer {
+    font-weight: 700;
+    letter-spacing: 0.01em;
+}
+
+.tag-sep {
+    width: 1px;
+    height: 12px;
+    background: rgba(var(--sk-rgb), 0.4);
+    flex-shrink: 0;
+}
+
+.tag-cert-name {
+    font-weight: 500;
+    opacity: 0.88;
 }
 
 /* Language gauges */
